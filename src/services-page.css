@@ -619,3 +619,8 @@
     height: 230px;
   }
 }
+.oz-services #services-hero .oz-hero-art > img {
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+}

@@ -402,6 +402,7 @@ export async function seedCms(db) {
   });
   await migrateServicePhotos(db);
   await migrateServicePhotos(db, "mobile-app-image-v2", new Set(["/assets/service-photo-mobile-app-development.jpg"]));
+  await migrateServicePhotos(db, "fullstack-hero-image-v3", new Set(["/assets/service-photo-overview.jpg"]));
   await updateServiceMenuLinks(db);
 }
 

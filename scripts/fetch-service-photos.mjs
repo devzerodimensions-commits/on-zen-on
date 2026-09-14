@@ -36,11 +36,6 @@ const photos = [
     "a-bunch-of-blue-wires-connected-to-each-other-PSpf_XgOM5w",
     "Network cables connected to server equipment",
   ],
-  [
-    "overview",
-    "people-collaborating-on-workspace-wireframe-sketches--ySLeov8m_8",
-    "People collaborating on wireframe sketches in a workspace",
-  ],
 ];
 const manifest = JSON.parse(await readFile("shared/service-photos.json", "utf8"));
 for (const [slug, source, alt] of photos) {

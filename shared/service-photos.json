@@ -48,9 +48,9 @@
     "license": "https://unsplash.com/license"
   },
   "overview": {
-    "image": "/assets/service-photo-overview.jpg",
-    "alt": "People collaborating on wireframe sketches in a workspace",
-    "source": "https://unsplash.com/photos/people-collaborating-on-workspace-wireframe-sketches--ySLeov8m_8",
-    "license": "https://unsplash.com/license"
+    "image": "/assets/service-fullstack-studio.webp",
+    "alt": "Full-stack developer workspace with a business website on a monitor, backend code on a laptop and a mobile app on a phone",
+    "source": "Custom AI-generated image using the built-in image generation tool",
+    "license": "Generated for On Zen On"
   }
 }

@@ -38,7 +38,7 @@ test("photo migration updates existing published images and preserves custom dra
     );
     assert.equal(
       JSON.parse(after.published).blocks[0].image,
-      "/assets/service-photo-overview.jpg",
+      "/assets/service-fullstack-studio.webp",
     );
     assert.equal(
       JSON.parse(after.draft).blocks[0].image,
