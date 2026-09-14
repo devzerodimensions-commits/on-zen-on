@@ -8,6 +8,52 @@ import { createUser } from "../cms/server/auth.js";
 import { templateDefaults } from "../shared/templates.js";
 import { pageSchema } from "../cms/shared/content.js";
 import { serviceCatalog } from "../shared/services.js";
+import { migrateServicePhotos } from "../server/service-photos.js";
+test("photo migration updates existing published images and preserves custom drafts", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const id = stableId("services-page");
+    const [row] = await db.query(
+      "SELECT published FROM documents WHERE id=$1",
+      [id],
+    );
+    const old = JSON.parse(row.published);
+    old.blocks[0].image = "/assets/software-laptop-3d.png";
+    const draft = structuredClone(old);
+    draft.blocks[0].image = "/assets/custom-customer-photo.jpg";
+    draft.blocks[0].alt = "Customer's own photo";
+    await db.query("UPDATE documents SET draft=$1,published=$2 WHERE id=$3", [
+      JSON.stringify(draft),
+      JSON.stringify(old),
+      id,
+    ]);
+    await db.query("DELETE FROM cms_migrations WHERE id=$1", [
+      "service-photos-v1",
+    ]);
+    await migrateServicePhotos(db);
+    const [after] = await db.query(
+      "SELECT draft,published,version FROM documents WHERE id=$1",
+      [id],
+    );
+    assert.equal(
+      JSON.parse(after.published).blocks[0].image,
+      "/assets/service-photo-overview.jpg",
+    );
+    assert.equal(
+      JSON.parse(after.draft).blocks[0].image,
+      draft.blocks[0].image,
+    );
+    await migrateServicePhotos(db);
+    const [again] = await db.query(
+      "SELECT version FROM documents WHERE id=$1",
+      [id],
+    );
+    assert.equal(again.version, after.version);
+  } finally {
+    await db.close();
+  }
+});
 test("service detail pages publish with SEO and seed preserves edited content", async () => {
   const db = await openDb({ url: null, path: ":memory:" });
   try {

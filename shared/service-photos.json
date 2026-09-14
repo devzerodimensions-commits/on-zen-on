@@ -1,0 +1,56 @@
+{
+  "frontend-development": {
+    "image": "/assets/service-photo-frontend-development.jpg",
+    "alt": "Laptop displaying a code editor in a real development workspace",
+    "source": "https://unsplash.com/photos/laptop-screen-displaying-colorful-code-8qEB0fTe9Vw",
+    "license": "https://unsplash.com/license"
+  },
+  "backend-development": {
+    "image": "/assets/service-photo-backend-development.jpg",
+    "alt": "Close-up of programming code on a computer screen",
+    "source": "https://unsplash.com/photos/a-computer-screen-with-a-bunch-of-code-on-it-ieic5Tq8YMk",
+    "license": "https://unsplash.com/license"
+  },
+  "mobile-app-development": {
+    "image": "/assets/service-photo-mobile-app-development.jpg",
+    "alt": "A hand holding a smartphone",
+    "source": "https://unsplash.com/photos/a-person-holding-a-phone-in-their-hand-u1b6E6IkSGQ",
+    "license": "https://unsplash.com/license"
+  },
+  "ai-workflow-automation": {
+    "image": "/assets/service-photo-ai-workflow-automation.jpg",
+    "alt": "Colleagues collaborating around a computer in an office",
+    "source": "https://unsplash.com/photos/team-collaborating-around-a-computer-in-an-office-UikYLDQj9_I",
+    "license": "https://unsplash.com/license"
+  },
+  "digital-marketing": {
+    "image": "/assets/service-photo-digital-marketing.jpg",
+    "alt": "A laptop displaying performance analytics",
+    "source": "https://unsplash.com/photos/black-and-silver-laptop-computer-tR0jvlsmCuQ",
+    "license": "https://unsplash.com/license"
+  },
+  "ui-ux-product-design": {
+    "image": "/assets/service-photo-ui-ux-product-design.jpg",
+    "alt": "Hands sketching website wireframes beside a keyboard",
+    "source": "https://unsplash.com/photos/a-person-writing-on-a-piece-of-paper-next-to-a-keyboard-ml1IgjV8OvY",
+    "license": "https://unsplash.com/license"
+  },
+  "cloud-api-devops": {
+    "image": "/assets/service-photo-cloud-api-devops.jpg",
+    "alt": "Server racks in a data centre",
+    "source": "https://unsplash.com/photos/black-imgix-server-system-pgdaAwf6IJg",
+    "license": "https://unsplash.com/license"
+  },
+  "cybersecurity": {
+    "image": "/assets/service-photo-cybersecurity.jpg",
+    "alt": "Network cables connected to server equipment",
+    "source": "https://unsplash.com/photos/a-bunch-of-blue-wires-connected-to-each-other-PSpf_XgOM5w",
+    "license": "https://unsplash.com/license"
+  },
+  "overview": {
+    "image": "/assets/service-photo-overview.jpg",
+    "alt": "People collaborating on wireframe sketches in a workspace",
+    "source": "https://unsplash.com/photos/people-collaborating-on-workspace-wireframe-sketches--ySLeov8m_8",
+    "license": "https://unsplash.com/license"
+  }
+}

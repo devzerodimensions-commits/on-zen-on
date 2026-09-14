@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
+import { applyServicePhotos, migrateServicePhotos } from "./service-photos.js";
 export const stableId = (name) => {
   const h = createHash("sha256").update(`onzenon-cms-v1:${name}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
@@ -391,6 +392,7 @@ export async function seedCms(db) {
   ];
   await db.transaction(async (q) => {
     for (const [name, kind, data, key] of seeds) {
+      if (kind === "page") applyServicePhotos(data);
       const json = JSON.stringify(schemas[kind].parse(data));
       await q.query(
         "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
@@ -398,6 +400,7 @@ export async function seedCms(db) {
       );
     }
   });
+  await migrateServicePhotos(db);
   await updateServiceMenuLinks(db);
 }
 
