@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
+import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
 let csrf = "";
 async function api(path, method = "GET", body) {
@@ -437,15 +438,7 @@ function App() {
             <span>Email address</span>
             <input name="email" type="email" autoComplete="username" required />
           </label>
-          <label className="field">
-            <span>Password</span>
-            <input
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-            />
-          </label>
+          <PasswordField name="password" autoComplete="current-password" required />
           <button className="primary" disabled={busy}>
             Sign in →
           </button>

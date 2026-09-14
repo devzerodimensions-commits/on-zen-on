@@ -845,3 +845,30 @@ header b {
     height: 110px;
   }
 }
+.password-control {
+  position: relative;
+}
+.field .password-control input {
+  width: 100%;
+  padding-right: 100px;
+}
+.password-control .password-toggle {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  min-width: 86px;
+  padding: 6px 10px;
+  background: transparent;
+  color: #244d36;
+  border: 0;
+}
+.password-control .password-toggle:focus-visible {
+  outline: 2px solid #244d36;
+  outline-offset: -2px;
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { PasswordField } from "./PasswordField.jsx";
 export function Management({ view, api, run }) {
   const [rows, S] = useState([]);
   const users = view === "Users";
@@ -27,17 +28,14 @@ export function Management({ view, api, run }) {
               Email
               <input type="email" name="email" required autoComplete="off" />
             </label>
-            <label className="field">
-              Initial password
-              <input
-                type="password"
-                name="password"
-                minLength={14}
-                maxLength={200}
-                required
-                autoComplete="new-password"
-              />
-            </label>
+            <PasswordField
+              label="Initial password"
+              name="password"
+              minLength={14}
+              maxLength={200}
+              required
+              autoComplete="new-password"
+            />
           </div>
           <label className="field">
             Role
