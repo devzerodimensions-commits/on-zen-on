@@ -114,6 +114,8 @@ const adminNav = [
 ];
 
 const emptyContent = { type: 'page', title: '', slug: '', status: 'draft', excerpt: '', body: '' };
+const emptyMedia = { title: '', url: '', alt: '', category: 'Website' };
+const emptyUser = { name: '', email: '', role: 'Editor', status: 'active' };
 
 function AdminPanel() {
   const [token, setToken] = useState(sessionStorage.getItem('oz_admin_token') || '');
@@ -128,9 +130,13 @@ function AdminPanel() {
   const [content, setContent] = useState([]);
   const [editing, setEditing] = useState(emptyContent);
   const [settings, setSettings] = useState({});
+  const [media, setMedia] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [mediaForm, setMediaForm] = useState(emptyMedia);
+  const [userForm, setUserForm] = useState(emptyUser);
 
   const headers = useMemo(() => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }), [token]);
-  const mediaItems = ['/assets/on-zen-on-logo-transparent.png', '/assets/software-laptop-3d.png', '/assets/portfolio-floating-sites.png', '/assets/hero-orbit.png'];
 
   const api = async (url, options = {}) => {
     const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
@@ -148,16 +154,22 @@ function AdminPanel() {
     setLoading(true);
     setNotice('');
     try {
-      const [summaryData, inquiryData, contentData, settingsData] = await Promise.all([
+      const [summaryData, inquiryData, contentData, settingsData, mediaData, userData, activityData] = await Promise.all([
         api('/api/admin/summary'),
         api('/api/admin/inquiries'),
         api('/api/admin/content'),
         api('/api/admin/settings'),
+        api('/api/admin/media'),
+        api('/api/admin/users'),
+        api('/api/admin/activity'),
       ]);
       setSummary(summaryData);
       setInquiries(inquiryData);
       setContent(contentData);
       setSettings(settingsData);
+      setMedia(mediaData);
+      setUsers(userData);
+      setActivity(activityData);
     } catch (error) {
       setNotice(error.message);
     } finally {
@@ -222,6 +234,40 @@ function AdminPanel() {
     setNotice('Settings saved.');
   };
 
+  const saveMedia = async (event) => {
+    event.preventDefault();
+    const method = mediaForm.id ? 'PATCH' : 'POST';
+    const url = mediaForm.id ? `/api/admin/media/${mediaForm.id}` : '/api/admin/media';
+    await api(url, { method, body: JSON.stringify(mediaForm) });
+    setMediaForm(emptyMedia);
+    await loadAdmin();
+    setNotice('Media library updated.');
+  };
+
+  const deleteMedia = async (id) => {
+    await api(`/api/admin/media/${id}`, { method: 'DELETE' });
+    setMediaForm(emptyMedia);
+    await loadAdmin();
+    setNotice('Media item deleted.');
+  };
+
+  const saveUser = async (event) => {
+    event.preventDefault();
+    const method = userForm.id ? 'PATCH' : 'POST';
+    const url = userForm.id ? `/api/admin/users/${userForm.id}` : '/api/admin/users';
+    await api(url, { method, body: JSON.stringify(userForm) });
+    setUserForm(emptyUser);
+    await loadAdmin();
+    setNotice('User saved.');
+  };
+
+  const deleteUser = async (id) => {
+    await api(`/api/admin/users/${id}`, { method: 'DELETE' });
+    setUserForm(emptyUser);
+    await loadAdmin();
+    setNotice('User deleted.');
+  };
+
   if (!token) {
     return <main className="wp-login">
       <form onSubmit={login} className="wp-login-card">
@@ -249,17 +295,17 @@ function AdminPanel() {
         <div className="wp-top-actions"><a href="#home">View site</a><button onClick={loadAdmin}>{loading ? 'Refreshing...' : 'Refresh'}</button></div>
       </div>
       {notice && <p className="wp-notice">{notice}</p>}
-      {active === 'dashboard' && <AdminDashboard summary={summary} inquiries={inquiries} content={content} />}
+      {active === 'dashboard' && <AdminDashboard summary={summary} inquiries={inquiries} content={content} activity={activity} />}
       {active === 'inquiries' && <AdminInquiries inquiries={inquiries} onSave={saveInquiry} onDelete={deleteInquiry} />}
       {active === 'content' && <AdminContent content={content} editing={editing} setEditing={setEditing} onSave={saveContent} onDelete={removeContent} />}
-      {active === 'media' && <AdminMedia mediaItems={mediaItems} />}
-      {active === 'users' && <AdminUsers />}
+      {active === 'media' && <AdminMedia media={media} mediaForm={mediaForm} setMediaForm={setMediaForm} onSave={saveMedia} onDelete={deleteMedia} />}
+      {active === 'users' && <AdminUsers users={users} userForm={userForm} setUserForm={setUserForm} onSave={saveUser} onDelete={deleteUser} />}
       {active === 'settings' && <AdminSettings settings={settings} setSettings={setSettings} onSave={saveSettings} />}
     </section>
   </main>;
 }
 
-function AdminDashboard({ summary, inquiries, content }) {
+function AdminDashboard({ summary, inquiries, content, activity }) {
   const cards = [
     ['Total inquiries', summary?.inquiries?.total ?? 0, 'All contact form leads'],
     ['New leads', summary?.inquiries?.fresh ?? 0, 'Need review'],
@@ -270,7 +316,7 @@ function AdminDashboard({ summary, inquiries, content }) {
     <div className="wp-card-grid">{cards.map(([label, value, help]) => <article className="wp-stat" key={label}><span>{label}</span><strong>{value}</strong><p>{help}</p></article>)}</div>
     <div className="wp-two-column">
       <section className="wp-panel"><h2>Recent Inquiries</h2>{inquiries.slice(0, 5).map((item) => <div className="wp-feed" key={item.id}><b>{item.name}</b><span>{item.email}</span><p>{item.message}</p></div>)}{!inquiries.length && <p className="wp-empty">No inquiries yet.</p>}</section>
-      <section className="wp-panel"><h2>Content Activity</h2>{content.slice(0, 5).map((item) => <div className="wp-feed" key={item.id}><b>{item.title}</b><span>{item.type} / {item.status}</span><p>{item.excerpt || 'No excerpt added.'}</p></div>)}{!content.length && <p className="wp-empty">Create your first page or post.</p>}</section>
+      <section className="wp-panel"><h2>Latest Activity</h2>{activity.slice(0, 7).map((item, index) => <div className="wp-feed" key={`${item.type}-${item.title}-${index}`}><b>{item.title}</b><span>{item.type}</span><p>{item.detail}</p></div>)}{!activity.length && <p className="wp-empty">No admin activity yet.</p>}</section>
     </div>
   </div>;
 }
@@ -286,12 +332,18 @@ function AdminContent({ content, editing, setEditing, onSave, onDelete }) {
   </div>;
 }
 
-function AdminMedia({ mediaItems }) {
-  return <div className="wp-panel"><div className="wp-panel-head"><h2>Media Library</h2><span>Project assets</span></div><div className="wp-media-grid">{mediaItems.map((src) => <article key={src}><img src={src} alt="" /><input readOnly value={src} /></article>)}</div></div>;
+function AdminMedia({ media, mediaForm, setMediaForm, onSave, onDelete }) {
+  return <div className="wp-content-layout">
+    <section className="wp-panel"><div className="wp-panel-head"><h2>Media Library</h2><button onClick={() => setMediaForm(emptyMedia)}>Add New</button></div><div className="wp-media-grid">{media.map((item) => <article key={item.id} onClick={() => setMediaForm(item)}><img src={item.url} alt={item.alt || item.title} /><b>{item.title}</b><span>{item.category}</span><input readOnly value={item.url} /></article>)}</div>{!media.length && <p className="wp-empty">No media records yet.</p>}</section>
+    <form className="wp-panel wp-settings" onSubmit={onSave}><div className="wp-panel-head"><h2>{mediaForm.id ? 'Edit Media' : 'Add Media'}</h2><div><button type="submit">Save</button>{mediaForm.id && <button type="button" className="danger" onClick={() => onDelete(mediaForm.id)}>Delete</button>}</div></div><label>Title<input value={mediaForm.title} onChange={(event) => setMediaForm({ ...mediaForm, title: event.target.value })} required /></label><label>Image URL<input value={mediaForm.url} onChange={(event) => setMediaForm({ ...mediaForm, url: event.target.value })} placeholder="/assets/example.png" required /></label><label>Alt text<input value={mediaForm.alt || ''} onChange={(event) => setMediaForm({ ...mediaForm, alt: event.target.value })} /></label><label>Category<input value={mediaForm.category || 'Website'} onChange={(event) => setMediaForm({ ...mediaForm, category: event.target.value })} /></label></form>
+  </div>;
 }
 
-function AdminUsers() {
-  return <div className="wp-panel"><div className="wp-panel-head"><h2>Users</h2><button disabled>Add User</button></div><table className="wp-table"><thead><tr><th>User</th><th>Role</th><th>Status</th></tr></thead><tbody><tr><td><b>Website Administrator</b><small>Configured through ADMIN_PASSWORD</small></td><td>Administrator</td><td><span className="wp-badge">Active</span></td></tr><tr><td><b>Editor</b><small>Coming next when multi-user auth is needed</small></td><td>Editor</td><td>Planned</td></tr></tbody></table></div>;
+function AdminUsers({ users, userForm, setUserForm, onSave, onDelete }) {
+  return <div className="wp-content-layout">
+    <section className="wp-panel"><div className="wp-panel-head"><h2>Users</h2><button onClick={() => setUserForm(emptyUser)}>Add User</button></div><table className="wp-table"><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>{users.map((item) => <tr key={item.id}><td><b>{item.name}</b><small>{item.email}</small></td><td>{item.role}</td><td><span className="wp-badge">{item.status}</span></td><td><button onClick={() => setUserForm(item)}>Edit</button></td></tr>)}</tbody></table>{!users.length && <p className="wp-empty">No users found.</p>}</section>
+    <form className="wp-panel wp-settings" onSubmit={onSave}><div className="wp-panel-head"><h2>{userForm.id ? 'Edit User' : 'Add User'}</h2><div><button type="submit">Save</button>{userForm.id && <button type="button" className="danger" onClick={() => onDelete(userForm.id)}>Delete</button>}</div></div><label>Name<input value={userForm.name} onChange={(event) => setUserForm({ ...userForm, name: event.target.value })} required /></label><label>Email<input type="email" value={userForm.email} onChange={(event) => setUserForm({ ...userForm, email: event.target.value })} required /></label><label>Role<select value={userForm.role} onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}><option>Administrator</option><option>Editor</option><option>Marketing</option><option>Viewer</option></select></label><label>Status<select value={userForm.status} onChange={(event) => setUserForm({ ...userForm, status: event.target.value })}><option value="active">Active</option><option value="paused">Paused</option></select></label></form>
+  </div>;
 }
 
 function AdminSettings({ settings, setSettings, onSave }) {

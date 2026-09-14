@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import crypto from 'crypto';
 import express from 'express';
+import fs from 'fs/promises';
 import { Pool } from 'pg';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'url';
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.join(__dirname, '..', 'dist');
+const schemaPath = path.join(__dirname, 'schema.sql');
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
 const adminUser = process.env.ADMIN_USER || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
@@ -15,6 +17,24 @@ const adminToken = crypto.createHash('sha256').update(`${adminUser}:${adminPassw
 
 app.use(express.json());
 app.use(express.static(distPath));
+
+function asyncRoute(handler) {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+function requireDatabase(res) {
+  if (!pool) {
+    res.status(503).json({ error: 'Database is not configured.' });
+    return false;
+  }
+  return true;
+}
 
 function requireAdmin(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');
@@ -139,7 +159,106 @@ app.patch('/api/admin/settings', requireAdmin, async (req, res) => {
   return res.json({ ok: true });
 });
 
+app.get('/api/admin/users', requireAdmin, asyncRoute(async (_req, res) => {
+  if (!requireDatabase(res)) return;
+  const result = await pool.query('SELECT id, name, email, role, status, created_at, updated_at FROM admin_users ORDER BY id ASC');
+  res.json(result.rows);
+}));
+
+app.post('/api/admin/users', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  const { name, email, role = 'Editor', status = 'active' } = req.body;
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
+  const result = await pool.query(
+    'INSERT INTO admin_users (name, email, role, status) VALUES ($1, $2, $3, $4) RETURNING *',
+    [name, email, role, status],
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+app.patch('/api/admin/users/:id', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  const { name, email, role = 'Editor', status = 'active' } = req.body;
+  if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
+  const result = await pool.query(
+    'UPDATE admin_users SET name = $1, email = $2, role = $3, status = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
+    [name, email, role, status, req.params.id],
+  );
+  if (!result.rowCount) return res.status(404).json({ error: 'User not found.' });
+  res.json(result.rows[0]);
+}));
+
+app.delete('/api/admin/users/:id', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  await pool.query('DELETE FROM admin_users WHERE id = $1', [req.params.id]);
+  res.json({ ok: true });
+}));
+
+app.get('/api/admin/media', requireAdmin, asyncRoute(async (_req, res) => {
+  if (!requireDatabase(res)) return;
+  const result = await pool.query('SELECT id, title, url, alt, category, created_at, updated_at FROM media_items ORDER BY id DESC');
+  res.json(result.rows);
+}));
+
+app.post('/api/admin/media', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  const { title, url, alt = '', category = 'Website' } = req.body;
+  if (!title || !url) return res.status(400).json({ error: 'Title and URL are required.' });
+  const result = await pool.query(
+    'INSERT INTO media_items (title, url, alt, category) VALUES ($1, $2, $3, $4) RETURNING *',
+    [title, url, alt, category],
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+app.patch('/api/admin/media/:id', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  const { title, url, alt = '', category = 'Website' } = req.body;
+  if (!title || !url) return res.status(400).json({ error: 'Title and URL are required.' });
+  const result = await pool.query(
+    'UPDATE media_items SET title = $1, url = $2, alt = $3, category = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
+    [title, url, alt, category, req.params.id],
+  );
+  if (!result.rowCount) return res.status(404).json({ error: 'Media item not found.' });
+  res.json(result.rows[0]);
+}));
+
+app.delete('/api/admin/media/:id', requireAdmin, asyncRoute(async (req, res) => {
+  if (!requireDatabase(res)) return;
+  await pool.query('DELETE FROM media_items WHERE id = $1', [req.params.id]);
+  res.json({ ok: true });
+}));
+
+app.get('/api/admin/activity', requireAdmin, asyncRoute(async (_req, res) => {
+  if (!requireDatabase(res)) return;
+  const result = await pool.query(`
+    SELECT 'Inquiry' AS type, name AS title, message AS detail, created_at FROM inquiries
+    UNION ALL
+    SELECT initcap(type) AS type, title, status AS detail, updated_at AS created_at FROM content_items
+    ORDER BY created_at DESC
+    LIMIT 12
+  `);
+  res.json(result.rows);
+}));
+
 app.get(['/admin', '/admin/*'], (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
 app.get('*', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
-app.listen(process.env.PORT || 3001, () => console.log('On Zen On API ready'));
+app.use((error, _req, res, _next) => {
+  console.error(error);
+  const message = error.code === '23505' ? 'This record already exists.' : 'Admin backend request failed.';
+  res.status(500).json({ error: message });
+});
+
+async function boot() {
+  if (pool) {
+    const schema = await fs.readFile(schemaPath, 'utf8');
+    await pool.query(schema);
+  }
+  app.listen(process.env.PORT || 3001, () => console.log('On Zen On API ready'));
+}
+
+boot().catch((error) => {
+  console.error('Unable to start On Zen On API', error);
+  process.exit(1);
+});

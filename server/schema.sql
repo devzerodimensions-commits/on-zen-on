@@ -29,9 +29,39 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS admin_users (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  role TEXT NOT NULL DEFAULT 'Editor',
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS media_items (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL,
+  alt TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT 'Website',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 INSERT INTO site_settings (key, value) VALUES
   ('siteTitle', 'On Zen On Private Limited'),
   ('tagline', 'Creation meets growth'),
   ('adminEmail', 'hello@onzenon.com'),
   ('businessHours', '24 Hours')
 ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO admin_users (name, email, role, status) VALUES
+  ('Website Administrator', 'hello@onzenon.com', 'Administrator', 'active')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO media_items (title, url, alt, category) VALUES
+  ('Transparent logo', '/assets/on-zen-on-logo-transparent.png', 'On Zen On logo', 'Brand'),
+  ('Software laptop 3D', '/assets/software-laptop-3d.png', '3D software laptop model', 'Hero'),
+  ('Portfolio floating sites', '/assets/portfolio-floating-sites.png', 'Portfolio website previews', 'Portfolio')
+ON CONFLICT DO NOTHING;
