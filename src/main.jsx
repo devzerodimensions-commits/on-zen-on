@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import './admin.css';
 import './tech-theme.css';
 import './growth-layout.css';
 import './golden-sections.css';
@@ -16,8 +17,15 @@ const services = [
 ];
 
 function App() {
+  const [route, setRoute] = useState(window.location.hash || '#home');
   const [menu, setMenu] = useState(false);
   const [formState, setFormState] = useState('');
+  useEffect(() => {
+    const updateRoute = () => setRoute(window.location.hash || '#home');
+    window.addEventListener('hashchange', updateRoute);
+    return () => window.removeEventListener('hashchange', updateRoute);
+  }, []);
+  if (route.startsWith('#/admin')) return <AdminPanel />;
   const submit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -90,4 +98,197 @@ function App() {
     </footer>
   </>;
 }
+
+const adminNav = [
+  ['dashboard', 'Dashboard', 'dashicons-dashboard'],
+  ['inquiries', 'Inquiries', 'dashicons-email'],
+  ['content', 'Pages & Posts', 'dashicons-admin-page'],
+  ['media', 'Media Library', 'dashicons-format-image'],
+  ['users', 'Users', 'dashicons-admin-users'],
+  ['settings', 'Settings', 'dashicons-admin-generic'],
+];
+
+const emptyContent = { type: 'page', title: '', slug: '', status: 'draft', excerpt: '', body: '' };
+
+function AdminPanel() {
+  const [token, setToken] = useState(sessionStorage.getItem('oz_admin_token') || '');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [active, setActive] = useState('dashboard');
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [summary, setSummary] = useState(null);
+  const [inquiries, setInquiries] = useState([]);
+  const [content, setContent] = useState([]);
+  const [editing, setEditing] = useState(emptyContent);
+  const [settings, setSettings] = useState({});
+
+  const headers = useMemo(() => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }), [token]);
+  const mediaItems = ['/assets/on-zen-on-logo-transparent.png', '/assets/software-laptop-3d.png', '/assets/portfolio-floating-sites.png', '/assets/hero-orbit.png'];
+
+  const api = async (url, options = {}) => {
+    const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+    if (response.status === 401) {
+      sessionStorage.removeItem('oz_admin_token');
+      setToken('');
+      throw new Error('Please login again.');
+    }
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Admin request failed.');
+    return response.json();
+  };
+
+  const loadAdmin = async () => {
+    if (!token) return;
+    setLoading(true);
+    setNotice('');
+    try {
+      const [summaryData, inquiryData, contentData, settingsData] = await Promise.all([
+        api('/api/admin/summary'),
+        api('/api/admin/inquiries'),
+        api('/api/admin/content'),
+        api('/api/admin/settings'),
+      ]);
+      setSummary(summaryData);
+      setInquiries(inquiryData);
+      setContent(contentData);
+      setSettings(settingsData);
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadAdmin(); }, [token]);
+
+  const login = async (event) => {
+    event.preventDefault();
+    setLoginError('');
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Login failed.');
+      sessionStorage.setItem('oz_admin_token', data.token);
+      setToken(data.token);
+      setPassword('');
+    } catch (error) {
+      setLoginError(error.message);
+    }
+  };
+
+  const saveInquiry = async (item, changes) => {
+    await api(`/api/admin/inquiries/${item.id}`, { method: 'PATCH', body: JSON.stringify({ ...item, ...changes }) });
+    await loadAdmin();
+    setNotice('Inquiry updated.');
+  };
+
+  const deleteInquiry = async (id) => {
+    await api(`/api/admin/inquiries/${id}`, { method: 'DELETE' });
+    await loadAdmin();
+    setNotice('Inquiry moved out of the queue.');
+  };
+
+  const saveContent = async (event) => {
+    event.preventDefault();
+    const method = editing.id ? 'PATCH' : 'POST';
+    const url = editing.id ? `/api/admin/content/${editing.id}` : '/api/admin/content';
+    const saved = await api(url, { method, body: JSON.stringify(editing) });
+    setEditing(saved);
+    await loadAdmin();
+    setNotice('Content saved.');
+  };
+
+  const removeContent = async (id) => {
+    await api(`/api/admin/content/${id}`, { method: 'DELETE' });
+    setEditing(emptyContent);
+    await loadAdmin();
+    setNotice('Content deleted.');
+  };
+
+  const saveSettings = async (event) => {
+    event.preventDefault();
+    await api('/api/admin/settings', { method: 'PATCH', body: JSON.stringify(settings) });
+    await loadAdmin();
+    setNotice('Settings saved.');
+  };
+
+  if (!token) {
+    return <main className="wp-login">
+      <form onSubmit={login} className="wp-login-card">
+        <img src="/assets/on-zen-on-logo-transparent.png" alt="On Zen On" />
+        <h1>Admin Login</h1>
+        <p>Manage On Zen On website content, inquiries and settings.</p>
+        {loginError && <span className="wp-error">{loginError}</span>}
+        <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter admin password" required /></label>
+        <button type="submit">Log In</button>
+        <a href="#home">Back to website</a>
+      </form>
+    </main>;
+  }
+
+  return <main className="wp-admin">
+    <aside className="wp-sidebar">
+      <a className="wp-admin-brand" href="#home"><img src="/assets/on-zen-on-logo-transparent.png" alt="On Zen On" /><span>On Zen On</span></a>
+      <nav>{adminNav.map(([id, label, icon]) => <button className={active === id ? 'active' : ''} key={id} onClick={() => setActive(id)}><i className={icon} />{label}</button>)}</nav>
+      <button className="wp-logout" onClick={() => { sessionStorage.removeItem('oz_admin_token'); setToken(''); }}>Log out</button>
+    </aside>
+    <section className="wp-workspace">
+      <div className="wp-topbar">
+        <div><span>WordPress-style Admin</span><h1>{adminNav.find(([id]) => id === active)?.[1]}</h1></div>
+        <div className="wp-top-actions"><a href="#home">View site</a><button onClick={loadAdmin}>{loading ? 'Refreshing...' : 'Refresh'}</button></div>
+      </div>
+      {notice && <p className="wp-notice">{notice}</p>}
+      {active === 'dashboard' && <AdminDashboard summary={summary} inquiries={inquiries} content={content} />}
+      {active === 'inquiries' && <AdminInquiries inquiries={inquiries} onSave={saveInquiry} onDelete={deleteInquiry} />}
+      {active === 'content' && <AdminContent content={content} editing={editing} setEditing={setEditing} onSave={saveContent} onDelete={removeContent} />}
+      {active === 'media' && <AdminMedia mediaItems={mediaItems} />}
+      {active === 'users' && <AdminUsers />}
+      {active === 'settings' && <AdminSettings settings={settings} setSettings={setSettings} onSave={saveSettings} />}
+    </section>
+  </main>;
+}
+
+function AdminDashboard({ summary, inquiries, content }) {
+  const cards = [
+    ['Total inquiries', summary?.inquiries?.total ?? 0, 'All contact form leads'],
+    ['New leads', summary?.inquiries?.fresh ?? 0, 'Need review'],
+    ['Content items', summary?.content?.total ?? 0, 'Pages and posts'],
+    ['Published', summary?.content?.published ?? 0, 'Live content records'],
+  ];
+  return <div className="wp-screen">
+    <div className="wp-card-grid">{cards.map(([label, value, help]) => <article className="wp-stat" key={label}><span>{label}</span><strong>{value}</strong><p>{help}</p></article>)}</div>
+    <div className="wp-two-column">
+      <section className="wp-panel"><h2>Recent Inquiries</h2>{inquiries.slice(0, 5).map((item) => <div className="wp-feed" key={item.id}><b>{item.name}</b><span>{item.email}</span><p>{item.message}</p></div>)}{!inquiries.length && <p className="wp-empty">No inquiries yet.</p>}</section>
+      <section className="wp-panel"><h2>Content Activity</h2>{content.slice(0, 5).map((item) => <div className="wp-feed" key={item.id}><b>{item.title}</b><span>{item.type} / {item.status}</span><p>{item.excerpt || 'No excerpt added.'}</p></div>)}{!content.length && <p className="wp-empty">Create your first page or post.</p>}</section>
+    </div>
+  </div>;
+}
+
+function AdminInquiries({ inquiries, onSave, onDelete }) {
+  return <div className="wp-panel"><div className="wp-panel-head"><h2>Contact Form Leads</h2><span>{inquiries.length} records</span></div><div className="wp-table-wrap"><table className="wp-table"><thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>{inquiries.map((item) => <tr key={item.id}><td><b>{item.name}</b><small>{new Date(item.created_at).toLocaleDateString()}</small></td><td><a href={`mailto:${item.email}`}>{item.email}</a></td><td>{item.message}</td><td><select value={item.status} onChange={(event) => onSave(item, { status: event.target.value })}><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="closed">Closed</option></select></td><td><input defaultValue={item.notes} onBlur={(event) => onSave(item, { notes: event.target.value })} placeholder="Internal note" /></td><td><button onClick={() => onDelete(item.id)}>Delete</button></td></tr>)}</tbody></table></div>{!inquiries.length && <p className="wp-empty">No inquiries found.</p>}</div>;
+}
+
+function AdminContent({ content, editing, setEditing, onSave, onDelete }) {
+  return <div className="wp-content-layout">
+    <section className="wp-panel"><div className="wp-panel-head"><h2>All Pages & Posts</h2><button onClick={() => setEditing(emptyContent)}>Add New</button></div>{content.map((item) => <button className={`wp-content-item ${editing.id === item.id ? 'active' : ''}`} key={item.id} onClick={() => setEditing(item)}><b>{item.title}</b><span>{item.type} / {item.status} / {item.slug}</span></button>)}{!content.length && <p className="wp-empty">No content yet.</p>}</section>
+    <form className="wp-editor wp-panel" onSubmit={onSave}><div className="wp-panel-head"><h2>{editing.id ? 'Edit Content' : 'Add New Content'}</h2><div><button type="submit">Save</button>{editing.id && <button type="button" className="danger" onClick={() => onDelete(editing.id)}>Delete</button>}</div></div><div className="wp-form-grid"><label>Title<input value={editing.title} onChange={(event) => setEditing({ ...editing, title: event.target.value })} required /></label><label>Slug<input value={editing.slug} onChange={(event) => setEditing({ ...editing, slug: event.target.value })} placeholder="auto-from-title" /></label><label>Type<select value={editing.type} onChange={(event) => setEditing({ ...editing, type: event.target.value })}><option value="page">Page</option><option value="post">Post</option><option value="case-study">Case Study</option></select></label><label>Status<select value={editing.status} onChange={(event) => setEditing({ ...editing, status: event.target.value })}><option value="draft">Draft</option><option value="published">Published</option><option value="private">Private</option></select></label></div><label>Excerpt<textarea rows="3" value={editing.excerpt} onChange={(event) => setEditing({ ...editing, excerpt: event.target.value })} /></label><label>Body<textarea rows="13" value={editing.body} onChange={(event) => setEditing({ ...editing, body: event.target.value })} placeholder="Write page or blog content here..." /></label></form>
+  </div>;
+}
+
+function AdminMedia({ mediaItems }) {
+  return <div className="wp-panel"><div className="wp-panel-head"><h2>Media Library</h2><span>Project assets</span></div><div className="wp-media-grid">{mediaItems.map((src) => <article key={src}><img src={src} alt="" /><input readOnly value={src} /></article>)}</div></div>;
+}
+
+function AdminUsers() {
+  return <div className="wp-panel"><div className="wp-panel-head"><h2>Users</h2><button disabled>Add User</button></div><table className="wp-table"><thead><tr><th>User</th><th>Role</th><th>Status</th></tr></thead><tbody><tr><td><b>Website Administrator</b><small>Configured through ADMIN_PASSWORD</small></td><td>Administrator</td><td><span className="wp-badge">Active</span></td></tr><tr><td><b>Editor</b><small>Coming next when multi-user auth is needed</small></td><td>Editor</td><td>Planned</td></tr></tbody></table></div>;
+}
+
+function AdminSettings({ settings, setSettings, onSave }) {
+  return <form className="wp-panel wp-settings" onSubmit={onSave}><div className="wp-panel-head"><h2>General Settings</h2><button type="submit">Save Changes</button></div><label>Site title<input value={settings.siteTitle || ''} onChange={(event) => setSettings({ ...settings, siteTitle: event.target.value })} /></label><label>Tagline<input value={settings.tagline || ''} onChange={(event) => setSettings({ ...settings, tagline: event.target.value })} /></label><label>Admin email<input value={settings.adminEmail || ''} onChange={(event) => setSettings({ ...settings, adminEmail: event.target.value })} /></label><label>Business hours<input value={settings.businessHours || ''} onChange={(event) => setSettings({ ...settings, businessHours: event.target.value })} /></label></form>;
+}
+
 createRoot(document.getElementById('root')).render(<App />);
