@@ -17,15 +17,20 @@ const services = [
 ];
 
 function App() {
-  const [route, setRoute] = useState(window.location.hash || '#home');
+  const getRoute = () => window.location.pathname === '/admin' ? '/admin' : window.location.hash || '#home';
+  const [route, setRoute] = useState(getRoute);
   const [menu, setMenu] = useState(false);
   const [formState, setFormState] = useState('');
   useEffect(() => {
-    const updateRoute = () => setRoute(window.location.hash || '#home');
+    const updateRoute = () => setRoute(getRoute());
     window.addEventListener('hashchange', updateRoute);
-    return () => window.removeEventListener('hashchange', updateRoute);
+    window.addEventListener('popstate', updateRoute);
+    return () => {
+      window.removeEventListener('hashchange', updateRoute);
+      window.removeEventListener('popstate', updateRoute);
+    };
   }, []);
-  if (route.startsWith('#/admin')) return <AdminPanel />;
+  if (route === '/admin' || route.startsWith('#/admin')) return <AdminPanel />;
   const submit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
