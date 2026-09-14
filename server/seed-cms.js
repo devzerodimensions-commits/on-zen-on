@@ -401,6 +401,7 @@ export async function seedCms(db) {
     }
   });
   await migrateServicePhotos(db);
+  await migrateServicePhotos(db, "mobile-app-image-v2", new Set(["/assets/service-photo-mobile-app-development.jpg"]));
   await updateServiceMenuLinks(db);
 }
 

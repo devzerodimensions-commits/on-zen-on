@@ -12,10 +12,10 @@
     "license": "https://unsplash.com/license"
   },
   "mobile-app-development": {
-    "image": "/assets/service-photo-mobile-app-development.jpg",
-    "alt": "A hand holding a smartphone",
-    "source": "https://unsplash.com/photos/a-person-holding-a-phone-in-their-hand-u1b6E6IkSGQ",
-    "license": "https://unsplash.com/license"
+    "image": "/assets/service-mobile-app-studio.webp",
+    "alt": "Smartphone displaying a green productivity app beside a laptop in a sunlit developer workspace",
+    "source": "Custom AI-generated image using the built-in image generation tool",
+    "license": "Generated for On Zen On"
   },
   "ai-workflow-automation": {
     "image": "/assets/service-photo-ai-workflow-automation.jpg",

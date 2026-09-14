@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 
 const photos = [
   [
@@ -10,11 +10,6 @@ const photos = [
     "backend-development",
     "a-computer-screen-with-a-bunch-of-code-on-it-ieic5Tq8YMk",
     "Close-up of programming code on a computer screen",
-  ],
-  [
-    "mobile-app-development",
-    "a-person-holding-a-phone-in-their-hand-u1b6E6IkSGQ",
-    "A hand holding a smartphone",
   ],
   [
     "ai-workflow-automation",
@@ -47,7 +42,7 @@ const photos = [
     "People collaborating on wireframe sketches in a workspace",
   ],
 ];
-const manifest = {};
+const manifest = JSON.parse(await readFile("shared/service-photos.json", "utf8"));
 for (const [slug, source, alt] of photos) {
   const page = `https://unsplash.com/photos/${source}`;
   const response = await fetch(page);
