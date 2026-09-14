@@ -9,8 +9,9 @@ const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.join(__dirname, '..', 'dist');
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
+const adminUser = process.env.ADMIN_USER || 'admin';
 const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-const adminToken = crypto.createHash('sha256').update(adminPassword).digest('hex');
+const adminToken = crypto.createHash('sha256').update(`${adminUser}:${adminPassword}`).digest('hex');
 
 app.use(express.json());
 app.use(express.static(distPath));
@@ -50,7 +51,9 @@ app.post('/api/inquiries', async (req, res) => {
 });
 
 app.post('/api/admin/login', (req, res) => {
-  if (req.body?.password !== adminPassword) return res.status(401).json({ error: 'Invalid admin password.' });
+  if (req.body?.user !== adminUser || req.body?.password !== adminPassword) {
+    return res.status(401).json({ error: 'Invalid admin ID or password.' });
+  }
   return res.json({ token: adminToken });
 });
 

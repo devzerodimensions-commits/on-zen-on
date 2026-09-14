@@ -112,6 +112,7 @@ const emptyContent = { type: 'page', title: '', slug: '', status: 'draft', excer
 
 function AdminPanel() {
   const [token, setToken] = useState(sessionStorage.getItem('oz_admin_token') || '');
+  const [user, setUser] = useState('admin');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [active, setActive] = useState('dashboard');
@@ -168,7 +169,7 @@ function AdminPanel() {
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ user, password }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Login failed.');
@@ -223,6 +224,7 @@ function AdminPanel() {
         <h1>Admin Login</h1>
         <p>Manage On Zen On website content, inquiries and settings.</p>
         {loginError && <span className="wp-error">{loginError}</span>}
+        <label>Admin ID<input value={user} onChange={(event) => setUser(event.target.value)} placeholder="admin" required /></label>
         <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter admin password" required /></label>
         <button type="submit">Log In</button>
         <a href="#home">Back to website</a>
