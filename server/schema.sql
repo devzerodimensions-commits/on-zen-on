@@ -59,9 +59,3 @@ ON CONFLICT (key) DO NOTHING;
 INSERT INTO admin_users (name, email, role, status) VALUES
   ('Website Administrator', 'hello@onzenon.com', 'Administrator', 'active')
 ON CONFLICT (email) DO NOTHING;
-
-INSERT INTO media_items (title, url, alt, category) VALUES
-  ('Transparent logo', '/assets/on-zen-on-logo-transparent.png', 'On Zen On logo', 'Brand'),
-  ('Software laptop 3D', '/assets/software-laptop-3d.png', '3D software laptop model', 'Hero'),
-  ('Portfolio floating sites', '/assets/portfolio-floating-sites.png', 'Portfolio website previews', 'Portfolio')
-ON CONFLICT DO NOTHING;

@@ -1,0 +1,26 @@
+name: Website checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: cms_test
+          POSTGRES_PASSWORD: cms_ci_only
+          POSTGRES_DB: cms_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: node --test tests/postgres.test.js
+        env:
+          CMS_TEST_DATABASE_URL: postgresql://cms_test:cms_ci_only@localhost:5432/cms_test

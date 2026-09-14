@@ -1,0 +1,11 @@
+import {mkdtemp} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {openDb} from '../cms/server/db.js';
+import {createUser} from '../cms/server/auth.js';
+import {seedCms} from '../server/seed-cms.js';
+import {createWebsite} from '../server/website.js';
+if(process.env.NODE_ENV==='production'||process.env.DATABASE_URL)throw Error('Local preview only');
+const dir=await mkdtemp(join(tmpdir(),'onzenon-preview-'));const db=await openDb({url:null,path:join(dir,'cms.db')});await seedCms(db);await createUser(db,'preview@example.test','local-review-only-4829');
+const app=await createWebsite(db,{origin:'http://localhost:3101',production:false});const server=app.listen(3101,'127.0.0.1',()=>console.log('Website: http://localhost:3101/ — Admin: http://localhost:3101/admin/'));
+for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>server.close(async()=>{await db.close();process.exit(0);}));

@@ -1,24 +1,30 @@
-# On Zen On website
+# On Zen On website and dynamic admin
+
+The original React website now reads published pages, menus and layouts from a secure Express CMS. Your supplied logo is used throughout. Visit `/admin/` for pages, original-layout sections, image uploads, SEO, drafts, publishing, history, menus, users and inquiries. The interface follows a WordPress-style editing workflow while retaining the existing React design.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render and first-administrator setup. Use the existing Render service and database; do not create a replacement Blueprint.
 
 ## Run locally
 
 ```bash
-npm install
-npm run dev
+npm ci
+npm run build
+npm start
 ```
 
-In another terminal, run the inquiry API:
+For a disposable local demonstration (stop the server above first):
 
 ```bash
-Copy-Item .env.example .env
-npm run server
+node scripts/preview.mjs
 ```
+
+The demonstration runs at `http://localhost:3101/` and `/admin/` with `preview@example.test` / `local-review-only-4829`. It uses a temporary local database and cannot run in production. For persistent local editing, follow `.env.example`, set your own first-admin email/password and use `npm start` on port 3001. No password is enabled by default.
 
 ## Deploy to Render with PostgreSQL
 
 1. Push this project, including `render.yaml`, to a GitHub repository.
-2. In Render, select **New → Blueprint** and choose the repository.
-3. Render creates the web service and the `on-zen-on-postgres` database. It connects the database URL automatically and runs `npm run db:migrate` before deployment.
+2. Use the existing `on-zen-on` service; privately configure the initial administrator as described in the deployment guide.
+3. Retain the existing database connection. The service runs `npm run db:migrate` before deployment; startup adds the CMS tables and imports initial content without overwriting subsequent edits.
 4. After the deploy finishes, open the generated `onrender.com` URL.
 
 `DATABASE_URL` stays server-side; it is never exposed to the React app. For local PostgreSQL, copy `.env.example` to `.env`, set your own connection string, run `npm run db:migrate`, then run `npm run server` alongside Vite.
