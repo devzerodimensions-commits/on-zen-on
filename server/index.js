@@ -139,6 +139,7 @@ app.patch('/api/admin/settings', requireAdmin, async (req, res) => {
   return res.json({ ok: true });
 });
 
+app.get(['/admin', '/admin/*'], (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
 app.get('*', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 app.listen(process.env.PORT || 3001, () => console.log('On Zen On API ready'));
