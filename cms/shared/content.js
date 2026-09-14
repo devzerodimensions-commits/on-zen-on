@@ -92,6 +92,18 @@ const item = z
     href: safeLink.default(""),
     image: image.default(""),
     alt: short.default(""),
+    icon: z
+      .enum([
+        "code",
+        "server",
+        "phone",
+        "spark",
+        "growth",
+        "design",
+        "cloud",
+        "shield",
+      ])
+      .optional(),
   })
   .strict();
 export const blockSchema = z

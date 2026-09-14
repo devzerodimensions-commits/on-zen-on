@@ -274,6 +274,40 @@ function BlockEditor({ block, onChange, media, sections }) {
                 }
               />
             ))}
+            <label className="field">
+              <span>Card icon</span>
+              <select
+                value={item.icon || ""}
+                onChange={(e) =>
+                  set(
+                    "items",
+                    block.items.map((it, j) => {
+                      if (j !== i) return it;
+                      const next = { ...it };
+                      if (e.target.value) next.icon = e.target.value;
+                      else delete next.icon;
+                      return next;
+                    }),
+                  )
+                }
+              >
+                <option value="">Automatic</option>
+                {[
+                  "code",
+                  "server",
+                  "phone",
+                  "spark",
+                  "growth",
+                  "design",
+                  "cloud",
+                  "shield",
+                ].map((icon) => (
+                  <option key={icon} value={icon}>
+                    {icon[0].toUpperCase() + icon.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </label>
             <MediaSelect
               value={item.image}
               media={media}
@@ -438,7 +472,11 @@ function App() {
             <span>Email address</span>
             <input name="email" type="email" autoComplete="username" required />
           </label>
-          <PasswordField name="password" autoComplete="current-password" required />
+          <PasswordField
+            name="password"
+            autoComplete="current-password"
+            required
+          />
           <button className="primary" disabled={busy}>
             Sign in →
           </button>

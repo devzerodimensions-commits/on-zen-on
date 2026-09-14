@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
+import {
+  enrichServicePage,
+  migrateServiceDetails,
+} from "./service-detail-content.js";
 import { applyServicePhotos, migrateServicePhotos } from "./service-photos.js";
 export const stableId = (name) => {
   const h = createHash("sha256").update(`onzenon-cms-v1:${name}`).digest("hex");
@@ -43,8 +47,7 @@ export async function seedCms(db) {
         anchor: "services-hero",
         eyebrow: "ON ZEN ON SERVICES",
         heading: "Full-stack IT services for digital growth.",
-        body:
-          "From high-performance websites and mobile applications to secure backend systems, AI automation and search-led digital marketing, our team builds connected solutions that help businesses launch, scale and compete with confidence.",
+        body: "From high-performance websites and mobile applications to secure backend systems, AI automation and search-led digital marketing, our team builds connected solutions that help businesses launch, scale and compete with confidence.",
         buttonLabel: "Start your project",
         href: "/#contact",
         image: "/assets/software-laptop-3d.png",
@@ -79,8 +82,7 @@ export async function seedCms(db) {
         anchor: "core-services",
         eyebrow: "WHAT WE BUILD",
         heading: "All IT services under one growth-focused team.",
-        body:
-          "Choose one service or combine several into a complete digital system. Each service is designed with clean UX, fast loading speed, SEO visibility, robust security and long-term maintainability.",
+        body: "Choose one service or combine several into a complete digital system. Each service is designed with clean UX, fast loading speed, SEO visibility, robust security and long-term maintainability.",
         buttonLabel: "",
         href: "",
         image: "",
@@ -88,64 +90,56 @@ export async function seedCms(db) {
         items: [
           {
             title: "⌘ Frontend Development",
-            text:
-              "Responsive HTML, CSS, JavaScript and React interfaces with clean navigation, fast loading speed, accessibility and conversion-focused UI.",
+            text: "Responsive HTML, CSS, JavaScript and React interfaces with clean navigation, fast loading speed, accessibility and conversion-focused UI.",
             href: "/#contact",
             image: "/assets/portfolio-floating-sites.png",
             alt: "Website interface previews",
           },
           {
             title: "⬡ Backend Development",
-            text:
-              "Node.js APIs, database design, admin panels, authentication, dashboards and integrations that make your business systems reliable.",
+            text: "Node.js APIs, database design, admin panels, authentication, dashboards and integrations that make your business systems reliable.",
             href: "/#contact",
             image: "/assets/software-laptop-3d.png",
             alt: "Software dashboard on laptop",
           },
           {
             title: "📱 Mobile App Development",
-            text:
-              "Android, iOS and cross-platform mobile applications with booking, scheduling, notifications, user accounts and secure data flows.",
+            text: "Android, iOS and cross-platform mobile applications with booking, scheduling, notifications, user accounts and secure data flows.",
             href: "/#contact",
             image: "/assets/hero-orbit.png",
             alt: "Digital orbit visual",
           },
           {
             title: "✦ AI & Workflow Automation",
-            text:
-              "AI-powered chatbots, virtual assistants, workflow automation, self-service portals and smart internal tools for faster operations.",
+            text: "AI-powered chatbots, virtual assistants, workflow automation, self-service portals and smart internal tools for faster operations.",
             href: "/#contact",
             image: "/assets/software-laptop-3d.png",
             alt: "AI workflow software visual",
           },
           {
             title: "↗ SEO, PPC & Digital Marketing",
-            text:
-              "SEO, PPC, AEO, content writing, social media marketing and campaign optimisation built to increase qualified traffic and leads.",
+            text: "SEO, PPC, AEO, content writing, social media marketing and campaign optimisation built to increase qualified traffic and leads.",
             href: "/#contact",
             image: "/assets/portfolio-floating-sites.png",
             alt: "Digital marketing website previews",
           },
           {
             title: "◈ UI/UX & Product Design",
-            text:
-              "Wireframes, product flows, interactive prototypes, motion UI, dark mode options and user journeys that feel simple and premium.",
+            text: "Wireframes, product flows, interactive prototypes, motion UI, dark mode options and user journeys that feel simple and premium.",
             href: "/#contact",
             image: "/assets/hero-orbit.png",
             alt: "Product design visual",
           },
           {
             title: "☁ Cloud, API & DevOps",
-            text:
-              "Cloud-native, API-first architecture with scalable deployment, monitoring, edge processing and infrastructure support.",
+            text: "Cloud-native, API-first architecture with scalable deployment, monitoring, edge processing and infrastructure support.",
             href: "/#contact",
             image: "/assets/software-laptop-3d.png",
             alt: "Cloud software dashboard",
           },
           {
             title: "🛡 Cybersecurity",
-            text:
-              "Advanced cybersecurity measures, zero-trust rules, protective defence, secure forms and safer application architecture.",
+            text: "Advanced cybersecurity measures, zero-trust rules, protective defence, secure forms and safer application architecture.",
             href: "/#contact",
             image: "/assets/portfolio-floating-sites.png",
             alt: "Secure website previews",
@@ -158,8 +152,7 @@ export async function seedCms(db) {
         anchor: "technology-stack",
         eyebrow: "TECHNOLOGY STACK",
         heading: "Languages, frameworks and platforms we use.",
-        body:
-          "We choose the right technology for each project, with a practical stack for frontend, backend, databases, cloud, automation and marketing operations.",
+        body: "We choose the right technology for each project, with a practical stack for frontend, backend, databases, cloud, automation and marketing operations.",
         buttonLabel: "",
         href: "",
         image: "",
@@ -201,8 +194,7 @@ export async function seedCms(db) {
         anchor: "delivery-process",
         eyebrow: "HOW WE DELIVER",
         heading: "A clear process from idea to launch.",
-        body:
-          "Every project follows a practical flow so you always know what is being built, why it matters and what comes next.",
+        body: "Every project follows a practical flow so you always know what is being built, why it matters and what comes next.",
         buttonLabel: "",
         href: "",
         image: "",
@@ -210,32 +202,28 @@ export async function seedCms(db) {
         items: [
           {
             title: "01. Strategy & Scope",
-            text:
-              "We understand your goals, audience, services, competitors and required features before design or development begins.",
+            text: "We understand your goals, audience, services, competitors and required features before design or development begins.",
             href: "",
             image: "",
             alt: "",
           },
           {
             title: "02. Design & Prototype",
-            text:
-              "We create the page structure, content flow, UI style, icons, images and interactive experience.",
+            text: "We create the page structure, content flow, UI style, icons, images and interactive experience.",
             href: "",
             image: "",
             alt: "",
           },
           {
             title: "03. Build & Integrate",
-            text:
-              "Frontend, backend, database, admin panel, forms, CMS, APIs and automation are built into one working system.",
+            text: "Frontend, backend, database, admin panel, forms, CMS, APIs and automation are built into one working system.",
             href: "",
             image: "",
             alt: "",
           },
           {
             title: "04. Launch & Optimise",
-            text:
-              "We test speed, responsiveness, SEO, security, forms and deployment so your site is ready for real users.",
+            text: "We test speed, responsiveness, SEO, security, forms and deployment so your site is ready for real users.",
             href: "",
             image: "",
             alt: "",
@@ -248,8 +236,7 @@ export async function seedCms(db) {
         anchor: "business-features",
         eyebrow: "FEATURES YOU CAN ADD",
         heading: "Modern features for a serious IT website.",
-        body:
-          "Your services page can connect into a wider digital product: self-service portals, online booking, automated scheduling, search, AI visibility optimisation, analytics and secure admin control.",
+        body: "Your services page can connect into a wider digital product: self-service portals, online booking, automated scheduling, search, AI visibility optimisation, analytics and secure admin control.",
         buttonLabel: "",
         href: "",
         image: "",
@@ -340,8 +327,7 @@ export async function seedCms(db) {
         anchor: "contact",
         eyebrow: "START A SERVICE REQUEST",
         heading: "Tell us what you want to build.",
-        body:
-          "Share your website, app, automation or marketing requirement and we will help shape it into a practical plan.",
+        body: "Share your website, app, automation or marketing requirement and we will help shape it into a practical plan.",
         buttonLabel: "",
         href: "",
         image: "",
@@ -393,6 +379,7 @@ export async function seedCms(db) {
   await db.transaction(async (q) => {
     for (const [name, kind, data, key] of seeds) {
       if (kind === "page") applyServicePhotos(data);
+      if (kind === "page") enrichServicePage(data, stableId);
       const json = JSON.stringify(schemas[kind].parse(data));
       await q.query(
         "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
@@ -401,9 +388,18 @@ export async function seedCms(db) {
     }
   });
   await migrateServicePhotos(db);
-  await migrateServicePhotos(db, "mobile-app-image-v2", new Set(["/assets/service-photo-mobile-app-development.jpg"]));
-  await migrateServicePhotos(db, "fullstack-hero-image-v3", new Set(["/assets/service-photo-overview.jpg"]));
+  await migrateServicePhotos(
+    db,
+    "mobile-app-image-v2",
+    new Set(["/assets/service-photo-mobile-app-development.jpg"]),
+  );
+  await migrateServicePhotos(
+    db,
+    "fullstack-hero-image-v3",
+    new Set(["/assets/service-photo-overview.jpg"]),
+  );
   await updateServiceMenuLinks(db);
+  await migrateServiceDetails(db, stableId);
 }
 
 async function updateServiceMenuLinks(db) {
@@ -439,7 +435,12 @@ async function updateServiceMenuLinks(db) {
       if (changed) {
         await q.query(
           "UPDATE documents SET draft=$1,published=$2,updated=$3 WHERE id=$4",
-          [next.draft || row.draft, next.published || row.published, Date.now(), row.id],
+          [
+            next.draft || row.draft,
+            next.published || row.published,
+            Date.now(),
+            row.id,
+          ],
         );
       }
     }

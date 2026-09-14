@@ -110,7 +110,7 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
           <section
             key={b.id}
             id={b.anchor || undefined}
-            className={`oz-service-section oz-kind-${b.type}`}
+            className={`oz-service-section oz-kind-${b.type} ${b.type === "about" && b.image ? "oz-image-story" : ""}`}
           >
             <div className="oz-service-wrap">
               <div className="oz-section-heading">
@@ -166,6 +166,7 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                               <span className="oz-service-icon">
                                 <Icon
                                   name={
+                                    item.icon ||
                                     service?.icon ||
                                     (b.type === "technology" ? "code" : "spark")
                                   }
