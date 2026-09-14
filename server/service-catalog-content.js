@@ -1,4 +1,5 @@
 import photos from "../shared/service-photos.json" with { type: "json" };
+import marketingImages from "../shared/marketing-offering-images.json" with { type: "json" };
 
 // Each entry explains an individual service within its parent category.
 // Title, summary, included work, icon and illustration category.
@@ -544,8 +545,8 @@ export function addOfferingCatalog(page, stableId) {
       title,
       text: `${summary}\n\nIncludes: ${included}`,
       icon,
-      image: photos[photo].image,
-      alt: photos[photo].alt,
+      image: (slug === "digital-marketing" && marketingImages[title]?.image) || photos[photo].image,
+      alt: (slug === "digital-marketing" && marketingImages[title]?.alt) || photos[photo].alt,
       href: "#contact",
     })),
   };

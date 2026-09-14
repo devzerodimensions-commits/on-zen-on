@@ -1,0 +1,50 @@
+{
+  "Search Engine Optimisation (SEO)": {
+    "image": "/assets/marketing-seo.webp",
+    "alt": "A laptop prominently displaying a realistic search results page, with a clear highlighted organic result and a small keyword research panel beside it"
+  },
+  "Local SEO & Business Profiles": {
+    "image": "/assets/marketing-local-seo.webp",
+    "alt": "A tablet prominently showing a neighbourhood street map with a single green location pin and an adjacent business listing card, beside a small tabletop shop model"
+  },
+  "Google Ads & PPC Campaigns": {
+    "image": "/assets/marketing-ppc.webp",
+    "alt": "A desktop monitor showing a realistic paid-search campaign manager with ad previews clearly labelled Sponsored, campaign toggles and a budget chart"
+  },
+  "Paid Social Advertising": {
+    "image": "/assets/marketing-paid-social.webp",
+    "alt": "Two smartphones on desk stands showing attractive sponsored social feed advertisements for a fictional ceramic product brand"
+  },
+  "Social Media Management": {
+    "image": "/assets/marketing-social-management.webp",
+    "alt": "A monitor showing a colourful weekly social-media publishing calendar with scheduled post thumbnails, next to a smartphone displaying a coordinated photo feed"
+  },
+  "Content Strategy & Copywriting": {
+    "image": "/assets/marketing-content.webp",
+    "alt": "Close realistic photograph of a laptop showing a neatly formatted article draft with a headline, paragraphs and editorial annotations, beside a notebook with a topic outline, fountain pen and reference book"
+  },
+  "Email Marketing & Automation": {
+    "image": "/assets/marketing-email.webp",
+    "alt": "A laptop screen clearly showing an email campaign builder with a polished newsletter preview and a simple welcome-email sequence diagram with three connected envelope tiles"
+  },
+  "Landing Pages & Conversion Optimisation": {
+    "image": "/assets/marketing-conversion.webp",
+    "alt": "A wide monitor showing two side-by-side variants of a beautiful landing page labelled A and B, with prominent contrasting call-to-action buttons and a small conversion comparison bar chart"
+  },
+  "Analytics & Conversion Tracking": {
+    "image": "/assets/marketing-analytics.webp",
+    "alt": "A monitor displaying an elegant analytics dashboard with a clear four-step conversion funnel and a line chart, a second smaller device showing traffic sources"
+  },
+  "Answer Engine Optimisation (AEO)": {
+    "image": "/assets/marketing-aeo.webp",
+    "alt": "A laptop displaying a clean AI answer interface: a question above a concise answer with three numbered source citation cards clearly visible underneath"
+  },
+  "E-commerce Marketing": {
+    "image": "/assets/marketing-ecommerce.webp",
+    "alt": "A laptop displaying a beautiful online shop of ceramic homewares with product photographs, a shopping cart panel and a matching smartphone storefront"
+  },
+  "Creative Campaign Assets": {
+    "image": "/assets/marketing-creative.webp",
+    "alt": "A graphic designer workstation with monitor showing an artboard of coordinated social ad graphics, square and portrait campaign formats and a colour palette in forest green cream and gold"
+  }
+}

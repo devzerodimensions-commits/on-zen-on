@@ -11,6 +11,7 @@ import {
   migrateServiceDetails,
 } from "./service-detail-content.js";
 import { applyServicePhotos, migrateServicePhotos } from "./service-photos.js";
+import { migrateMarketingImages } from "./marketing-images.js";
 export const stableId = (name) => {
   const h = createHash("sha256").update(`onzenon-cms-v1:${name}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
@@ -406,6 +407,7 @@ export async function seedCms(db) {
   await updateServiceMenuLinks(db);
   await migrateServiceDetails(db, stableId);
   await migrateOfferingCatalogs(db, stableId);
+  await migrateMarketingImages(db);
 }
 
 async function updateServiceMenuLinks(db) {
