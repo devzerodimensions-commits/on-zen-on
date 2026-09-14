@@ -665,3 +665,73 @@
     grid-template-columns: 1fr;
   }
 }
+.oz-services .oz-offering-index {
+  display: flex;
+  flex-wrap: wrap;
+  position: static;
+  gap: 10px;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 36px;
+}
+.oz-services .oz-offering-index a {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  border: 1px solid #cdddcf;
+  background: #fff;
+  padding: 12px 15px;
+  border-radius: 7px;
+  color: #20513d;
+  text-decoration: none;
+  text-transform: none;
+  font:
+    600 12px Arial,
+    sans-serif;
+}
+.oz-services .oz-offering-index a:hover {
+  background: #e7f0df;
+}
+.oz-services #included-services .oz-service-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.oz-services #included-services .oz-service-card {
+  scroll-margin-top: 110px;
+}
+.oz-services #included-services .oz-card-visual {
+  height: 205px;
+}
+.oz-services #included-services .oz-card-content {
+  padding: 26px;
+}
+.oz-services #included-services .oz-card-content h3 {
+  font-size: 22px;
+}
+.oz-services #included-services .oz-card-content > p {
+  margin-bottom: 18px;
+}
+.oz-services #included-services .oz-card-content > p strong {
+  color: #244e3a;
+  font-size: 12px;
+  line-height: 2.2;
+}
+.oz-services #included-services .oz-action {
+  margin-top: 30px;
+}
+@media (max-width: 1000px) {
+  .oz-services #included-services .oz-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .oz-services #included-services .oz-service-grid {
+    grid-template-columns: 1fr;
+  }
+  .oz-services .oz-offering-index {
+    flex-direction: row;
+  }
+  .oz-services #included-services .oz-card-visual {
+    height: 230px;
+  }
+}

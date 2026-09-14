@@ -3,6 +3,10 @@ import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
 import {
+  addOfferingCatalog,
+  migrateOfferingCatalogs,
+} from "./service-catalog-content.js";
+import {
   enrichServicePage,
   migrateServiceDetails,
 } from "./service-detail-content.js";
@@ -380,6 +384,7 @@ export async function seedCms(db) {
     for (const [name, kind, data, key] of seeds) {
       if (kind === "page") applyServicePhotos(data);
       if (kind === "page") enrichServicePage(data, stableId);
+      if (kind === "page") addOfferingCatalog(data, stableId);
       const json = JSON.stringify(schemas[kind].parse(data));
       await q.query(
         "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
@@ -400,6 +405,7 @@ export async function seedCms(db) {
   );
   await updateServiceMenuLinks(db);
   await migrateServiceDetails(db, stableId);
+  await migrateOfferingCatalogs(db, stableId);
 }
 
 async function updateServiceMenuLinks(db) {

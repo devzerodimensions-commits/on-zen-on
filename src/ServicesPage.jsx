@@ -126,6 +126,19 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                   loading="lazy"
                 />
               )}
+              {b.anchor === "included-services" && (
+                <nav
+                  className="oz-offering-index"
+                  aria-label="Choose a service"
+                >
+                  {b.items.map((item, i) => (
+                    <a key={i} href={`#offering-${i + 1}`}>
+                      {item.title}
+                      <span aria-hidden="true">↘</span>
+                    </a>
+                  ))}
+                </nav>
+              )}
               {b.type === "faq" ? (
                 <div className="oz-questions">
                   {b.items.map((item, i) => (
@@ -151,7 +164,15 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                           ? `/services/${service.slug}`
                           : item.href;
                       return (
-                        <article key={i} className="oz-service-card">
+                        <article
+                          key={i}
+                          className="oz-service-card"
+                          id={
+                            b.anchor === "included-services"
+                              ? `offering-${i + 1}`
+                              : undefined
+                          }
+                        >
                           {item.image && (
                             <div className="oz-card-visual">
                               <img
@@ -179,10 +200,26 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                             <h3>
                               {item.title.replace(/^[^a-zA-Z0-9]+\s*/, "")}
                             </h3>
-                            <p>{item.text}</p>
+                            {item.text
+                              .split(/\n\n+/)
+                              .map((paragraph, index) => (
+                                <p key={index}>
+                                  {paragraph.startsWith("Includes: ") ? (
+                                    <>
+                                      <strong>What’s included</strong>
+                                      <br />
+                                      {paragraph.slice(10)}
+                                    </>
+                                  ) : (
+                                    paragraph
+                                  )}
+                                </p>
+                              ))}
                             {href && (
                               <a className="oz-card-link" href={href}>
-                                Explore service{" "}
+                                {b.anchor === "included-services"
+                                  ? "Discuss this service"
+                                  : "Explore service"}{" "}
                                 <span aria-hidden="true">↗</span>
                               </a>
                             )}
