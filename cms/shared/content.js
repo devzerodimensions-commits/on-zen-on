@@ -116,6 +116,9 @@ export const blockSchema = z
       .regex(/^[a-z][a-z0-9-]*$|^$/)
       .default(""),
     eyebrow: short.default(""),
+    imageCaption: short.optional(),
+    imageCaptionStrong: short.optional(),
+    cardLinkLabel: short.optional(),
     heading: short.default(""),
     body: z.string().max(15000).default(""),
     buttonLabel: short.default(""),

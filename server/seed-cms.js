@@ -12,6 +12,7 @@ import {
 } from "./service-detail-content.js";
 import { applyServicePhotos, migrateServicePhotos } from "./service-photos.js";
 import { migrateMarketingImages } from "./marketing-images.js";
+import { applyServiceSectionImages, migrateServiceSectionImages } from "./service-section-images.js";
 export const stableId = (name) => {
   const h = createHash("sha256").update(`onzenon-cms-v1:${name}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
@@ -386,6 +387,7 @@ export async function seedCms(db) {
       if (kind === "page") applyServicePhotos(data);
       if (kind === "page") enrichServicePage(data, stableId);
       if (kind === "page") addOfferingCatalog(data, stableId);
+      if (kind === "page") applyServiceSectionImages(data);
       const json = JSON.stringify(schemas[kind].parse(data));
       await q.query(
         "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
@@ -408,6 +410,7 @@ export async function seedCms(db) {
   await migrateServiceDetails(db, stableId);
   await migrateOfferingCatalogs(db, stableId);
   await migrateMarketingImages(db);
+  await migrateServiceSectionImages(db);
 }
 
 async function updateServiceMenuLinks(db) {

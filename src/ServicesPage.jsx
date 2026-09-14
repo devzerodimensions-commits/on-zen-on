@@ -80,14 +80,14 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                   <div className="oz-hero-art">
                     <span className="oz-art-orbit" />
                     <img src={b.image} alt={b.alt} fetchPriority="high" />
-                    <div className="oz-art-label">
+                    {(b.imageCaption !== "" || b.imageCaptionStrong !== "") && <div className="oz-art-label">
                       <Icon name="spark" />
                       <span>
-                        Thoughtfully designed.
+                        {b.imageCaption ?? "Thoughtfully designed."}
                         <br />
-                        <strong>Built for what’s next.</strong>
+                        <strong>{b.imageCaptionStrong ?? "Built for what’s next."}</strong>
                       </span>
-                    </div>
+                    </div>}
                   </div>
                 )}
               </div>
@@ -97,6 +97,7 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                     <div key={i}>
                       <span className="oz-small-number">0{i + 1}</span>
                       <div>
+                        {item.image && <img className="oz-detail-item-image" src={item.image} alt={item.alt} loading="lazy"/>}
                         <strong>{item.title}</strong>
                         <p>{item.text}</p>
                       </div>
@@ -148,6 +149,7 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                         <span aria-hidden="true">+</span>
                       </summary>
                       <p>{item.text}</p>
+                      {item.image && <img className="oz-detail-item-image" src={item.image} alt={item.alt} loading="lazy"/>}
                     </details>
                   ))}
                 </div>
@@ -217,9 +219,9 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                               ))}
                             {href && (
                               <a className="oz-card-link" href={href}>
-                                {b.anchor === "included-services"
+                                {b.cardLinkLabel ?? (b.anchor === "included-services"
                                   ? "Discuss this service"
-                                  : "Explore service"}{" "}
+                                  : "Explore service")}{" "}
                                 <span aria-hidden="true">↗</span>
                               </a>
                             )}

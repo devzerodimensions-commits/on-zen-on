@@ -735,3 +735,4 @@
     height: 230px;
   }
 }
+.oz-services .oz-detail-item-image { display: block; width: 100%; max-width: 520px; height: auto; border-radius: 12px; margin: 12px 0; }

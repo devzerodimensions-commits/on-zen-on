@@ -848,6 +848,11 @@ header b {
 .password-control {
   position: relative;
 }
+.image-picker { min-width: 0; padding: 12px; border: 1px solid #dce5db; border-radius: 12px; background: #f8faf6; }
+.image-picker-preview { display: block; width: 100%; height: 160px; object-fit: contain; background: #edf1eb; border-radius: 8px; margin-bottom: 12px; }
+.image-picker select { max-width: 100%; }
+.image-upload summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.image-picker-message { font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .field .password-control input {
   width: 100%;
   padding-right: 100px;

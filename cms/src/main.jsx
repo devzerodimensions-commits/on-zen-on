@@ -5,6 +5,7 @@ import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
+import { MediaSelect as ImagePicker } from "./MediaSelect.jsx";
 let csrf = "";
 async function api(path, method = "GET", body) {
   const form = body instanceof FormData;
@@ -73,29 +74,8 @@ function Field({ label, value, onChange, area = false, ...props }) {
     </label>
   );
 }
-function MediaSelect({ label = "Image", value, onChange, media }) {
-  return (
-    <label className="field">
-      <span>{label}</span>
-      <select value={value || ""} onChange={(e) => onChange(e.target.value)}>
-        <option value="">No image</option>
-        {[
-          "on-zen-on-official-logo.png",
-          "software-laptop-3d.png",
-          "portfolio-floating-sites.png",
-        ].map((file) => (
-          <option key={file} value={`/assets/${file}`}>
-            {file}
-          </option>
-        ))}
-        {media.map((m) => (
-          <option key={m.id} value={m.url}>
-            {m.alt} · {m.original_name}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+function MediaSelect(props) {
+ return <ImagePicker {...props} upload={data=>api("/media","POST",data)}/>;
 }
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
@@ -203,7 +183,7 @@ function BlockEditor({ block, onChange, media, sections }) {
       <div className="two">
         <MediaSelect
           value={block.image}
-          onChange={(v) => set("image", v)}
+          onChange={(v,alt) => onChange({...block,image:v,...(alt ? {alt} : {})})}
           media={media}
         />
         <Field
@@ -213,6 +193,11 @@ function BlockEditor({ block, onChange, media, sections }) {
         />
       </div>
       <div className="itemlist">
+        {block.type === "hero" && <div className="two">
+          <Field label="Image caption" value={block.imageCaption ?? "Thoughtfully designed."} onChange={v=>set("imageCaption",v)}/>
+          <Field label="Image caption emphasis" value={block.imageCaptionStrong ?? "Built for what’s next."} onChange={v=>set("imageCaptionStrong",v)}/>
+        </div>}
+        <Field label="Card button text" value={block.cardLinkLabel ?? (block.anchor==="included-services" ? "Discuss this service" : "Explore service")} onChange={v=>set("cardLinkLabel",v)}/>
         <div className="row">
           <h4>Content cards</h4>
           <button
@@ -311,11 +296,11 @@ function BlockEditor({ block, onChange, media, sections }) {
             <MediaSelect
               value={item.image}
               media={media}
-              onChange={(v) =>
+              onChange={(v,alt) =>
                 set(
                   "items",
                   block.items.map((it, j) =>
-                    j === i ? { ...it, image: v } : it,
+                    j === i ? { ...it, image: v, ...(alt ? {alt} : {}) } : it,
                   ),
                 )
               }
@@ -346,6 +331,11 @@ function App() {
     [preview, P] = useState(null),
     [history, H] = useState([]),
     [search, Q] = useState("");
+  useEffect(() => {
+    const added = e => M(current => [e.detail, ...current.filter(m => m.id !== e.detail.id)]);
+    window.addEventListener("cms-media-uploaded", added);
+    return () => window.removeEventListener("cms-media-uploaded", added);
+  }, []);
   const dirty =
     selected && JSON.stringify(draft) !== JSON.stringify(selected.draft);
   const load = async () => {
