@@ -1479,7 +1479,7 @@ export const menuDefaults = {
     {
       id: "59c305f9-21ef-49d0-a29a-2944311d55c7",
       label: "Services",
-      href: "/#services",
+      href: "/services",
       newTab: false,
     },
     {
@@ -1523,7 +1523,7 @@ export const menuDefaults = {
     {
       id: "1918ce02-bf40-47f8-a75c-61c29f683b85",
       label: "Services & technologies",
-      href: "/#services",
+      href: "/services",
       newTab: false,
     },
     {
@@ -1555,43 +1555,43 @@ export const menuDefaults = {
     {
       id: "845d0de3-0017-4561-b183-1cefeb0ad48d",
       label: "Frontend development",
-      href: "/#services",
+      href: "/services#core-services",
       newTab: false,
     },
     {
       id: "1e481975-f0d4-4814-8b8f-2e6f44879d9f",
       label: "Backend development",
-      href: "/#services",
+      href: "/services#core-services",
       newTab: false,
     },
     {
       id: "d6e08592-1f9c-4921-a688-60fc54fda267",
       label: "Web & mobile applications",
-      href: "/#services",
+      href: "/services#core-services",
       newTab: false,
     },
     {
       id: "cba68db6-5695-45d6-8f2f-08110ca0b29d",
       label: "AI & workflow automation",
-      href: "/#services",
+      href: "/services#business-features",
       newTab: false,
     },
     {
       id: "e519eff3-719a-4c28-b7ae-5b65285e3230",
       label: "Digital marketing",
-      href: "/#services",
+      href: "/services#core-services",
       newTab: false,
     },
     {
       id: "9ea19fcc-6364-4125-9a4b-ec55e2c42769",
       label: "SEO, PPC & AEO",
-      href: "/#services",
+      href: "/services#core-services",
       newTab: false,
     },
     {
       id: "67d4f349-7f87-4768-857c-a2325ab013ab",
       label: "Cloud, API & security",
-      href: "/#services",
+      href: "/services#business-features",
       newTab: false,
     },
   ],
