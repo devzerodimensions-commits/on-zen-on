@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
+import { mainServicePages, connectMainServices, migrateMainServices } from "./main-service-pages.js";
 import {
   addOfferingCatalog,
   migrateOfferingCatalogs,
@@ -359,6 +360,7 @@ export async function seedCms(db) {
     ["home", "page", home, "page:/"],
     ["services-page", "page", servicesPage, "page:/services"],
     ...servicePages(stableId),
+    ...mainServicePages(stableId),
     [
       "site-header",
       "section",
@@ -388,6 +390,7 @@ export async function seedCms(db) {
       if (kind === "page") enrichServicePage(data, stableId);
       if (kind === "page") addOfferingCatalog(data, stableId);
       if (kind === "page") applyServiceSectionImages(data);
+      if (kind === "page") connectMainServices(data, stableId);
       const json = JSON.stringify(schemas[kind].parse(data));
       await q.query(
         "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
@@ -411,6 +414,7 @@ export async function seedCms(db) {
   await migrateOfferingCatalogs(db, stableId);
   await migrateMarketingImages(db);
   await migrateServiceSectionImages(db);
+  await migrateMainServices(db, stableId);
 }
 
 async function updateServiceMenuLinks(db) {

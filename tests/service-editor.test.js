@@ -18,7 +18,7 @@ test("every service section and card accepts uploaded images and publishes witho
   const upload=await admin.post("/api/cms/media").set("Origin",origin).set("X-CSRF-Token",csrf).field("alt","Replacement service image").attach("file",image,"replacement.png").expect(201);
   const url=upload.body.url;
   const docs=(await admin.get("/api/cms/documents").expect(200)).body.filter(d=>d.kind==="page"&&d.draft.path.startsWith("/services"));
-  assert.equal(docs.length,9);
+  assert.equal(docs.length,11);
   for(const doc of docs){
    const data=structuredClone(doc.draft);
    for(const b of data.blocks){

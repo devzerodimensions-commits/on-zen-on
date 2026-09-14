@@ -14,6 +14,8 @@ Uploads are stored in the database, so they survive Render restarts and deployme
 
 ## Image set
 
-The service overview and eight detail pages contain 120 unique image placements after this update: 99 newly generated replacements, 12 existing marketing card images and 9 retained overview images. Logo reuse in the global header and footer is intentional.
+The service overview and ten detail pages contain 122 unique image placements: 99 generated replacements, 2 main-service hero images, 12 marketing card images and 9 retained overview images. Logo reuse in the global header and footer is intentional.
 
 The generated scenes are illustrative service photography, not customer case studies. Built-in OpenAI image generation was used. The asset paths and complete prompts are in public/assets/service-image-prompts.md; image-to-section mappings are in shared/service-section-images.json.
+
+The homepage has four main service links: Software Engineering, Digital Marketing, AI & Automation, and Secure Experience Design. Edit those links under Home → Services; the main-service overview pages are separate editable entries under Pages.

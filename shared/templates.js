@@ -1,3 +1,4 @@
+import { mainServiceLinks } from "./main-services.js";
 // Generated from the original website markup. Edit through the CMS; keep field IDs stable.
 export const templateManifest = {
   hero: {
@@ -1176,25 +1177,25 @@ export const templateDefaults = {
       text_6: "Software engineering",
       text_7:
         "Custom software, cloud platforms and API-first systems that turn your next idea into reliable growth.",
-      link_8: "/#contact",
+      link_8: mainServiceLinks.link_8,
       text_9: "Explore ",
       text_10: "02",
       text_11: "Digital marketing",
       text_12:
         "SEO, PPC, content and social campaigns engineered for visibility, qualified traffic and momentum.",
-      link_13: "/#contact",
+      link_13: mainServiceLinks.link_13,
       text_14: "Explore ",
       text_15: "03",
       text_16: "AI & automation",
       text_17:
         "Practical AI assistants and workflow automation that make every customer interaction more useful.",
-      link_18: "/#contact",
+      link_18: mainServiceLinks.link_18,
       text_19: "Explore ",
       text_20: "04",
       text_21: "Secure experience design",
       text_22:
         "Fast, intuitive digital products with zero-trust thinking and protection built in from day one.",
-      link_23: "/#contact",
+      link_23: mainServiceLinks.link_23,
       text_24: "Explore ",
     },
   },
