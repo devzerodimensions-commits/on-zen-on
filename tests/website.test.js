@@ -7,6 +7,53 @@ import { seedCms, stableId } from "../server/seed-cms.js";
 import { createUser } from "../cms/server/auth.js";
 import { templateDefaults } from "../shared/templates.js";
 import { pageSchema } from "../cms/shared/content.js";
+import { serviceCatalog } from "../shared/services.js";
+test("service detail pages publish with SEO and seed preserves edited content", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const app = await createWebsite(db, {
+      origin: "http://localhost:3001",
+      production: false,
+    });
+    for (const service of serviceCatalog) {
+      const path = `/services/${service.slug}`;
+      const { body } = await request(app)
+        .get(`/api/public/page?path=${path}`)
+        .expect(200);
+      assert.equal(body.title, service.title);
+      assert.equal(body.seo.canonical, path);
+      assert.equal(body.blocks[1].items.length, 3);
+      await request(app)
+        .get(path)
+        .expect(200)
+        .expect(/rel="canonical"/);
+    }
+    const id = stableId(`service-${serviceCatalog[0].slug}`);
+    const [row] = await db.query("SELECT draft FROM documents WHERE id=$1", [
+      id,
+    ]);
+    const edited = JSON.parse(row.draft);
+    edited.blocks[0].heading = "Our edited service heading";
+    await db.query("UPDATE documents SET draft=$1 WHERE id=$2", [
+      JSON.stringify(edited),
+      id,
+    ]);
+    await seedCms(db);
+    const [after] = await db.query("SELECT draft FROM documents WHERE id=$1", [
+      id,
+    ]);
+    assert.equal(
+      JSON.parse(after.draft).blocks[0].heading,
+      edited.blocks[0].heading,
+    );
+    const sitemap = await request(app).get("/sitemap.xml").expect(200);
+    for (const service of serviceCatalog)
+      assert.ok(sitemap.text.includes(`/services/${service.slug}`));
+  } finally {
+    await db.close();
+  }
+});
 test("integrated public website, template drafts, menus, inquiries, users and restart persistence", async () => {
   const db = await openDb({ url: null, path: ":memory:" });
   try {

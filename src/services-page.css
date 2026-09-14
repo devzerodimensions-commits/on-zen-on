@@ -1,0 +1,582 @@
+.oz-services {
+  --oz-ink: #122a26;
+  --oz-green: #126349;
+  --oz-gold: #f4cc35;
+  background: #f8f9f5;
+  color: var(--oz-ink);
+  font-family: Arial, sans-serif;
+}
+.oz-services * {
+  box-sizing: border-box;
+}
+.oz-service-wrap {
+  width: min(1240px, 88%);
+  margin: auto;
+}
+.oz-services a:focus-visible,
+.oz-services button:focus-visible,
+.oz-services summary:focus-visible {
+  outline: 3px solid #d6a600;
+  outline-offset: 5px;
+}
+.oz-service-hero {
+  background: linear-gradient(125deg, #052f2c, #104d3d 65%, #18583f);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  padding: 38px 0 0;
+}
+.oz-service-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#ffffff06 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+  background-size: 70px 70px;
+}
+.oz-hero-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 35px;
+  align-items: center;
+  padding-bottom: 66px;
+}
+.oz-breadcrumb {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #c8dad1;
+  margin: 0 0 58px;
+}
+.oz-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+.oz-services .oz-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--oz-green);
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+.oz-service-hero .oz-kicker {
+  color: var(--oz-gold);
+}
+.oz-services h1 {
+  font-size: clamp(38px, 4.3vw, 66px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -2.5px;
+  color: inherit;
+  margin: 0 0 26px;
+  max-width: 750px;
+}
+.oz-services .oz-intro {
+  font-size: 16px;
+  line-height: 1.85;
+  color: #c8ded3;
+  max-width: 590px;
+}
+.oz-hero-actions {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 32px;
+}
+.oz-services .oz-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  min-height: 52px;
+  padding: 15px 23px;
+  background: var(--oz-gold);
+  color: #16392b;
+  border: 0;
+  border-radius: 6px;
+  font:
+    700 13px Arial,
+    sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+.oz-action:hover {
+  filter: brightness(1.05);
+}
+.oz-services .oz-text-link {
+  font-size: 13px;
+  color: #fff;
+  text-underline-offset: 6px;
+}
+.oz-hero-art {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 65px 0 25px;
+  isolation: isolate;
+}
+.oz-hero-art > img {
+  width: 112%;
+  max-width: 600px;
+  position: relative;
+  filter: drop-shadow(0 35px 25px #001e2580);
+  z-index: 1;
+}
+.oz-art-orbit {
+  position: absolute;
+  width: 95%;
+  aspect-ratio: 1;
+  border: 1px solid #c2deb733;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d2e8ad20, transparent 65%);
+}
+.oz-art-orbit:before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px dashed #c2deb733;
+  border-radius: 50%;
+}
+.oz-art-label {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  z-index: 2;
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  padding: 16px 22px;
+  border: 1px solid #ffffff30;
+  border-radius: 10px;
+  background: #163e38ee;
+  color: #e4eedd;
+  font-size: 12px;
+  line-height: 1.7;
+  box-shadow: 0 15px 40px #001e2530;
+}
+.oz-art-label svg {
+  color: var(--oz-gold);
+}
+.oz-hero-benefits {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #ffffff25;
+  padding: 27px 0;
+  gap: 25px;
+}
+.oz-hero-benefits > div {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.oz-small-number {
+  color: #dbd98b;
+  font-size: 12px;
+}
+.oz-hero-benefits strong {
+  font-size: 17px;
+}
+.oz-hero-benefits p {
+  font-size: 12px;
+  color: #c8ded3;
+  margin: 5px 0;
+}
+.oz-service-section {
+  padding: 88px 0;
+  scroll-margin-top: 95px;
+}
+.oz-section-heading {
+  margin-bottom: 36px;
+}
+.oz-services h2 {
+  font-size: clamp(30px, 3.3vw, 47px);
+  letter-spacing: -1.6px;
+  line-height: 1.16;
+  color: inherit;
+  margin: 0;
+  max-width: 820px;
+  font-weight: 600;
+}
+.oz-section-description {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #5b6c62;
+  max-width: 760px;
+  margin: 20px 0 0;
+}
+.oz-service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.oz-service-card {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #dfe6dc;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.oz-service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px #102e2010;
+}
+.oz-card-visual {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse, #f5fae7, #eaf2e9);
+  padding: 15px;
+  overflow: hidden;
+}
+.oz-card-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s;
+}
+.oz-service-card:hover .oz-card-visual img {
+  transform: scale(1.045);
+}
+.oz-card-content {
+  padding: 27px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.oz-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 23px;
+}
+.oz-service-icon {
+  display: grid;
+  place-items: center;
+  background: #eff5e9;
+  border: 1px solid #dfebd8;
+  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  color: #226046;
+}
+.oz-card-number {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #748477;
+}
+.oz-services h3 {
+  font-size: 21px;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  color: inherit;
+  margin: 0 0 13px;
+}
+.oz-card-content > p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #5b6c62;
+  margin: 0 0 23px;
+}
+.oz-card-link {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 19px;
+  border-top: 1px solid #e7ece4;
+  margin-top: auto;
+  color: #195637;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+.oz-kind-technology {
+  background: #112e2c;
+  color: #fff;
+}
+.oz-kind-technology .oz-kicker {
+  color: var(--oz-gold);
+}
+.oz-kind-technology .oz-section-description,
+.oz-kind-technology .oz-card-content > p {
+  color: #c3d4c8;
+}
+.oz-kind-technology .oz-service-grid,
+.oz-kind-process .oz-service-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.oz-kind-technology .oz-service-card {
+  background: #ffffff07;
+  border-color: #ffffff20;
+}
+.oz-kind-technology .oz-service-icon {
+  background: #ffffff0a;
+  border-color: #ffffff20;
+  color: var(--oz-gold);
+}
+.oz-kind-technology .oz-card-number {
+  color: #abc0b6;
+}
+.oz-kind-process {
+  background: white;
+}
+.oz-kind-process .oz-service-card {
+  border: 0;
+  border-top: 2px solid #176349;
+  border-radius: 0;
+  background: transparent;
+}
+.oz-kind-process .oz-card-content {
+  padding: 25px 8px;
+}
+.oz-kind-process .oz-card-top {
+  flex-direction: row-reverse;
+}
+.oz-kind-process .oz-card-number {
+  font-size: 36px;
+  color: #c4d3bf;
+  letter-spacing: -2px;
+}
+.oz-kind-process .oz-service-icon {
+  display: none;
+}
+.oz-kind-features {
+  background: #f1f4eb;
+}
+.oz-kind-faq {
+  background: #fff;
+}
+.oz-questions {
+  max-width: 1000px;
+  border-top: 1px solid #dfe6dc;
+}
+.oz-questions details {
+  border-bottom: 1px solid #dfe6dc;
+  padding: 24px 0;
+}
+.oz-questions summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.oz-questions summary::-webkit-details-marker {
+  display: none;
+}
+.oz-questions summary span {
+  color: #266246;
+  font-size: 24px;
+  font-weight: 400;
+}
+.oz-questions details[open] summary span {
+  transform: rotate(45deg);
+}
+.oz-questions details p {
+  max-width: 820px;
+  line-height: 1.8;
+  font-size: 15px;
+  color: #5b6c62;
+  margin: 18px 0 0;
+}
+.oz-kind-contact {
+  background: #e9efdf;
+}
+.oz-kind-contact > .oz-service-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 70px;
+}
+.oz-inquiry {
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #dbe4d2;
+  border-radius: 12px;
+}
+.oz-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.oz-inquiry label {
+  display: grid;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.oz-inquiry input,
+.oz-inquiry textarea {
+  width: 100%;
+  border: 1px solid #dce4d6;
+  border-radius: 5px;
+  background: #fafbf8;
+  color: #173b30;
+  font:
+    14px Arial,
+    sans-serif;
+  padding: 14px;
+  resize: vertical;
+}
+.oz-inquiry input:focus,
+.oz-inquiry textarea:focus {
+  outline: 2px solid #397156;
+  outline-offset: 2px;
+}
+.oz-inquiry [role="status"] {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.oz-section-image {
+  max-width: 100%;
+  max-height: 460px;
+  object-fit: contain;
+}
+.oz-kind-about .oz-action {
+  margin-top: 0;
+}
+@media (min-width: 1100px) {
+  .oz-kind-services .oz-service-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .oz-kind-services .oz-card-content {
+    padding: 23px;
+  }
+  .oz-kind-services h3 {
+    font-size: 19px;
+  }
+  .oz-kind-services .oz-card-visual {
+    height: 175px;
+  }
+}
+@media (max-width: 900px) {
+  .oz-hero-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .oz-services h1 {
+    letter-spacing: -1.5px;
+  }
+  .oz-service-grid,
+  .oz-kind-technology .oz-service-grid,
+  .oz-kind-process .oz-service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .oz-kind-contact > .oz-service-wrap {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .oz-breadcrumb {
+    margin-bottom: 35px;
+  }
+  .oz-service-section {
+    padding: 64px 0;
+  }
+  .oz-art-label {
+    left: 0;
+  }
+}
+@media (max-width: 600px) {
+  .oz-hero-grid {
+    grid-template-columns: 1fr;
+    padding-bottom: 40px;
+  }
+  .oz-hero-art {
+    padding: 10px 0 35px;
+  }
+  .oz-hero-art > img {
+    width: 85%;
+    max-height: 300px;
+    object-fit: contain;
+  }
+  .oz-art-orbit {
+    width: 70%;
+  }
+  .oz-art-label {
+    left: 17%;
+    bottom: 5px;
+  }
+  .oz-hero-benefits {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .oz-service-grid,
+  .oz-kind-technology .oz-service-grid,
+  .oz-kind-process .oz-service-grid {
+    grid-template-columns: 1fr;
+  }
+  .oz-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .oz-inquiry {
+    padding: 22px;
+  }
+  .oz-services h1 {
+    font-size: 42px;
+  }
+  .oz-services h2 {
+    font-size: 33px;
+  }
+  .oz-hero-actions {
+    gap: 20px;
+  }
+  .oz-breadcrumb {
+    font-size: 11px;
+  }
+  .oz-card-visual {
+    height: 210px;
+  }
+  .oz-service-section {
+    padding: 55px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oz-services * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.oz-services p {
+  font-family: Arial, sans-serif !important;
+  font-weight: 400 !important;
+  color: #5b6c62 !important;
+}
+.oz-services .oz-service-hero .oz-intro,
+.oz-services .oz-hero-benefits p,
+.oz-services .oz-kind-technology p {
+  color: #c8ded3 !important;
+  font-weight: 400;
+  line-height: 1.85;
+}
+.oz-services .oz-kicker {
+  color: #126349 !important;
+  font-weight: 700 !important;
+}
+.oz-services .oz-service-hero .oz-kicker,
+.oz-services .oz-kind-technology .oz-kicker {
+  color: #f4cc35 !important;
+}
+.oz-services .oz-breadcrumb {
+  display: flex;
+  position: static;
+  background: none;
+  padding: 0;
+  box-shadow: none;
+  flex-direction: row;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { OriginalTemplate } from "./OriginalTemplates.jsx";
+import { ServicesPage } from "./ServicesPage.jsx";
 import { templateDefaults } from "../shared/templates.js";
 import "./styles.css";
 import "./tech-theme.css";
@@ -186,12 +187,23 @@ function App() {
     <>
       <OriginalTemplate content={header} {...props} />
       <main id="home">
-        {page.blocks.map((b) =>
-          b.type === "template" ? (
-            <OriginalTemplate key={b.id} content={b} {...props} />
-          ) : (
-            <GenericBlock key={b.id} content={b} {...props} />
-          ),
+        {page.path === "/services" || page.path.startsWith("/services/") ? (
+          <ServicesPage
+            page={page}
+            submit={submit}
+            formState={formState}
+            renderFallback={(b) => (
+              <OriginalTemplate key={b.id} content={b} {...props} />
+            )}
+          />
+        ) : (
+          page.blocks.map((b) =>
+            b.type === "template" ? (
+              <OriginalTemplate key={b.id} content={b} {...props} />
+            ) : (
+              <GenericBlock key={b.id} content={b} {...props} />
+            ),
+          )
         )}
       </main>
       <OriginalTemplate content={footer} {...props} />
