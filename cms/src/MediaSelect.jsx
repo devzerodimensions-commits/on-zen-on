@@ -4,6 +4,9 @@ import marketing from "../../shared/marketing-offering-images.json";
 import sections from "../../shared/service-section-images.json";
 
 const bundled = [...new Map([
+ {image:"/assets/blog-ai-assistants.webp",alt:"AI assistants blog: customer support workspace"},
+ {image:"/assets/blog-api-first.webp",alt:"API-first blog: connected devices"},
+ {image:"/assets/blog-website-security.webp",alt:"Website security blog: network equipment review"},
  {image:"/assets/main-software-engineering.webp",alt:"Software Engineering studio"},
  {image:"/assets/main-secure-experience-design.webp",alt:"Secure Experience Design review"},
  {image:"/assets/on-zen-on-official-logo.png",alt:"On Zen On logo"},

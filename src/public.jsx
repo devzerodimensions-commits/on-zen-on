@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { OriginalTemplate } from "./OriginalTemplates.jsx";
 import { ServicesPage } from "./ServicesPage.jsx";
+import {BlogPage,BlogCards} from "./BlogPage.jsx";
 import { templateDefaults } from "../shared/templates.js";
 import "./styles.css";
 import "./tech-theme.css";
@@ -18,6 +19,7 @@ import { ExperienceTools } from "./ExperienceTools.jsx";
 import { Portal } from "./Portal.jsx";
 import {ExperienceProvider} from "./ExperienceContext.jsx";
 function GenericBlock({ content: b, submit, formState }) {
+  if(b.type==="updates")return <BlogCards block={b}/>;
   return (
     <section
       id={b.anchor || undefined}
@@ -195,7 +197,7 @@ function App() {
       <OriginalTemplate content={header} {...props} />
       {!previewId && <ExperienceTools />}
       <main id="home">
-        {page.path === "/services" || page.path.startsWith("/services/") ? (
+        {page.path==="/tech-updates"||page.path.startsWith("/blog/")?<BlogPage page={page}/>:page.path === "/services" || page.path.startsWith("/services/") ? (
           <ServicesPage
             page={page}
             submit={submit}

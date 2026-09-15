@@ -216,7 +216,8 @@ test("integrated public website, template drafts, menus, inquiries, users and re
       await request(app).get("/api/public/page?path=/").expect(200)
     ).body;
     assert.equal(homepage.blocks.length, 15);
-    assert.ok(homepage.blocks.every((b) => b.type === "template"));
+    assert.ok(homepage.blocks.every((b) => b.type === "template" || (b.type === "updates" && b.anchor === "updates")));
+    assert.equal(homepage.blocks.find(b=>b.anchor==="updates").items.length,3);
     let d = (await agent.get("/api/cms/documents")).body.find(
       (d) => d.id === stableId("home"),
     );
