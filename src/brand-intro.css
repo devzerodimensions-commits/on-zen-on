@@ -1,0 +1,20 @@
+.brand-intro {
+  position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center;
+  background: radial-gradient(ellipse at center, #fff 0%, #f5f7f1 75%);
+  animation: brand-intro-exit .4s ease 1.8s forwards;
+}
+.brand-intro-mark { position: relative; display: grid; justify-items: center; gap: 22px; padding: 40px; }
+.brand-intro-mark img {
+  width: clamp(180px, 28vw, 280px); height: clamp(180px, 28vw, 280px);
+  object-fit: contain; animation: brand-intro-arrive .8s cubic-bezier(.2,.7,.2,1) both;
+}
+.brand-intro-mark p { color: #14513e !important; font: 600 11px/1.5 Manrope, Arial, sans-serif !important; letter-spacing: .22em; margin: 0; animation: brand-intro-arrive .7s .25s both; }
+.brand-intro-ring { position: absolute; top: 24px; width: calc(clamp(180px, 28vw, 280px) + 32px); height: calc(clamp(180px, 28vw, 280px) + 32px); border: 1px solid #0d74451c; border-top: 2px solid #efb900; border-radius: 50%; animation: brand-intro-turn 2.2s ease-in-out both; }
+.brand-intro-line { height: 3px; width: 100px; background: linear-gradient(90deg,#1119a5,#08723b,#efb900); transform-origin: left; animation: brand-intro-progress 1.8s ease both; }
+.brand-intro-skip { position: absolute; right: max(24px,env(safe-area-inset-right)); bottom: max(24px,env(safe-area-inset-bottom)); background: transparent; color: #14513e; border: 1px solid #14513e55; border-radius: 30px; padding: 12px 20px; cursor: pointer; font: 600 13px Manrope,Arial,sans-serif; }
+.brand-intro-skip:focus-visible { outline: 3px solid #1119a5; outline-offset: 4px; }
+@keyframes brand-intro-arrive { from { opacity: 0; transform: translateY(12px) scale(.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes brand-intro-turn { from { transform: rotate(-100deg); opacity: 0; } to { transform: rotate(260deg); opacity: 1; } }
+@keyframes brand-intro-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes brand-intro-exit { to { opacity: 0; visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .brand-intro { display: none; animation: none; } .brand-intro * { animation: none !important; } }

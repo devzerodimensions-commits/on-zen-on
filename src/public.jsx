@@ -12,6 +12,7 @@ import "./stack-showcase.css";
 import "./showcase.css";
 import "./dynamic.css";
 import "./homepage-logo.css";
+import { BrandIntro } from "./BrandIntro.jsx";
 function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
@@ -186,6 +187,7 @@ function App() {
   }
   return (
     <div className={page.path === "/" ? "homepage" : undefined}>
+      {!previewId && <BrandIntro logo={header.fields.image_4} />}
       <OriginalTemplate content={header} {...props} />
       <main id="home">
         {page.path === "/services" || page.path.startsWith("/services/") ? (
