@@ -1,5 +1,8 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import {mountGuide} from "./service-guide.js";
+import {mountPortal,portalTable} from "./portal.js";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { z } from "zod";
@@ -15,7 +18,9 @@ export async function createWebsite(
   } = {},
 ) {
   const app = express();
+  await portalTable(db);
   app.disable("x-powered-by");
+  app.use(helmet({contentSecurityPolicy:{directives:{"upgrade-insecure-requests":production?[]:null}}}));
   app.set(
     "trust proxy",
     Number(process.env.TRUST_PROXY_HOPS || (production ? "1" : "0")),
@@ -61,6 +66,7 @@ export async function createWebsite(
     }),
     express.json({ limit: "16kb" }),
     async (req, res) => {
+      if(req.get("origin")&&req.get("origin")!==origin)return res.status(403).json({error:"Origin not allowed"});
       const result = z
         .object({
           name: z.string().trim().min(1).max(150),
@@ -89,6 +95,9 @@ export async function createWebsite(
       }
     },
   );
+  mountGuide(app,db,origin);
+  mountPortal(app,db,origin);
+  app.get("/portal",async(_req,res)=>res.set({"Cache-Control":"no-store","X-Robots-Tag":"noindex"}).type("html").send(await readFile("dist/index.html","utf8")));
   app.get("/sitemap.xml", sitemapHandler(db, origin));
   app.get("/robots.txt", (_req, res) =>
     res

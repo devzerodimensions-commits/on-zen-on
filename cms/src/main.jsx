@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
+import { Requests } from "./Requests.jsx";
 import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
 import { MediaSelect as ImagePicker } from "./MediaSelect.jsx";
@@ -511,7 +512,7 @@ function App() {
             "Menus",
             "Media library",
             "Site settings",
-            ...(user.role === "admin" ? ["Inquiries", "Users"] : []),
+            ...(user.role === "admin" ? ["Inquiries", "Requests", "Users"] : []),
           ].map((v, i) => (
             <button
               className={view === v ? "active" : ""}
@@ -1210,6 +1211,7 @@ function App() {
           {["Inquiries", "Users"].includes(view) && (
             <Management view={view} api={api} run={run} />
           )}
+          {view==="Requests"&&<Requests api={api} run={run}/>}
           {view === "Media library" && (
             <>
               <form

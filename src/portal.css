@@ -1,0 +1,127 @@
+.portal-page {
+  min-height: 100vh;
+  background: #f7f9f4;
+  color: #183c30;
+  font:
+    16px/1.6 Manrope,
+    Arial,
+    sans-serif;
+}
+.portal-wrap {
+  max-width: 1120px;
+  margin: auto;
+  padding: 50px 24px 100px;
+}
+.portal-wrap h1 {
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1.12;
+  max-width: 720px;
+  margin: 20px 0;
+}
+.portal-wrap p {
+  color: inherit !important;
+  font-weight: 400 !important;
+}
+.portal-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 32px 0;
+}
+.portal-services a {
+  background: #e1eee5;
+  padding: 12px 18px;
+  border-radius: 24px;
+  color: #14513e;
+}
+.portal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.portal-card {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #dbe5db;
+  border-radius: 20px;
+}
+.portal-card label {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.portal-card input,
+.portal-card textarea,
+.portal-card select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #afc2b8;
+  border-radius: 8px;
+  font: inherit;
+}
+.portal-card button {
+  background: #efc400;
+  color: #172c27;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.portal-card button:disabled {
+  opacity: 0.5;
+}
+.portal-note {
+  font-size: 12px;
+}
+html[data-theme="dark"] .portal-page {
+  background: #101923;
+  color: #eef4fa;
+}
+@media (max-width: 700px) {
+  .portal-grid {
+    grid-template-columns: 1fr;
+  }
+  .portal-wrap {
+    padding-top: 28px;
+  }
+}
+.portal-page .portal-wrap h2 {
+  font:
+    700 26px/1.25 Manrope,
+    Arial,
+    sans-serif;
+  letter-spacing: -0.5px;
+  margin: 0 0 20px;
+}
+.portal-page .portal-wrap p {
+  font:
+    400 15px/1.7 Manrope,
+    Arial,
+    sans-serif !important;
+  max-width: 760px;
+}
+.portal-page .portal-wrap .portal-note {
+  font-size: 12px !important;
+}
+.portal-page .portal-wrap h3 {
+  font:
+    700 19px/1.4 Manrope,
+    Arial,
+    sans-serif;
+}
+.portal-card input,
+.portal-card textarea,
+.portal-card select {
+  background: #fff;
+  color: #173b2d;
+}
+html[data-theme="dark"] .portal-card input,
+html[data-theme="dark"] .portal-card textarea,
+html[data-theme="dark"] .portal-card select {
+  background: #101c28;
+  color: #eef4fa;
+  border-color: #64798b;
+}

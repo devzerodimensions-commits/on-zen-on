@@ -14,6 +14,8 @@ import "./dynamic.css";
 import "./homepage-logo.css";
 import { BrandIntro } from "./BrandIntro.jsx";
 import { ServiceChat } from "./ServiceChat.jsx";
+import { ExperienceTools } from "./ExperienceTools.jsx";
+import { Portal } from "./Portal.jsx";
 function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
@@ -190,6 +192,7 @@ function App() {
     <div className={page.path === "/" ? "homepage" : undefined}>
       {!previewId && <BrandIntro logo={header.fields.image_4} />}
       <OriginalTemplate content={header} {...props} />
+      {!previewId && <ExperienceTools />}
       <main id="home">
         {page.path === "/services" || page.path.startsWith("/services/") ? (
           <ServicesPage
@@ -216,4 +219,4 @@ function App() {
   );
 }
 if (location.hash.startsWith("#/admin")) location.replace("/admin/");
-else createRoot(document.getElementById("root")).render(<App />);
+else createRoot(document.getElementById("root")).render(location.pathname==="/portal"?<Portal/>:<App />);

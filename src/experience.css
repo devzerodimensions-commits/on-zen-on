@@ -1,0 +1,136 @@
+.experience-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 5%;
+  background: #f3f6ef;
+  border-bottom: 1px solid #d8e1db;
+  font:
+    600 12px Arial,
+    sans-serif;
+}
+.experience-tools a,
+.experience-tools button {
+  color: #14513e;
+}
+.experience-tools button {
+  padding: 8px 12px;
+  border: 1px solid #becfc4;
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cream: #121925;
+  --logo-ink: #eef4fa;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] .oz-services {
+  background: #111923;
+  color: #eef4fa;
+  --oz-ink: #eef4fa;
+  --oz-green: #8de0bb;
+}
+html[data-theme="dark"]
+  :is(
+    header,
+    footer,
+    .intro,
+    .outcomes,
+    .industries-showcase,
+    .results,
+    .updates,
+    .trust-bar,
+    .experience-tools,
+    .oz-service-card,
+    .oz-service-section,
+    .oz-offering-card,
+    .oz-process-card,
+    .oz-faq,
+    .portal-card
+  ) {
+  background: #182430 !important;
+  color: #eef4fa !important;
+  border-color: #344556 !important;
+}
+html[data-theme="dark"]
+  :is(
+    header nav a,
+    footer a,
+    footer p,
+    footer small,
+    .intro p,
+    .outcomes p,
+    .results p,
+    .updates p,
+    .experience-tools a,
+    .experience-tools button,
+    .oz-services p,
+    .oz-services h1,
+    .oz-services h2,
+    .oz-services h3,
+    .oz-services summary
+  ) {
+  color: #e0eaf1 !important;
+}
+html[data-theme="dark"] :is(.service-chat-panel, .service-chat-message) {
+  background: #182430;
+  color: #edf5f2;
+  border-color: #3a5148;
+}
+html[data-theme="dark"] .service-chat-log {
+  background: #101d18;
+}
+html[data-theme="dark"] .service-chat .service-chat-message p,
+html[data-theme="dark"] .service-chat-message a {
+  color: #e0f1e7 !important;
+}
+html[data-theme="dark"] .service-chat-message.from-user {
+  background: #243849;
+}
+html[data-theme="dark"] .service-chat-note {
+  color: #b3c9bf;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .service-chat-panel {
+    animation: chat-appear 0.22s ease-out;
+  }
+  .oz-service-card,
+  .button {
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  .oz-service-card:hover {
+    transform: translateY(-4px);
+  }
+  @keyframes chat-appear {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+html[data-theme="dark"] .brand,html[data-theme="dark"] footer .footer-brand img{background:white;border-radius:10px}
+html[data-theme="dark"] header nav{background:#182430}
+html[data-theme="dark"] .oz-offering-index{background:#182430}
+html[data-theme="dark"] .oz-offering-index a{color:#dfede7;background:#263d34}
+html[data-theme="dark"] .mobile-toggle{color:#eef4fa!important}

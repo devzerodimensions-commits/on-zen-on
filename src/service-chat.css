@@ -17,3 +17,4 @@
 .service-chat-form button { width: 40px; border: 0; border-radius: 10px; background: #efc400; color: #123e30; font-size: 22px; cursor: pointer; }.service-chat-form button:disabled { opacity: .4; cursor: default; }
 .service-chat-note { display: block; padding: 0 14px 12px; color: #64786c; font-size: 10px; line-height: 1.5; }
 .service-chat button:focus-visible,.service-chat a:focus-visible { outline: 3px solid #efb900; outline-offset: 2px; }
+.service-chat-log{position:relative}.service-chat-message{flex-shrink:0}.service-chat-panel{max-height:calc(100dvh - 94px);display:flex;flex-direction:column}.service-chat-head,.service-chat-prompts,.service-chat-form,.service-chat-note{flex-shrink:0}.service-chat-log{min-height:60px;flex-shrink:1}

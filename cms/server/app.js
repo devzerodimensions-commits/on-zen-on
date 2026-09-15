@@ -352,6 +352,29 @@ export async function createApp(
       ),
     ),
   );
+  app.get("/api/cms/requests",admin,async(_req,res)=>res.json(await db.query("SELECT r.id,r.name,r.email,r.service,r.message,r.status,r.created,a.starts,a.status AS appointment_status FROM service_requests r LEFT JOIN appointment_requests a ON a.request_id=r.id ORDER BY r.created DESC LIMIT 200")));
+  app.patch("/api/cms/appointments/:id",admin,async(req,res)=>{
+    const id=idSchema.parse(req.params.id);
+    const {status}=z.object({status:z.enum(["confirmed","cancelled"])}).strict().parse(req.body);
+    await db.transaction(async q=>{
+      await q.query("UPDATE scheduling_lock SET id=1 WHERE id=1");
+      const [row]=await q.query("SELECT starts FROM appointment_requests WHERE request_id=$1",[id]);
+      if(!row)throw fail(404,"Appointment not found");
+      const starts=Number(row.starts);
+      if(status==="confirmed"){
+        if(starts<=Date.now())throw fail(400,"This requested time has passed");
+        const overlap=await q.query("SELECT request_id FROM appointment_requests WHERE status='confirmed' AND request_id<>$1 AND starts>$2 AND starts<$3",[id,starts-1800000,starts+1800000]);
+        if(overlap.length)throw fail(409,"Another confirmed 30-minute appointment overlaps this time");
+      }
+      await q.query("UPDATE appointment_requests SET status=$1 WHERE request_id=$2",[status,id]);
+    });res.json({ok:true});
+  });
+  app.patch("/api/cms/requests/:id",admin,async(req,res)=>{
+    const id=idSchema.parse(req.params.id);
+    const {status}=z.object({status:z.enum(["received","reviewing","contacted","completed","cancelled"])}).strict().parse(req.body);
+    const rows=await db.query("UPDATE service_requests SET status=$1 WHERE id=$2 RETURNING id",[status,id]);
+    if(!rows.length)throw fail(404,"Request not found");res.json({ok:true});
+  });
   app.patch("/api/cms/inquiries/:id", admin, async (req, res) => {
     const data = z
       .object({
