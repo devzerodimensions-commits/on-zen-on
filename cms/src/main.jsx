@@ -4,6 +4,7 @@ import { blankBlock, sectionTypes } from "../shared/content.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
+import {ExperienceSettings} from "./ExperienceSettings.jsx";
 import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
 import { MediaSelect as ImagePicker } from "./MediaSelect.jsx";
@@ -1194,7 +1195,7 @@ function App() {
                       </>
                     )}
                     {selected.kind === "settings" &&
-                      Object.keys(draft).map((k) => (
+                      Object.keys(draft).filter(k=>k!=="experience").map((k) => (
                         <Field
                           label={k.replace(/([A-Z])/g, " $1")}
                           key={k}
@@ -1203,6 +1204,7 @@ function App() {
                           onChange={(v) => change(k, v)}
                         />
                       ))}
+                    {selected.kind==="settings"&&<ExperienceSettings value={draft.experience} onChange={v=>change("experience",v)}/>}
                   </div>
                 )}
               </fieldset>

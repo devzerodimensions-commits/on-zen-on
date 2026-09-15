@@ -16,6 +16,7 @@ import { BrandIntro } from "./BrandIntro.jsx";
 import { ServiceChat } from "./ServiceChat.jsx";
 import { ExperienceTools } from "./ExperienceTools.jsx";
 import { Portal } from "./Portal.jsx";
+import {ExperienceProvider} from "./ExperienceContext.jsx";
 function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
@@ -219,4 +220,4 @@ function App() {
   );
 }
 if (location.hash.startsWith("#/admin")) location.replace("/admin/");
-else createRoot(document.getElementById("root")).render(location.pathname==="/portal"?<Portal/>:<App />);
+else createRoot(document.getElementById("root")).render(<ExperienceProvider>{location.pathname==="/portal"?<Portal/>:<App />}</ExperienceProvider>);

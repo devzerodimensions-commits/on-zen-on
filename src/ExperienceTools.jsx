@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./experience.css";
+import {useExperience} from "./ExperienceContext.jsx";
 export function ExperienceTools() {
+  const config=useExperience();
   const [dark, setDark] = useState(() => {
     try {
-      return localStorage.getItem("oz-theme") === "dark";
+      const saved=localStorage.getItem("oz-theme");return config.darkModeEnabled&&saved?saved==="dark":config.defaultTheme==="dark";
     } catch {
-      return false;
+      return config.defaultTheme==="dark";
     }
   });
   useEffect(() => {
@@ -17,9 +19,9 @@ export function ExperienceTools() {
   return (
     <aside className="experience-tools" aria-label="Website tools">
       <a href="/portal">Self-service portal ↗</a>
-      <button type="button" aria-pressed={dark} onClick={() => setDark(!dark)}>
+      {config.darkModeEnabled&&<button type="button" aria-pressed={dark} onClick={() => setDark(!dark)}>
         {dark ? "☀ Light mode" : "☾ Dark mode"}
-      </button>
+      </button>}
     </aside>
   );
 }

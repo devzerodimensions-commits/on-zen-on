@@ -3,6 +3,7 @@ import { mainServices } from "../shared/main-services.js";
 import { ExperienceTools } from "./ExperienceTools.jsx";
 import { ServiceChat } from "./ServiceChat.jsx";
 import "./portal.css";
+import {useExperience} from "./ExperienceContext.jsx";
 function calendar(appointment) {
   const stamp = (n) =>
     new Date(Number(n))
@@ -31,6 +32,7 @@ function calendar(appointment) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function Portal() {
+  const config=useExperience();
   const [result, R] = useState(null),
     [status, S] = useState(null),
     [error, E] = useState(""),
@@ -75,11 +77,8 @@ export function Portal() {
       <main className="portal-wrap">
         <a href="/">← Back to On Zen On</a>
         <p className="eyebrow">YOUR NEXT STEP</p>
-        <h1>Let’s move your project forward.</h1>
-        <p>
-          Explore services, send a project request and check its progress in one
-          place.
-        </p>
+        <h1>{config.portalTitle}</h1>
+        <p>{config.portalIntro}</p>
         <div className="portal-services">
           {mainServices.map((s) => (
             <a key={s.slug} href={"/services/" + s.slug}>
@@ -112,7 +111,7 @@ export function Portal() {
                 </p>
                 <button onClick={() => R(null)}>Create another request</button>
               </div>
-            ) : (
+            ) : !config.portalEnabled?<p>{config.portalClosedMessage}</p>:(
               <form onSubmit={(e) => send(e, false)}>
                 <label>
                   Name
@@ -125,8 +124,8 @@ export function Portal() {
                 <label>
                   Service
                   <select name="service">
-                    {mainServices.map((s) => (
-                      <option key={s.slug}>{s.title}</option>
+                    {config.portalServices.map((s) => (
+                      <option key={s}>{s}</option>
                     ))}
                   </select>
                 </label>
@@ -140,17 +139,17 @@ export function Portal() {
                     rows={5}
                   />
                 </label>
-                <label>
+                {config.bookingEnabled&&<><label>
                   Preferred consultation time (optional)
                   <input name="preferredTime" type="datetime-local" />
                 </label>
                 <p className="portal-note">
                   Times use your device timezone:{" "}
                   {Intl.DateTimeFormat().resolvedOptions().timeZone}. Choose a
-                  time at least one hour ahead and within 180 days.
+                  time at least {config.bookingLeadHours} hours ahead and within {config.bookingMaxDays} days.
                   Consultations are 30 minutes; a request is not confirmed until
                   the team approves it.
-                </p>
+                </p></>}
                 <p className="portal-note">
                   Your details are saved for the team to respond. Please do not
                   include passwords or sensitive information.

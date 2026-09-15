@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { token, digest } from "../cms/server/auth.js";
+import {getExperience} from "./experience-settings.js";
 export async function portalTable(db) {
   await db.query(
     "CREATE TABLE IF NOT EXISTS service_requests (id TEXT PRIMARY KEY,access_hash TEXT NOT NULL,name TEXT NOT NULL,email TEXT NOT NULL,service TEXT NOT NULL,message TEXT NOT NULL,status TEXT NOT NULL,created BIGINT NOT NULL)",
@@ -35,6 +36,8 @@ export function mountPortal(app, db, origin) {
     },
   );
   app.post("/api/portal/requests", async (req, res) => {
+    const config=await getExperience(db);
+    if(!config.portalEnabled)return res.status(503).json({error:config.portalClosedMessage});
     const parsed = z
       .object({
         name: z.string().trim().min(1).max(150),
@@ -45,7 +48,7 @@ export function mountPortal(app, db, origin) {
           .number()
           .int()
           .refine(
-            (v) => v > Date.now() + 3600000 && v < Date.now() + 180 * 86400000,
+            (v) => v > Date.now() + config.bookingLeadHours*3600000 && v < Date.now() + config.bookingMaxDays*86400000,
           )
           .optional(),
       })
@@ -56,8 +59,10 @@ export function mountPortal(app, db, origin) {
         .status(400)
         .json({
           error:
-            "Complete all fields with a valid email and at least 10 characters about your project. A preferred time must be at least one hour ahead and within 180 days.",
+            "Complete all fields with a valid email and at least 10 characters about your project. Check the allowed booking window shown in the form.",
         });
+    if(parsed.data.starts&&!config.bookingEnabled)return res.status(400).json({error:"Consultation requests are currently disabled."});
+    if(!config.portalServices.includes(parsed.data.service))return res.status(400).json({error:"Choose an available service."});
     const id = randomUUID(),
       access = token(),
       d = parsed.data;

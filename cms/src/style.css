@@ -877,3 +877,4 @@ header b {
   outline: 2px solid #244d36;
   outline-offset: -2px;
 }
+.experience-settings details{border:1px solid #dce4df;border-radius:10px;padding:18px;margin:14px 0}.experience-settings summary{cursor:pointer;font-weight:700}.experience-settings .feature-toggle{display:flex;align-items:center;gap:10px;margin:18px 0}.experience-settings .feature-toggle input{width:18px;height:18px;margin:0;flex:none}.experience-settings .feature-toggle span{margin:0}.experience-settings p{line-height:1.6;color:#607365}

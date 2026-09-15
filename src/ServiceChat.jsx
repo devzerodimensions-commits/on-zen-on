@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./service-chat.css";
+import {useExperience} from "./ExperienceContext.jsx";
 
-const greeting = {
-  text: "Hello! I can help you explore On Zen On services or start an inquiry. What would you like to know?",
-};
 export function ServiceChat({ page }) {
+  const config=useExperience();
   const [open, setOpen] = useState(false),
     [input, setInput] = useState(""),
-    [messages, setMessages] = useState([greeting]);
+    [messages, setMessages] = useState([{text:config.chatGreeting}]);
   const field = useRef(null),
     log = useRef(null),
     launcher = useRef(null);
@@ -58,6 +57,7 @@ export function ServiceChat({ page }) {
       setBusy(false);
     }
   };
+  if(!config.chatEnabled)return null;
   return (
     <div className="service-chat">
       {open && (
@@ -70,7 +70,7 @@ export function ServiceChat({ page }) {
         >
           <header className="service-chat-head">
             <div>
-              <strong>On Zen On helper</strong>
+              <strong>{config.chatTitle}</strong>
               <small>Website knowledge guide</small>
             </div>
             <button type="button" onClick={close} aria-label="Close chat">
@@ -172,7 +172,7 @@ export function ServiceChat({ page }) {
           <path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" />
           <path d="M7 9h10M7 13h6" />
         </svg>{" "}
-        {open ? "Close" : "Chat with us"}
+        {open ? "Close" : config.chatLauncher}
       </button>
     </div>
   );

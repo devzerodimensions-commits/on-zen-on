@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./brand-intro.css";
+import {useExperience} from "./ExperienceContext.jsx";
 
 const sessionKey = "onzenon-brand-intro-v1";
 export function BrandIntro({ logo }) {
+  const config=useExperience();
   const [visible, setVisible] = useState(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+    if (!config.introEnabled||!config.motionEnabled||window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
     try { return !sessionStorage.getItem(sessionKey); } catch { return true; }
   });
   useEffect(() => {
@@ -25,7 +27,7 @@ export function BrandIntro({ logo }) {
       <div className="brand-intro-mark">
         <div className="brand-intro-ring" aria-hidden="true" />
         <img src={logo} alt="On Zen On" onError={() => setVisible(false)} />
-        <p>CREATION MEETS GROWTH</p>
+        <p>{config.introTagline}</p>
         <span className="brand-intro-line" aria-hidden="true" />
       </div>
       <button type="button" className="brand-intro-skip" onClick={() => setVisible(false)}>Skip intro →</button>

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import rateLimit from "express-rate-limit";
 import express from "express";
+import {getExperience} from "./experience-settings.js";
 
 const input = z
   .object({
@@ -22,6 +23,11 @@ const stop = new Set(
 const tokens = (text) => [...new Set(words(text).filter((w) => !stop.has(w)))];
 const contact = { label: "Open self-service portal", href: "/portal" };
 export async function guideAnswer(db, { question, context }) {
+  const config=await getExperience(db);
+  if(!config.chatEnabled)return {text:"The website guide is currently unavailable.",links:[],context:null};
+  const normalize=s=>words(s).join(" ");
+  const custom=config.customAnswers.find(a=>normalize(a.question)===normalize(question));
+  if(custom)return {text:custom.answer,links:[contact],context};
   const rows = await db.query(
     "SELECT published FROM documents WHERE kind='page' AND published IS NOT NULL",
   );
@@ -31,7 +37,7 @@ export async function guideAnswer(db, { question, context }) {
   const q = question.toLowerCase();
   if (/\b(price|cost|budget|quote|pricing)\b/.test(q))
     return {
-      text: "We prepare a quote after reviewing your scope. Share the features you need, existing systems, integrations and target launch date. The team will confirm pricing; this guide cannot issue a binding quote.",
+      text: config.pricingAnswer,
       links: [contact],
       context,
     };
@@ -41,13 +47,13 @@ export async function guideAnswer(db, { question, context }) {
     )
   )
     return {
-      text: "The self-service portal helps you send a project request and review its status. For a conversation with the team, include your preferred contact time. I am an automated guide, not a live agent.",
+      text: config.contactAnswer,
       links: [contact],
       context,
     };
   if (/\b(timeline|deadline|duration)\b|how long/.test(q))
     return {
-      text: "Your schedule depends on the agreed features, integrations, content and review rounds. Share your launch target in the portal so the team can confirm a realistic plan.",
+      text: config.timelineAnswer,
       links: [contact],
       context,
     };

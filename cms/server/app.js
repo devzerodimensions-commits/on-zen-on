@@ -1,4 +1,5 @@
 import express from "express";
+import {getExperience} from "../../server/experience-settings.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
@@ -481,6 +482,7 @@ export async function createApp(
     if (!row) throw fail(404, "Published page not found");
     res.set("Cache-Control", "no-cache").json(JSON.parse(row.published));
   });
+  app.get("/api/public/experience",async(_req,res)=>res.set("Cache-Control","no-store").json(await getExperience(db)));
   app.get("/api/public/site", async (_req, res) => {
     const rows = await db.query(
       "SELECT kind,published FROM documents WHERE published IS NOT NULL AND kind IN ('menu','settings','section')",

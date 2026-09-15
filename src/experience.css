@@ -134,3 +134,4 @@ html[data-theme="dark"] header nav{background:#182430}
 html[data-theme="dark"] .oz-offering-index{background:#182430}
 html[data-theme="dark"] .oz-offering-index a{color:#dfede7;background:#263d34}
 html[data-theme="dark"] .mobile-toggle{color:#eef4fa!important}
+html[data-motion="off"]{scroll-behavior:auto!important}html[data-motion="off"] *,html[data-motion="off"] *::before,html[data-motion="off"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}

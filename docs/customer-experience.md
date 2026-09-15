@@ -1,5 +1,13 @@
 # Customer experience features
 
+## Admin feature controls
+
+Open **Site settings → On Zen On Private Limited → Website features**. Controls include chatbot visibility, name, button label, greeting, pricing/timeline/contact responses and up to 50 custom question/answer pairs; portal availability, heading, introduction, closed message and service choices; booking availability, minimum notice and booking horizon; default theme, theme switch, motion and first-visit logo introduction/tagline.
+
+Use **Save draft**, then **Publish**. Published settings are stored in the existing versioned settings document and loaded by the public frontend and backend. Changes apply on the next page load or API request without deployment. Draft changes are not shown on the public website. Existing request tracking remains accessible when new requests are closed. Direct API submissions enforce the published service list, booking window and feature switches.
+
+Operational request and booking status changes are under **Requests**. Existing Pages, Reusable sections, Menus, Media library and Users controls remain available. Infrastructure credentials, provider integrations and security enforcement are not editable public content settings.
+
 ## Free website guide
 
 The chat widget calls `POST /api/guide`. It searches published service pages only, returns service details and links, and retains the selected service for follow-up questions. Publishing updated service content updates its source material without a deployment. Questions are processed by this server and are not stored by the application. This is keyword-based retrieval, not a generative AI assistant. No AI provider is configured and no provider fees are incurred. It does not claim a live agent, invent quotes or confirm timelines.
