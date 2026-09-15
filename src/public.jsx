@@ -13,6 +13,7 @@ import "./showcase.css";
 import "./dynamic.css";
 import "./homepage-logo.css";
 import { BrandIntro } from "./BrandIntro.jsx";
+import { ServiceChat } from "./ServiceChat.jsx";
 function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
@@ -210,6 +211,7 @@ function App() {
         )}
       </main>
       <OriginalTemplate content={footer} {...props} />
+      {!previewId && <ServiceChat page={page} />}
     </div>
   );
 }
