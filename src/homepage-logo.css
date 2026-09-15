@@ -1,0 +1,10 @@
+/* Keep the supplied artwork intact while increasing its homepage presence. */
+.homepage > header { height: 144px; padding-top: 8px; padding-bottom: 8px; }
+.homepage > header .brand { width: 128px; height: 128px; flex: 0 0 128px; }
+.homepage > header .brand img { width: 128px !important; height: 128px !important; object-fit: contain !important; }
+@media (max-width: 800px) {
+  .homepage > header { height: 108px; }
+  .homepage > header .brand { width: 92px; height: 92px; flex-basis: 92px; }
+  .homepage > header .brand img { width: 92px !important; height: 92px !important; }
+  .homepage > header nav { top: 100%; }
+}

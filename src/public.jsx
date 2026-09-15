@@ -11,6 +11,7 @@ import "./balanced-brand.css";
 import "./stack-showcase.css";
 import "./showcase.css";
 import "./dynamic.css";
+import "./homepage-logo.css";
 function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
@@ -184,7 +185,7 @@ function App() {
     }
   }
   return (
-    <>
+    <div className={page.path === "/" ? "homepage" : undefined}>
       <OriginalTemplate content={header} {...props} />
       <main id="home">
         {page.path === "/services" || page.path.startsWith("/services/") ? (
@@ -207,7 +208,7 @@ function App() {
         )}
       </main>
       <OriginalTemplate content={footer} {...props} />
-    </>
+    </div>
   );
 }
 if (location.hash.startsWith("#/admin")) location.replace("/admin/");
