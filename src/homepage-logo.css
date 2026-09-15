@@ -1,10 +1,16 @@
-/* Keep the supplied artwork intact while increasing its homepage presence. */
-.homepage > header { height: 144px; padding-top: 8px; padding-bottom: 8px; }
-.homepage > header .brand { width: 128px; height: 128px; flex: 0 0 128px; }
-.homepage > header .brand img { width: 128px !important; height: 128px !important; object-fit: contain !important; }
+/* Shared logo sizing for every public page using the site header. */
+.public-site-header { height: 176px; padding-top: 8px; padding-bottom: 8px; }
+.public-site-header .brand { width: 160px; height: 160px; flex: 0 0 160px; }
+.public-site-header .brand img { width: 160px !important; height: 160px !important; object-fit: contain !important; }
+@media (max-width: 1100px) {
+  .public-site-header .desktop-cta { display: none; }
+  .public-site-header .mobile-toggle { display: block; }
+  .public-site-header nav { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; padding: 25px 6%; box-shadow: 0 15px 20px #0001; flex-direction: column; gap: 18px; }
+  .public-site-header nav.open { display: flex; }
+}
 @media (max-width: 800px) {
-  .homepage > header { height: 108px; }
-  .homepage > header .brand { width: 92px; height: 92px; flex-basis: 92px; }
-  .homepage > header .brand img { width: 92px !important; height: 92px !important; }
-  .homepage > header nav { top: 100%; }
+  .public-site-header { height: 128px; }
+  .public-site-header .brand { width: 112px; height: 112px; flex-basis: 112px; }
+  .public-site-header .brand img { width: 112px !important; height: 112px !important; }
+  .public-site-header nav { top: 100%; }
 }

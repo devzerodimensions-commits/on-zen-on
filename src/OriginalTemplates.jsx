@@ -692,7 +692,7 @@ export function OriginalTemplate({
             {content.fields["text_1"]}
             <span>{content.fields["text_2"]}</span>
           </div>
-          <header>
+          <header className="public-site-header">
             <a
               className="brand"
               href={content.fields["link_3"]}
