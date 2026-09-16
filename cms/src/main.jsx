@@ -3,6 +3,7 @@ import "./studio.css";
 import { PageStarter, sectionNames } from "./PageStarter.jsx";
 import { SectionPicker } from "./SectionPicker.jsx";
 import { MediaLibrary } from "./MediaLibrary.jsx";
+import { PageBuilder } from "./PageBuilder.jsx";
 import "./editor-guide.css";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -430,7 +431,8 @@ function App() {
     [history, H] = useState([]),
     [search, Q] = useState(""),
     [starter, SetStarter] = useState(false),
-    [picker, SetPicker] = useState(false);
+    [picker, SetPicker] = useState(false),
+    [spot, SetSpot] = useState("");
   useEffect(() => {
     const added = (e) =>
       M((current) => [
@@ -492,7 +494,8 @@ function App() {
     if (dirty && !window.confirm("Discard unsaved changes?")) return;
     S(d);
     F(d ? structuredClone(d.draft) : null);
-    T("Content");
+    SetSpot("");
+    T(d?.kind === "page" ? "Builder" : "Content");
     P(null);
     H([]);
     E("");
@@ -644,6 +647,7 @@ function App() {
                       sectionId: choice.sectionId,
                     };
             change("blocks", [...draft.blocks, added]);
+            SetSpot(added.id);
             SetPicker(false);
             E(
               "Section added at the bottom of the page. Open it to add your content.",
@@ -1052,6 +1056,7 @@ function App() {
               </div>
               <div className="tabs">
                 {[
+                  ...(selected.kind === "page" ? ["Builder"] : []),
                   "Content",
                   ...(selected.kind === "page" ? ["SEO"] : []),
                   "History",
@@ -1072,7 +1077,42 @@ function App() {
                 ))}
               </div>
               <fieldset className="edit-lock" disabled={busy}>
-                {tab === "History" ? (
+                {tab === "Builder" ? (
+                  <PageBuilder
+                    documentId={selected.id}
+                    draft={draft}
+                    selected={spot}
+                    onSelect={SetSpot}
+                    onChange={(blocks) => change("blocks", blocks)}
+                    onAddSection={() => SetPicker(true)}
+                    busy={busy}
+                    dirty={dirty}
+                    canPublish={user.role === "admin"}
+                    onSave={() =>
+                      run(async () => {
+                        await save();
+                        E("Page saved. Select Publish page to put it online.");
+                      })
+                    }
+                    onPublish={publish}
+                  >
+                    {draft.blocks.some((b) => b.id === spot) && (
+                      <BlockEditor
+                        block={draft.blocks.find((b) => b.id === spot)}
+                        media={media}
+                        sections={docs.filter((d) => d.kind === "section")}
+                        onChange={(value) =>
+                          change(
+                            "blocks",
+                            draft.blocks.map((b) =>
+                              b.id === spot ? value : b,
+                            ),
+                          )
+                        }
+                      />
+                    )}
+                  </PageBuilder>
+                ) : tab === "History" ? (
                   <div className="panel">
                     <h2>Revision history</h2>
                     <p>

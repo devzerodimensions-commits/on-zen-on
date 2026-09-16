@@ -53,6 +53,53 @@ Google, both care about this.
 - **Undo all changes** puts every setting back to the original design. You still
   need to save and publish for that to reach the website.
 
+## Building a page
+
+Choose **Pages** in the left menu and open any page. It opens in the
+**Builder** tab.
+
+The screen has two halves:
+
+- **Left** — the list of sections on the page, and underneath it the settings
+  for whichever section you are editing.
+- **Right** — your real website.
+
+### Editing
+
+**Click any part of the website on the right.** That section turns blue, a
+small "Editing this section" label appears on it, and its settings open on the
+left. Change a word and the website changes as you type.
+
+### Changing the order
+
+Drag a section up or down in the list on the left. The arrows **↑** and **↓**
+do the same thing if dragging is awkward. The website reorders straight away.
+
+### Adding
+
+**+ Add** opens the picture list of sections. Pick one and it is added at the
+bottom of the page and opened for you to fill in.
+
+### Showing and hiding
+
+The **◌** button beside each section hides it from visitors while keeping
+everything inside it. It becomes **◉** to put it back.
+
+### Checking phones
+
+**Computer / Tablet / Mobile** at the top show the same page at those widths.
+
+### Saving
+
+- **Save changes** keeps your work privately.
+- **Publish page ↗** puts it on the website. Administrators only.
+
+Nothing you do in the builder is visible to visitors until you publish.
+
+The other tabs on a page are **Content** (the same sections as a long form, if
+you prefer that), **SEO** (the Google title and description) and **History**
+(go back to an earlier version).
+
 ## Sections you can show and hide
 
 Under **Pages**, open any page. Every section now has these buttons:

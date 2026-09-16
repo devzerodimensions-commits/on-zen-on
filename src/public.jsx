@@ -69,7 +69,9 @@ function App() {
     [site, S] = useState(null),
     [error, E] = useState(""),
     [menu, M] = useState(false),
-    [formState, F] = useState("");
+    [formState, F] = useState(""),
+    [builder, B] = useState(false),
+    [active, A] = useState("");
   const previewId = location.pathname.startsWith("/_preview/")
     ? location.pathname.split("/")[2]
     : null;
@@ -104,6 +106,62 @@ function App() {
       });
     return () => controller.abort();
   }, [previewId]);
+  /* The admin page builder shows this page in an iframe. It sends the draft as
+     it is typed, and this page reports back which section was clicked, so the
+     editor can point at the website itself instead of a list of form fields. */
+  useEffect(() => {
+    if (window.parent === window) return;
+    const listen = (event) => {
+      if (event.origin !== window.location.origin) return;
+      const message = event.data || {};
+      if (message.type === "oz-builder-init") B(true);
+      if (message.type === "oz-page-preview" && message.page) {
+        B(true);
+        P(message.page);
+      }
+      if (message.type === "oz-builder-select") A(message.id || "");
+    };
+    window.addEventListener("message", listen);
+    window.parent.postMessage(
+      { type: "oz-preview-ready" },
+      window.location.origin,
+    );
+    return () => window.removeEventListener("message", listen);
+  }, []);
+  /* Sections are matched to the elements they rendered by position, which keeps
+     the original markup untouched — no wrapper elements, no changed CSS. */
+  useEffect(() => {
+    if (!builder || !page) return;
+    const nodes = document.querySelectorAll("main > *");
+    const visible = page.blocks.filter((b) => !b.hidden);
+    nodes.forEach((node) => {
+      node.removeAttribute("data-oz-block");
+      node.classList.remove("oz-active");
+    });
+    visible.forEach((block, i) => {
+      if (!nodes[i]) return;
+      nodes[i].setAttribute("data-oz-block", block.id);
+      if (block.id === active) nodes[i].classList.add("oz-active");
+    });
+  }, [builder, page, active]);
+  useEffect(() => {
+    if (!builder) return;
+    const onClick = (event) => {
+      const element = event.target.closest("[data-oz-block]");
+      event.preventDefault();
+      event.stopPropagation();
+      if (element)
+        window.parent.postMessage(
+          {
+            type: "oz-block-click",
+            id: element.getAttribute("data-oz-block"),
+          },
+          window.location.origin,
+        );
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [builder]);
   useEffect(() => {
     if (page && location.hash) {
       const el = document.getElementById(
@@ -203,6 +261,15 @@ function App() {
   }
   return (
     <div className={page.path === "/" ? "homepage" : undefined}>
+      {builder && (
+        <style>{`
+[data-oz-block]{cursor:pointer}
+[data-oz-block]:hover{outline:3px dashed #2555f5;outline-offset:-3px}
+[data-oz-block].oz-active{outline:3px solid #2555f5;outline-offset:-3px}
+[data-oz-block].oz-active:after{content:"Editing this section";position:absolute;margin:6px 0 0 6px;background:#2555f5;color:#fff;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:5px;z-index:9}
+[data-oz-block]{position:relative}
+`}</style>
+      )}
       {!previewId && !framed && <BrandIntro logo={header.fields.image_4} />}
       <OriginalTemplate content={header} {...props} />
       {!previewId && !framed && <ExperienceTools />}
