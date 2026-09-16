@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./service-chat.css";
-import {useExperience} from "./ExperienceContext.jsx";
+import { useExperience } from "./ExperienceContext.jsx";
 
 export function ServiceChat({ page }) {
-  const config=useExperience();
+  const config = useExperience();
   const [open, setOpen] = useState(false),
     [input, setInput] = useState(""),
-    [messages, setMessages] = useState([{text:config.chatGreeting}]);
+    [messages, setMessages] = useState([{ text: config.chatGreeting }]);
   const field = useRef(null),
     log = useRef(null),
     launcher = useRef(null);
@@ -14,14 +14,20 @@ export function ServiceChat({ page }) {
     if (open) field.current?.focus();
   }, [open]);
   useEffect(() => {
-    if (open && log.current) log.current.scrollTop = Math.max(0,(log.current.lastElementChild?.offsetTop||0)-16);
+    if (open && log.current)
+      log.current.scrollTop = Math.max(
+        0,
+        (log.current.lastElementChild?.offsetTop || 0) - 16,
+      );
   }, [messages, open]);
   const close = () => {
     setOpen(false);
     launcher.current?.focus();
   };
   const [busy, setBusy] = useState(false),
-    [context, setContext] = useState(page?.path?.startsWith("/services/")?page.path:null);
+    [context, setContext] = useState(
+      page?.path?.startsWith("/services/") ? page.path : null,
+    );
   const sending = useRef(false);
   const send = async (text) => {
     const question = text.trim().slice(0, 500);
@@ -57,7 +63,7 @@ export function ServiceChat({ page }) {
       setBusy(false);
     }
   };
-  if(!config.chatEnabled)return null;
+  if (!config.chatEnabled) return null;
   return (
     <div className="service-chat">
       {open && (
@@ -103,6 +109,21 @@ export function ServiceChat({ page }) {
                     {link.label} ↗
                   </a>
                 ))}
+                {!m.user && m.suggestions?.length > 0 && (
+                  <div className="service-chat-suggestions">
+                    <small>You could also ask:</small>
+                    {m.suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => send(suggestion)}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             {busy && <p role="status">Finding service details…</p>}
@@ -134,7 +155,7 @@ export function ServiceChat({ page }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               maxLength={500}
-              placeholder="Ask about our services…"
+              placeholder="Ask anything about On Zen On…"
               autoComplete="off"
             />
             <button

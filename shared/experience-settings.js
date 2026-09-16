@@ -9,6 +9,8 @@ export const experienceDefaults = {
     "We prepare a quote after reviewing your scope. Share the features you need, existing systems, integrations and target launch date. The team will confirm pricing; this guide cannot issue a binding quote.",
   timelineAnswer:
     "Your schedule depends on the agreed features, integrations, content and review rounds. Share your launch target in the portal so the team can confirm a realistic plan.",
+  aboutAnswer:
+    "On Zen On Private Limited builds websites, mobile apps, AI automation and digital marketing for businesses that are ready to grow. One team covers design, engineering, security and marketing.",
   contactAnswer:
     "The self-service portal helps you send a project request and review its status. For a conversation with the team, include your preferred contact time. I am an automated guide, not a live agent.",
   customAnswers: [],
@@ -41,6 +43,14 @@ export const experienceSchema = z
     chatGreeting: z.string().trim().min(1).max(1000),
     pricingAnswer: z.string().trim().min(1).max(3000),
     timelineAnswer: z.string().trim().min(1).max(3000),
+    aboutAnswer: z
+      .string()
+      .trim()
+      .min(1)
+      .max(3000)
+      .default(
+        "On Zen On Private Limited builds websites, mobile apps, AI automation and digital marketing for businesses that are ready to grow. One team covers design, engineering, security and marketing.",
+      ),
     contactAnswer: z.string().trim().min(1).max(3000),
     customAnswers: z
       .array(

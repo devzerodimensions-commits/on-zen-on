@@ -18,3 +18,37 @@
 .service-chat-note { display: block; padding: 0 14px 12px; color: #64786c; font-size: 10px; line-height: 1.5; }
 .service-chat button:focus-visible,.service-chat a:focus-visible { outline: 3px solid #efb900; outline-offset: 2px; }
 .service-chat-log{position:relative}.service-chat-message{flex-shrink:0}.service-chat-panel{max-height:calc(100dvh - 94px);display:flex;flex-direction:column}.service-chat-head,.service-chat-prompts,.service-chat-form,.service-chat-note{flex-shrink:0}.service-chat-log{min-height:60px;flex-shrink:1}
+
+/* Follow-up questions the site can actually answer. */
+.service-chat-suggestions {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #00000014;
+}
+.service-chat-suggestions small {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.service-chat-suggestions button {
+  text-align: left;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  opacity: 0.85;
+}
+.service-chat-suggestions button:hover:not(:disabled) {
+  opacity: 1;
+}
+.service-chat-suggestions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
