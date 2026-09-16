@@ -313,3 +313,36 @@ test("softened text never drops below the readable threshold", () => {
     );
   }
 });
+
+test("card text beats the brand-section text rule that surrounds it", () => {
+  /* Cards keep a pale surface inside a brand-coloured section. If the rule for
+     text on the brand colour outranks the rule for text on a card, card text
+     turns almost white on white, which is exactly what shipped once before.
+     The card rule must therefore be nested at least as deeply as the section
+     rule AND come after it, so it wins on specificity or on source order. */
+  const css = themeCss({
+    ...themeDefaults,
+    ...colorPresets.original.colors,
+    surface: "#ffffff",
+    enabled: true,
+  });
+  const lines = css.split(String.fromCharCode(10));
+  const sectionRule = lines.findIndex(
+    (l) =>
+      l.includes(":is(.hero,.services,.contact) :is(p,") &&
+      !l.includes(".service-card"),
+  );
+  const cardRule = lines.findIndex(
+    (l) => l.includes(".service-card") && l.includes(":is(p,small,span"),
+  );
+  assert.ok(sectionRule !== -1, "no rule colours text on brand sections");
+  assert.ok(cardRule !== -1, "no rule colours text inside cards");
+  assert.ok(
+    cardRule > sectionRule,
+    "the card rule must come after the brand-section rule",
+  );
+  assert.ok(
+    lines[cardRule].includes(".hero,.services,.contact"),
+    "the card rule must be nested inside the same sections to match their specificity",
+  );
+});

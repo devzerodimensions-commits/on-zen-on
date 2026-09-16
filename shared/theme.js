@@ -417,6 +417,10 @@ export function themeCss(value) {
   const onPrimary = readableOn(t.primary);
   const onPrimarySoft = soften(onPrimary, t.primary, 0.18);
   const onSecondary = readableOn(t.secondary);
+  /* Cards keep their own pale surface even inside a brand-coloured section, so
+     their text is matched to the card, and the selector is deliberately as
+     specific as the section rule above it so it wins on source order. */
+  const cardIn = `${light} :is(.hero,.services,.contact,.intro,.outcomes,.cms-section) :is(.service-card,.outcome-grid div,.floating-card)`;
   return `${fontUrl ? `@import url('${fontUrl}');\n` : ""}
 html body{font-family:${body}!important;font-size:${t.bodySize}px;--logo-blue:${t.primary};--logo-green:${t.secondary};--logo-gold:${t.accent};--cream:${t.background};--logo-ink:${t.text};--blue:${t.primary};--green:${t.secondary};--yellow:${t.accent};--mist:${t.background};--ink:${t.text};--oz-surface:${t.surface};--oz-muted:${t.muted}}
 html body :is(p,a,button,input,textarea,select,li,span,small,label,td,th){font-family:${body}!important}
@@ -444,10 +448,12 @@ ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surf
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(h1,h2,h3,p){color:${t.text}!important}
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(.cms-body,.split>div p,.section-head>p){color:${t.muted}!important}
 ${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
-${light} :is(.hero,.services,.contact) :is(p,.hero-text,.cms-body,.split>div p,.section-head>p,li,small){color:${onPrimarySoft}!important}
+${light} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${onPrimarySoft}!important}
+${light} :is(.hero,.services,.contact) :is(.section-head,.split>div) p{color:${onPrimarySoft}!important}
 ${light} :is(.ticker,.oz-service-hero) :is(h1,h2,h3,p,span,b){color:${onSecondary}!important}
-${light} :is(.service-card,.outcome-grid div,.floating-card) :is(h1,h2,h3,strong){color:${t.text}!important}
-${light} :is(.service-card,.outcome-grid div,.floating-card) :is(p,small,span){color:${t.muted}!important}
+${cardIn} :is(h1,h2,h3,strong){color:${t.text}!important}
+${cardIn} :is(p,small,span,a){color:${t.muted}!important}
+${cardIn} a{color:${link}!important}
 ${light} main a:not(.button):not(.oz-action){color:${link}}
 html body :is(.hero h1 em,.hero .eyebrow,.services .eyebrow,.contact .eyebrow){color:${t.accent}!important}
 @media(max-width:800px){html body .public-site-header{height:${t.mobileLogoSize + 16}px!important}html body .public-site-header .brand{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important;flex-basis:${t.mobileLogoSize}px!important}html body .public-site-header .brand img{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important}html body main>section,html body .oz-services>section,html body .section{padding-top:${Math.round(t.sectionSpacing * 0.65)}px!important;padding-bottom:${Math.round(t.sectionSpacing * 0.65)}px!important}}
