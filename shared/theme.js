@@ -185,7 +185,7 @@ export const colorPresets = {
     hint: "Teal and aqua, fresh and calm",
     colors: {
       primary: "#0e6b74",
-      secondary: "#11868f",
+      secondary: "#0f737c",
       accent: "#f4b942",
       background: "#f2f8f8",
       surface: "#ffffff",
@@ -341,14 +341,28 @@ const luminance = (hex) => {
   });
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
-/* Used by the studio to warn an editor before unreadable colours are published. */
+/* Used by the studio to warn an editor before unreadable colours are published.
+   Whichever of near-black and white reads better on the colour wins, rather than
+   a fixed lightness threshold, so unusual brand colours are handled too. */
 export function readableOn(hex) {
-  return luminance(hex) > 0.45 ? "#111111" : "#ffffff";
+  const l = luminance(hex);
+  /* Pure black and white are used rather than softer near-blacks: on an awkward
+     mid-tone brand colour they are the only choices that still clear WCAG AA. */
+  return (l + 0.05) / 0.05 > 1.05 / (l + 0.05) ? "#000000" : "#ffffff";
 }
 export function contrastRatio(a, b) {
   const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m);
   return Math.round(((x + 0.05) / (y + 0.05)) * 100) / 100;
 }
+/* Blend a text colour towards its background for a softer look, but only as far
+   as still clears WCAG AA, so no theme can be published with unreadable text. */
+const soften = (fg, bg, amount) => {
+  for (let a = amount; a > 0; a -= 0.03) {
+    const blended = mix(fg, bg, a);
+    if (contrastRatio(blended, bg) >= 4.6) return blended;
+  }
+  return fg;
+};
 const mix = (hex, other, amount) => {
   const a = hexToRgb(hex),
     b = hexToRgb(other);
@@ -398,6 +412,11 @@ export function themeCss(value) {
     t.headingCase === "none"
       ? ""
       : `;text-transform:${t.headingCase}!important`;
+  /* Sections painted in the brand colours need text that reads against them,
+     not the muted colour meant for pale backgrounds. */
+  const onPrimary = readableOn(t.primary);
+  const onPrimarySoft = soften(onPrimary, t.primary, 0.18);
+  const onSecondary = readableOn(t.secondary);
   return `${fontUrl ? `@import url('${fontUrl}');\n` : ""}
 html body{font-family:${body}!important;font-size:${t.bodySize}px;--logo-blue:${t.primary};--logo-green:${t.secondary};--logo-gold:${t.accent};--cream:${t.background};--logo-ink:${t.text};--blue:${t.primary};--green:${t.secondary};--yellow:${t.accent};--mist:${t.background};--ink:${t.text};--oz-surface:${t.surface};--oz-muted:${t.muted}}
 html body :is(p,a,button,input,textarea,select,li,span,small,label,td,th){font-family:${body}!important}
@@ -422,10 +441,15 @@ ${light} :is(.hero,.services,.contact,.notice){background:${t.primary}!important
 ${light} :is(.ticker,.oz-service-hero){background:${t.secondary}!important}
 ${light} :is(.intro,.cms-section,.oz-service-section,.outcomes){background:${t.background}!important;color:${t.text}!important}
 ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surface}!important}
-${light} :is(.cms-section,.intro,.oz-service-section) :is(h1,h2,h3,p){color:${t.text}!important}
-${light} :is(.cms-body,.hero-text,.split>div p,.section-head>p){color:${t.muted}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(h1,h2,h3,p){color:${t.text}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(.cms-body,.split>div p,.section-head>p){color:${t.muted}!important}
+${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
+${light} :is(.hero,.services,.contact) :is(p,.hero-text,.cms-body,.split>div p,.section-head>p,li,small){color:${onPrimarySoft}!important}
+${light} :is(.ticker,.oz-service-hero) :is(h1,h2,h3,p,span,b){color:${onSecondary}!important}
+${light} :is(.service-card,.outcome-grid div,.floating-card) :is(h1,h2,h3,strong){color:${t.text}!important}
+${light} :is(.service-card,.outcome-grid div,.floating-card) :is(p,small,span){color:${t.muted}!important}
 ${light} main a:not(.button):not(.oz-action){color:${link}}
-html body .hero h1 em,html body .services .eyebrow{color:${t.accent}!important}
+html body :is(.hero h1 em,.hero .eyebrow,.services .eyebrow,.contact .eyebrow){color:${t.accent}!important}
 @media(max-width:800px){html body .public-site-header{height:${t.mobileLogoSize + 16}px!important}html body .public-site-header .brand{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important;flex-basis:${t.mobileLogoSize}px!important}html body .public-site-header .brand img{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important}html body main>section,html body .oz-services>section,html body .section{padding-top:${Math.round(t.sectionSpacing * 0.65)}px!important;padding-bottom:${Math.round(t.sectionSpacing * 0.65)}px!important}}
 `;
 }

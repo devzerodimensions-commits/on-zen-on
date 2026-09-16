@@ -10,13 +10,22 @@ import { openDb } from "../cms/server/db.js";
 import { createApp } from "../cms/server/app.js";
 import { createUser } from "../cms/server/auth.js";
 import { blankBlock } from "../cms/shared/content.js";
-import { themeDefaults, themeCss, colorPresets } from "../shared/theme.js";
+import {
+  themeDefaults,
+  themeCss,
+  colorPresets,
+  contrastRatio,
+  readableOn,
+} from "../shared/theme.js";
 
 let db, app, dir, admin, csrf;
 const origin = "http://localhost:3100";
 const pass = "test-only-password-very-long";
 const write = (method, path, body) =>
-  admin[method](path).set("Origin", origin).set("X-CSRF-Token", csrf).send(body);
+  admin[method](path)
+    .set("Origin", origin)
+    .set("X-CSRF-Token", csrf)
+    .send(body);
 
 before(async () => {
   dir = await mkdtemp(join(tmpdir(), "ozo-studio-"));
@@ -185,9 +194,13 @@ test("a hidden shared reference hides the section it points at", async () => {
       ],
     },
   }).expect(201);
-  const live = await write("post", `/api/cms/documents/${page.body.id}/publish`, {
-    version: page.body.version,
-  }).expect(200);
+  const live = await write(
+    "post",
+    `/api/cms/documents/${page.body.id}/publish`,
+    {
+      version: page.body.version,
+    },
+  ).expect(200);
   assert.equal(live.body.published.blocks[1].heading, "Shared promo");
   assert.equal(live.body.published.blocks[1].hidden, true);
 });
@@ -254,4 +267,49 @@ test("pictures can be renamed, and deleting one that is still in use is refused"
   }).expect(200);
   await write("delete", `/api/cms/media/${uploaded.body.id}`).expect(200);
   await admin.get(uploaded.body.url).expect(404);
+});
+
+test("every ready-made theme keeps its text readable", () => {
+  for (const [name, preset] of Object.entries(colorPresets)) {
+    const c = preset.colors;
+    const css = themeCss({ ...themeDefaults, ...c, enabled: true });
+    /* The colour the generator chose for text on the brand-coloured banner. */
+    const [, onBanner] = css.match(
+      /\.contact\) :is\(p,[^{]*\{color:(#[0-9a-f]{6})/,
+    );
+    const pairs = {
+      "body text on the page": [c.text, c.background],
+      "lighter text on a card": [c.muted, c.surface],
+      "text on the brand banner": [onBanner, c.primary],
+      "text on the second colour": [readableOn(c.secondary), c.secondary],
+      "button text on the button": [c.buttonText, c.primary],
+      "menu text on the header": [c.headerText, c.headerBackground],
+      "footer text on the footer": [c.footerTextColor, c.footerBackground],
+    };
+    for (const [what, [front, back]] of Object.entries(pairs))
+      assert.ok(
+        contrastRatio(front, back) >= 4.5,
+        `${name}: ${what} is ${contrastRatio(front, back)}:1, below WCAG AA`,
+      );
+  }
+});
+
+test("softened text never drops below the readable threshold", () => {
+  /* A brand colour whose ideal text colour is only just readable must not be
+     softened any further. */
+  for (const primary of ["#b3401b", "#0f737c", "#767676", "#ffdd00"]) {
+    const css = themeCss({
+      ...themeDefaults,
+      ...colorPresets.original.colors,
+      primary,
+      enabled: true,
+    });
+    const [, onBanner] = css.match(
+      /\.contact\) :is\(p,[^{]*\{color:(#[0-9a-f]{6})/,
+    );
+    assert.ok(
+      contrastRatio(onBanner, primary) >= 4.5,
+      `${primary}: banner text is ${contrastRatio(onBanner, primary)}:1`,
+    );
+  }
 });
