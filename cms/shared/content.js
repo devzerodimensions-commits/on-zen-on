@@ -1,5 +1,6 @@
+import { themeSchema } from "../../shared/theme.js";
 import { z } from "zod";
-import {experienceSchema} from "../../shared/experience-settings.js";
+import { experienceSchema } from "../../shared/experience-settings.js";
 import { templateManifest } from "../../shared/templates.js";
 const short = z.string().max(250);
 export const safeLink = z
@@ -20,6 +21,7 @@ export const templateSchema = z
     id: z.string().uuid(),
     type: z.literal("template"),
     template: z.enum(Object.keys(templateManifest)),
+    hidden: z.boolean().default(false),
     fields: z.record(z.string(), z.string().max(15000)),
   })
   .strict()
@@ -111,6 +113,7 @@ export const blockSchema = z
   .object({
     id: z.string().uuid(),
     type: z.enum(sectionTypes),
+    hidden: z.boolean().default(false),
     anchor: z
       .string()
       .max(80)
@@ -133,6 +136,7 @@ const reference = z
   .object({
     id: z.string().uuid(),
     type: z.literal("shared"),
+    hidden: z.boolean().default(false),
     sectionId: z.string().uuid(),
   })
   .strict();
@@ -209,7 +213,8 @@ export const schemas = {
       footerText: z.string().max(2000),
       email: z.email(),
       phone: short,
-      experience:experienceSchema.optional(),
+      experience: experienceSchema.optional(),
+      theme: themeSchema.optional(),
     })
     .strict(),
 };
@@ -217,6 +222,7 @@ export function blankBlock(type = "hero") {
   return {
     id: crypto.randomUUID(),
     type,
+    hidden: false,
     anchor: "",
     eyebrow: "",
     heading: "New section",

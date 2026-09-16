@@ -1,10 +1,16 @@
+import { ThemeStudio } from "./ThemeStudio.jsx";
+import "./studio.css";
+import { PageStarter, sectionNames } from "./PageStarter.jsx";
+import { SectionPicker } from "./SectionPicker.jsx";
+import { MediaLibrary } from "./MediaLibrary.jsx";
+import "./editor-guide.css";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
-import {ExperienceSettings} from "./ExperienceSettings.jsx";
+import { ExperienceSettings } from "./ExperienceSettings.jsx";
 import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
 import { MediaSelect as ImagePicker } from "./MediaSelect.jsx";
@@ -55,6 +61,37 @@ const defaults = (kind) =>
             email: "hello@onzenon.com",
             phone: "",
           };
+const navItems = [
+  { name: "Overview", icon: "◈", hint: "Start here" },
+  { name: "Pages", icon: "▤", hint: "Text, images and sections" },
+  { name: "Appearance", icon: "✻", hint: "Fonts, colours and theme" },
+  {
+    name: "Reusable sections",
+    icon: "▦",
+    hint: "Header, footer, shared blocks",
+  },
+  { name: "Menus", icon: "☷", hint: "Website navigation links" },
+  { name: "Media library", icon: "▧", hint: "Your pictures" },
+  { name: "Site settings", icon: "⚙", hint: "Business name, email, phone" },
+  {
+    name: "Inquiries",
+    icon: "✉",
+    hint: "Messages from visitors",
+    adminOnly: true,
+  },
+  {
+    name: "Requests",
+    icon: "☎",
+    hint: "Service and appointment requests",
+    adminOnly: true,
+  },
+  {
+    name: "Users",
+    icon: "♙",
+    hint: "Who can edit the website",
+    adminOnly: true,
+  },
+];
 function Field({ label, value, onChange, area = false, ...props }) {
   return (
     <label className="field">
@@ -77,7 +114,9 @@ function Field({ label, value, onChange, area = false, ...props }) {
   );
 }
 function MediaSelect(props) {
- return <ImagePicker {...props} upload={data=>api("/media","POST",data)}/>;
+  return (
+    <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
+  );
 }
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
@@ -88,26 +127,53 @@ function BlockEditor({ block, onChange, media, sections }) {
           Original {templateManifest[block.template].label} layout. Edit the
           content below; the design stays consistent.
         </p>
-        {Object.entries(templateManifest[block.template].fields).map(
-          ([key, field]) =>
-            field.kind === "image" ? (
-              <MediaSelect
-                key={key}
-                label={field.label}
-                value={block.fields[key]}
-                media={media}
-                onChange={(v) => set("fields", { ...block.fields, [key]: v })}
-              />
-            ) : (
-              <Field
-                key={key}
-                label={field.label}
-                value={block.fields[key]}
-                area={field.kind === "text" && block.fields[key].length > 80}
-                onChange={(v) => set("fields", { ...block.fields, [key]: v })}
-              />
-            ),
-        )}
+        {[
+          ["text", "Text content"],
+          ["image", "Images"],
+          ["link", "Buttons and links"],
+        ].map(([kind, title]) => {
+          const fields = Object.entries(
+            templateManifest[block.template].fields,
+          ).filter(([, field]) => field.kind === kind);
+          return fields.length ? (
+            <details
+              className="template-group"
+              key={kind}
+              open={kind === "text"}
+            >
+              <summary>
+                {title} <small>({fields.length})</small>
+              </summary>
+              {fields.map(([key, field], i) =>
+                kind === "image" ? (
+                  <MediaSelect
+                    key={key}
+                    label={"Image " + (i + 1) + " — " + field.label}
+                    value={block.fields[key]}
+                    media={media}
+                    onChange={(v) =>
+                      set("fields", { ...block.fields, [key]: v })
+                    }
+                  />
+                ) : (
+                  <Field
+                    key={key}
+                    label={
+                      kind === "link"
+                        ? "Link " + (i + 1) + " — destination"
+                        : field.label
+                    }
+                    value={block.fields[key]}
+                    area={kind === "text" && block.fields[key].length > 80}
+                    onChange={(v) =>
+                      set("fields", { ...block.fields, [key]: v })
+                    }
+                  />
+                ),
+              )}
+            </details>
+          ) : null;
+        })}
       </>
     );
   if (block.type === "shared")
@@ -142,19 +208,21 @@ function BlockEditor({ block, onChange, media, sections }) {
             onChange={(e) => set("type", e.target.value)}
           >
             {sectionTypes.map((t) => (
-              <option key={t}>{t}</option>
+              <option key={t} value={t}>
+                {sectionNames[t]}
+              </option>
             ))}
           </select>
         </label>
         <Field
-          label="Anchor ID"
+          label="Section link name (optional)"
           value={block.anchor}
           onChange={(v) => set("anchor", v)}
           placeholder="e.g. services"
         />
       </div>
       <Field
-        label="Eyebrow"
+        label="Small heading above the title"
         value={block.eyebrow}
         onChange={(v) => set("eyebrow", v)}
       />
@@ -164,7 +232,7 @@ function BlockEditor({ block, onChange, media, sections }) {
         onChange={(v) => set("heading", v)}
       />
       <Field
-        label="Body"
+        label="Main content"
         area
         value={block.body}
         onChange={(v) => set("body", v)}
@@ -185,7 +253,9 @@ function BlockEditor({ block, onChange, media, sections }) {
       <div className="two">
         <MediaSelect
           value={block.image}
-          onChange={(v,alt) => onChange({...block,image:v,...(alt ? {alt} : {})})}
+          onChange={(v, alt) =>
+            onChange({ ...block, image: v, ...(alt ? { alt } : {}) })
+          }
           media={media}
         />
         <Field
@@ -195,11 +265,30 @@ function BlockEditor({ block, onChange, media, sections }) {
         />
       </div>
       <div className="itemlist">
-        {block.type === "hero" && <div className="two">
-          <Field label="Image caption" value={block.imageCaption ?? "Thoughtfully designed."} onChange={v=>set("imageCaption",v)}/>
-          <Field label="Image caption emphasis" value={block.imageCaptionStrong ?? "Built for what’s next."} onChange={v=>set("imageCaptionStrong",v)}/>
-        </div>}
-        <Field label="Card button text" value={block.cardLinkLabel ?? (block.anchor==="included-services" ? "Discuss this service" : "Explore service")} onChange={v=>set("cardLinkLabel",v)}/>
+        {block.type === "hero" && (
+          <div className="two">
+            <Field
+              label="Image caption"
+              value={block.imageCaption ?? "Thoughtfully designed."}
+              onChange={(v) => set("imageCaption", v)}
+            />
+            <Field
+              label="Image caption emphasis"
+              value={block.imageCaptionStrong ?? "Built for what’s next."}
+              onChange={(v) => set("imageCaptionStrong", v)}
+            />
+          </div>
+        )}
+        <Field
+          label="Card button text"
+          value={
+            block.cardLinkLabel ??
+            (block.anchor === "included-services"
+              ? "Discuss this service"
+              : "Explore service")
+          }
+          onChange={(v) => set("cardLinkLabel", v)}
+        />
         <div className="row">
           <h4>Content cards</h4>
           <button
@@ -248,7 +337,14 @@ function BlockEditor({ block, onChange, media, sections }) {
             {["title", "text", "href", "alt"].map((k) => (
               <Field
                 key={k}
-                label={k === "alt" ? "Image alternative text" : k}
+                label={
+                  {
+                    alt: "Describe this image",
+                    title: "Card title",
+                    text: "Card description",
+                    href: "Link to page",
+                  }[k]
+                }
                 area={k === "text"}
                 value={item[k]}
                 onChange={(v) =>
@@ -298,11 +394,11 @@ function BlockEditor({ block, onChange, media, sections }) {
             <MediaSelect
               value={item.image}
               media={media}
-              onChange={(v,alt) =>
+              onChange={(v, alt) =>
                 set(
                   "items",
                   block.items.map((it, j) =>
-                    j === i ? { ...it, image: v, ...(alt ? {alt} : {}) } : it,
+                    j === i ? { ...it, image: v, ...(alt ? { alt } : {}) } : it,
                   ),
                 )
               }
@@ -312,8 +408,8 @@ function BlockEditor({ block, onChange, media, sections }) {
       </div>
       {block.type === "contact" && (
         <p className="note">
-          Contact content is editable here. The public component must retain the
-          existing inquiry form and its server-side validation.
+          Visitors can send you an inquiry from this section. Messages appear in
+          Inquiries. The form is added automatically.
         </p>
       )}
     </>
@@ -332,9 +428,15 @@ function App() {
     [busy, B] = useState(false),
     [preview, P] = useState(null),
     [history, H] = useState([]),
-    [search, Q] = useState("");
+    [search, Q] = useState(""),
+    [starter, SetStarter] = useState(false),
+    [picker, SetPicker] = useState(false);
   useEffect(() => {
-    const added = e => M(current => [e.detail, ...current.filter(m => m.id !== e.detail.id)]);
+    const added = (e) =>
+      M((current) => [
+        e.detail,
+        ...current.filter((m) => m.id !== e.detail.id),
+      ]);
     window.addEventListener("cms-media-uploaded", added);
     return () => window.removeEventListener("cms-media-uploaded", added);
   }, []);
@@ -355,6 +457,15 @@ function App() {
       .catch(() => {})
       .finally(() => R(true));
   }, []);
+  /* Appearance is a friendly front door onto the site-settings document, so the
+     editor never has to know where the theme values are stored. */
+  useEffect(() => {
+    if (view !== "Appearance" || selected) return;
+    const settings = docs.find((d) => d.kind === "settings");
+    if (!settings) return;
+    S(settings);
+    F(structuredClone(settings.draft));
+  }, [view, selected, docs]);
   useEffect(() => {
     const fn = (e) => {
       if (dirty) {
@@ -391,11 +502,19 @@ function App() {
     F(structuredClone(d.draft));
     D((a) => [d, ...a.filter((x) => x.id !== d.id)]);
   };
-  const create = (kind) =>
-    run(async () => {
+  const create = (kind, pageData) => {
+    if (kind === "page" && !pageData) {
+      SetStarter(true);
+      return;
+    }
+    return run(async () => {
       if (dirty && !window.confirm("Discard unsaved changes?")) return;
-      const d = await api("/documents", "POST", { kind, data: defaults(kind) });
+      const d = await api("/documents", "POST", {
+        kind,
+        data: pageData || defaults(kind),
+      });
       update(d);
+      SetStarter(false);
       T("Content");
       V(
         kind === "page"
@@ -407,6 +526,7 @@ function App() {
               : "Site settings",
       );
     });
+  };
   const save = async () => {
     const d = await api(`/documents/${selected.id}`, "PUT", {
       version: selected.version,
@@ -493,6 +613,44 @@ function App() {
   );
   return (
     <div className="app">
+      {starter && (
+        <PageStarter
+          busy={busy}
+          onCancel={() => SetStarter(false)}
+          onCreate={(data) => create("page", data)}
+        />
+      )}
+      {picker && draft?.blocks && (
+        <SectionPicker
+          usedTemplates={draft.blocks
+            .filter((b) => b.type === "template")
+            .map((b) => b.template)}
+          sections={docs.filter((d) => d.kind === "section")}
+          onCancel={() => SetPicker(false)}
+          onPick={(choice) => {
+            const added =
+              choice.kind === "basic"
+                ? blankBlock(choice.type)
+                : choice.kind === "branded"
+                  ? {
+                      ...structuredClone(templateDefaults[choice.template]),
+                      id: crypto.randomUUID(),
+                      hidden: false,
+                    }
+                  : {
+                      id: crypto.randomUUID(),
+                      type: "shared",
+                      hidden: false,
+                      sectionId: choice.sectionId,
+                    };
+            change("blocks", [...draft.blocks, added]);
+            SetPicker(false);
+            E(
+              "Section added at the bottom of the page. Open it to add your content.",
+            );
+          }}
+        />
+      )}
       <aside>
         <a className="brand" href="/admin/">
           <img
@@ -506,33 +664,30 @@ function App() {
           <i /> Website workspace<small>on-zen-on.onrender.com</small>
         </div>
         <nav>
-          {[
-            "Overview",
-            "Pages",
-            "Reusable sections",
-            "Menus",
-            "Media library",
-            "Site settings",
-            ...(user.role === "admin" ? ["Inquiries", "Requests", "Users"] : []),
-          ].map((v, i) => (
-            <button
-              className={view === v ? "active" : ""}
-              key={v}
-              onClick={() => {
-                if (dirty && !window.confirm("Discard unsaved changes?"))
-                  return;
-                V(v);
-                S(null);
-                F(null);
-                P(null);
-                Q("");
-                E("");
-              }}
-            >
-              <span>{["◈", "▤", "▦", "☷", "▧", "⚙", "✉", "♙"][i]}</span>
-              {v}
-            </button>
-          ))}
+          {navItems
+            .filter((item) => !item.adminOnly || user.role === "admin")
+            .map((item) => (
+              <button
+                className={view === item.name ? "active" : ""}
+                key={item.name}
+                onClick={() => {
+                  if (dirty && !window.confirm("Discard unsaved changes?"))
+                    return;
+                  V(item.name);
+                  S(null);
+                  F(null);
+                  P(null);
+                  Q("");
+                  E("");
+                }}
+              >
+                <span>{item.icon}</span>
+                <b>
+                  {item.name}
+                  <small>{item.hint}</small>
+                </b>
+              </button>
+            ))}
         </nav>
         <div className="aside-bottom">
           <a href="/" target="_blank" rel="noreferrer">
@@ -578,20 +733,24 @@ function App() {
             <div>
               <p className="eyebrow">YOUR WEBSITE, CONNECTED</p>
               <h1>
-                {selected
-                  ? draft.title ||
-                    draft.name ||
-                    draft.heading ||
-                    draft.siteName ||
-                    templateManifest[draft.template]?.label
-                  : view === "Overview"
-                    ? "A little clarity. A lot of possibility."
-                    : view}
+                {view === "Appearance"
+                  ? "Appearance"
+                  : selected
+                    ? draft.title ||
+                      draft.name ||
+                      draft.heading ||
+                      draft.siteName ||
+                      templateManifest[draft.template]?.label
+                    : view === "Overview"
+                      ? "A little clarity. A lot of possibility."
+                      : view}
               </h1>
               <p>
-                {selected
-                  ? "Shape your content. Your public design stays in place."
-                  : "Manage what’s next for On Zen On."}
+                {view === "Appearance"
+                  ? "Choose your fonts, colours and spacing, and watch the website change as you do."
+                  : selected
+                    ? "Shape your content. Your public design stays in place."
+                    : "Manage what’s next for On Zen On."}
               </p>
             </div>
             {kinds[view] && !selected && (
@@ -607,6 +766,56 @@ function App() {
           {message && (
             <div className="notice" role="status">
               {message}
+            </div>
+          )}
+          {view === "Overview" && !selected && (
+            <div className="quick-start">
+              <h2>What would you like to change?</h2>
+              <div>
+                {[
+                  [
+                    "Edit website pages",
+                    "Pages",
+                    "Change text, images and sections",
+                  ],
+                  [
+                    "Change fonts & colours",
+                    "Appearance",
+                    "Ready themes, fonts, colours and logo size",
+                  ],
+                  [
+                    "Manage pictures",
+                    "Media library",
+                    "Upload and reuse your images",
+                  ],
+                  [
+                    "Edit header & footer",
+                    "Reusable sections",
+                    "Logo, shared content and footer details",
+                  ],
+                  [
+                    "Manage navigation",
+                    "Menus",
+                    "Add page links to your website menus",
+                  ],
+                ].map(([title, destination, hint]) => (
+                  <button
+                    key={title}
+                    onClick={() => {
+                      V(destination);
+                      S(null);
+                      Q("");
+                    }}
+                  >
+                    <strong>{title} ↗</strong>
+                    <span>{hint}</span>
+                  </button>
+                ))}
+              </div>
+              <p>
+                Changes are private until you select Publish. Saved drafts can
+                be previewed before going live.
+              </p>
             </div>
           )}
           {view === "Overview" && !selected && (
@@ -737,7 +946,36 @@ function App() {
               )}
             </>
           )}
-          {selected && (
+          {view === "Appearance" &&
+            !docs.some((d) => d.kind === "settings") && (
+              <div className="empty">
+                Website settings have not been created yet. Create them under
+                Site settings first, then return here to choose your fonts and
+                colours.
+              </div>
+            )}
+          {selected && view === "Appearance" && (
+            <ThemeStudio
+              value={draft.theme}
+              onChange={(v) => change("theme", v)}
+              busy={busy}
+              dirty={dirty}
+              canPublish={user.role === "admin"}
+              pages={docs
+                .filter((d) => d.kind === "page" && d.published)
+                .map((d) => d.published.path)}
+              onSave={() =>
+                run(async () => {
+                  await save();
+                  E(
+                    "Design saved. Select Publish design to put it on the website.",
+                  );
+                })
+              }
+              onPublish={publish}
+            />
+          )}
+          {selected && view !== "Appearance" && (
             <>
               <div className="toolbar">
                 <button onClick={() => choose(null)}>← All entries</button>
@@ -936,6 +1174,18 @@ function App() {
                   <div className="panel">
                     {selected.kind === "page" && (
                       <>
+                        <div className="editor-steps">
+                          <strong>1. Edit your sections</strong>
+                          <span>2. Save draft</span>
+                          <span>3. Preview</span>
+                          <span>4. Publish</span>
+                        </div>
+                        <p className="note">
+                          Open a section below to change its text, images, and
+                          links. Move sections up or down to change their order.
+                          Add the published page to Menus so visitors can find
+                          it.
+                        </p>
                         <div className="two">
                           <Field
                             label="Page title"
@@ -943,7 +1193,7 @@ function App() {
                             onChange={(v) => change("title", v)}
                           />
                           <Field
-                            label="Page path"
+                            label="Website address"
                             value={draft.path}
                             onChange={(v) => change("path", v)}
                             placeholder="/services/web-development"
@@ -953,63 +1203,16 @@ function App() {
                           <h2>
                             Page sections <small>{draft.blocks.length}</small>
                           </h2>
-                          <div>
-                            <button
-                              onClick={() =>
-                                change("blocks", [
-                                  ...draft.blocks,
-                                  blankBlock("about"),
-                                ])
-                              }
-                            >
-                              + Section
-                            </button>
-                            <select
-                              aria-label="Add an original layout"
-                              value=""
-                              onChange={(e) => {
-                                if (e.target.value)
-                                  change("blocks", [
-                                    ...draft.blocks,
-                                    {
-                                      ...structuredClone(
-                                        templateDefaults[e.target.value],
-                                      ),
-                                      id: crypto.randomUUID(),
-                                    },
-                                  ]);
-                              }}
-                            >
-                              <option value="">+ Original layout</option>
-                              {Object.entries(templateManifest)
-                                .filter(([key]) => !key.startsWith("site-"))
-                                .map(([key, t]) => (
-                                  <option key={key} value={key}>
-                                    {t.label}
-                                  </option>
-                                ))}
-                            </select>
-                            <button
-                              onClick={() =>
-                                change("blocks", [
-                                  ...draft.blocks,
-                                  {
-                                    id: crypto.randomUUID(),
-                                    type: "shared",
-                                    sectionId:
-                                      docs.find((d) => d.kind === "section")
-                                        ?.id || "",
-                                  },
-                                ])
-                              }
-                            >
-                              + Reusable
-                            </button>
-                          </div>
+                          <button
+                            className="primary"
+                            onClick={() => SetPicker(true)}
+                          >
+                            + Add a section
+                          </button>
                         </div>
                         {draft.blocks.map((b, i) => (
                           <details
-                            className="block"
+                            className={b.hidden ? "block is-hidden" : "block"}
                             key={b.id}
                             open={draft.blocks.length === 1 ? true : undefined}
                           >
@@ -1022,14 +1225,26 @@ function App() {
                                   templateManifest[b.template]?.label ||
                                   "Reusable section"}
                               </strong>
-                              <span>{b.type}</span>
+                              <span>
+                                {sectionNames[b.type] ||
+                                  (b.type === "template"
+                                    ? "Original design"
+                                    : "Reusable section")}
+                              </span>
+                              {b.hidden && (
+                                <span className="badge hidden-badge">
+                                  Hidden from visitors
+                                </span>
+                              )}
+                              <span className="block-open">Open to edit ▾</span>
                             </summary>
                             <div className="block-body">
                               <div className="row">
                                 <span>Section controls</span>
-                                <div>
+                                <div className="section-controls">
                                   <button
                                     disabled={!i}
+                                    title="Move this section higher up the page"
                                     onClick={() => {
                                       const a = [...draft.blocks];
                                       [a[i - 1], a[i]] = [a[i], a[i - 1]];
@@ -1040,6 +1255,7 @@ function App() {
                                   </button>
                                   <button
                                     disabled={i === draft.blocks.length - 1}
+                                    title="Move this section further down the page"
                                     onClick={() => {
                                       const a = [...draft.blocks];
                                       [a[i + 1], a[i]] = [a[i], a[i + 1]];
@@ -1049,14 +1265,64 @@ function App() {
                                     ↓ Move down
                                   </button>
                                   <button
+                                    title="Make an identical copy of this section"
+                                    onClick={() => {
+                                      const copy = {
+                                        ...structuredClone(b),
+                                        id: crypto.randomUUID(),
+                                      };
+                                      if (copy.anchor) copy.anchor = "";
+                                      /* Each branded layout may appear only once per page. */
+                                      if (copy.type === "template") {
+                                        E(
+                                          "Branded sections can be used once on a page. Add it to another page instead.",
+                                        );
+                                        return;
+                                      }
+                                      const a = [...draft.blocks];
+                                      a.splice(i + 1, 0, copy);
+                                      change("blocks", a);
+                                    }}
+                                  >
+                                    ⧉ Make a copy
+                                  </button>
+                                  <button
+                                    className={b.hidden ? "warn" : ""}
+                                    title={
+                                      b.hidden
+                                        ? "Show this section on the website again"
+                                        : "Keep this section but hide it from visitors"
+                                    }
                                     onClick={() =>
                                       change(
                                         "blocks",
-                                        draft.blocks.filter((_, j) => j !== i),
+                                        draft.blocks.map((x, j) =>
+                                          i === j
+                                            ? { ...x, hidden: !x.hidden }
+                                            : x,
+                                        ),
                                       )
                                     }
                                   >
-                                    Remove
+                                    {b.hidden ? "◉ Show again" : "◌ Hide"}
+                                  </button>
+                                  <button
+                                    className="danger"
+                                    title="Delete this section from the page"
+                                    onClick={() => {
+                                      if (
+                                        !window.confirm(
+                                          "Delete this section? Use Hide instead if you may want it back later.",
+                                        )
+                                      )
+                                        return;
+                                      change(
+                                        "blocks",
+                                        draft.blocks.filter((_, j) => j !== i),
+                                      );
+                                    }}
+                                  >
+                                    Delete
                                   </button>
                                 </div>
                               </div>
@@ -1195,16 +1461,41 @@ function App() {
                       </>
                     )}
                     {selected.kind === "settings" &&
-                      Object.keys(draft).filter(k=>k!=="experience").map((k) => (
-                        <Field
-                          label={k.replace(/([A-Z])/g, " $1")}
-                          key={k}
-                          value={draft[k]}
-                          area={["addresses", "footerText"].includes(k)}
-                          onChange={(v) => change(k, v)}
-                        />
-                      ))}
-                    {selected.kind==="settings"&&<ExperienceSettings value={draft.experience} onChange={v=>change("experience",v)}/>}
+                      Object.keys(draft)
+                        .filter((k) => !["experience", "theme"].includes(k))
+                        .map((k) => (
+                          <Field
+                            label={k.replace(/([A-Z])/g, " $1")}
+                            key={k}
+                            value={draft[k]}
+                            area={["addresses", "footerText"].includes(k)}
+                            onChange={(v) => change(k, v)}
+                          />
+                        ))}
+                    {selected.kind === "settings" && (
+                      <div className="panel-pointer">
+                        <h2>Fonts, colours and theme</h2>
+                        <p>
+                          Everything about how the website looks now lives in
+                          Appearance, with a live preview beside the controls.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            V("Appearance");
+                            T("Content");
+                          }}
+                        >
+                          Open Appearance ↗
+                        </button>
+                      </div>
+                    )}
+                    {selected.kind === "settings" && (
+                      <ExperienceSettings
+                        value={draft.experience}
+                        onChange={(v) => change("experience", v)}
+                      />
+                    )}
                   </div>
                 )}
               </fieldset>
@@ -1213,74 +1504,16 @@ function App() {
           {["Inquiries", "Users"].includes(view) && (
             <Management view={view} api={api} run={run} />
           )}
-          {view==="Requests"&&<Requests api={api} run={run}/>}
+          {view === "Requests" && <Requests api={api} run={run} />}
           {view === "Media library" && (
-            <>
-              <form
-                className="panel upload"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.currentTarget;
-                  const data = new FormData(form);
-                  run(async () => {
-                    await api("/media", "POST", data);
-                    await load();
-                    form.reset();
-                    E(
-                      "Image uploaded. It is available in section and SEO image selectors.",
-                    );
-                  });
-                }}
-              >
-                <h2>Add an image</h2>
-                <p>
-                  Public website assets only. PNG, JPEG or WebP · up to 8 MB.
-                  Images are resized and converted to WebP.
-                </p>
-                <div className="two">
-                  <label className="field">
-                    <span>Choose image</span>
-                    <input
-                      name="file"
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      required
-                    />
-                  </label>
-                  <label className="field">
-                    <span>Alternative text</span>
-                    <input
-                      name="alt"
-                      required
-                      maxLength={250}
-                      placeholder="Describe the image"
-                    />
-                  </label>
-                </div>
-                <button className="primary" disabled={busy}>
-                  Upload image ↗
-                </button>
-              </form>
-              <div className="media-grid">
-                {media.map((m) => (
-                  <article key={m.id}>
-                    <img src={m.url} alt={m.alt} />
-                    <div>
-                      <strong>{m.alt}</strong>
-                      <small>
-                        {m.width} × {m.height} · WebP
-                      </small>
-                      <small>{m.url}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              {!media.length && (
-                <div className="empty">
-                  Your media library is ready for its first image.
-                </div>
-              )}
-            </>
+            <MediaLibrary
+              media={media}
+              api={api}
+              run={run}
+              reload={load}
+              canDelete={user.role === "admin"}
+              notify={E}
+            />
           )}
           {preview && (
             <div

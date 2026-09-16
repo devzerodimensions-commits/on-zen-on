@@ -2,6 +2,8 @@
 
 The original React website now reads published pages, menus and layouts from a secure Express CMS. Your supplied logo is used throughout. Visit `/admin/` for pages, original-layout sections, image uploads, SEO, drafts, publishing, history, menus, users and inquiries. The interface follows a WordPress-style editing workflow while retaining the existing React design.
 
+**Appearance** is the theme customiser: eight ready-made colour themes, seventeen fonts (separate heading and body fonts), every text size, colours for the page, cards, links, header and footer, button styles, spacing and logo sizes — all with the live website previewed beside the controls at computer, tablet and phone widths, and readability warnings before you publish. Page sections can be copied and hidden as well as reordered, and pictures can be searched, renamed and deleted in the media library. See [docs/change-the-look-of-the-website.md](docs/change-the-look-of-the-website.md), written for non-technical editors.
+
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete Render and first-administrator setup. Use the existing Render service and database; do not create a replacement Blueprint.
 
 ## Run locally

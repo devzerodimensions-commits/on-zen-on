@@ -1,3 +1,4 @@
+import { PublishedTheme } from "./PublishedTheme.jsx";
 import { InquiryForm, ThankYou } from "./InquiryForm.jsx";
 import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
@@ -164,6 +165,11 @@ function App() {
         <p>Loading…</p>
       </main>
     );
+  /* Inside the admin's appearance preview, skip the entrance animation and the
+     chat bubble so the editor sees the page itself. */
+  const framed = window.parent !== window;
+  /* Sections switched off in the admin stay in the draft but never reach visitors. */
+  const shown = { ...page, blocks: page.blocks.filter((b) => !b.hidden) };
   const props = { menu, setMenu: M, menus: site.menus, submit, formState };
   const header =
     site.layouts.find((x) => x.template === "site-header") ||
@@ -197,15 +203,15 @@ function App() {
   }
   return (
     <div className={page.path === "/" ? "homepage" : undefined}>
-      {!previewId && <BrandIntro logo={header.fields.image_4} />}
+      {!previewId && !framed && <BrandIntro logo={header.fields.image_4} />}
       <OriginalTemplate content={header} {...props} />
-      {!previewId && <ExperienceTools />}
+      {!previewId && !framed && <ExperienceTools />}
       <main id="home">
         {page.path === "/tech-updates" || page.path.startsWith("/blog/") ? (
-          <BlogPage page={page} />
+          <BlogPage page={shown} />
         ) : page.path === "/services" || page.path.startsWith("/services/") ? (
           <ServicesPage
-            page={page}
+            page={shown}
             submit={submit}
             formState={formState}
             renderFallback={(b) => (
@@ -213,7 +219,7 @@ function App() {
             )}
           />
         ) : (
-          page.blocks.map((b) =>
+          shown.blocks.map((b) =>
             b.type === "template" ? (
               <OriginalTemplate key={b.id} content={b} {...props} />
             ) : (
@@ -223,7 +229,7 @@ function App() {
         )}
       </main>
       <OriginalTemplate content={footer} {...props} />
-      {!previewId && <ServiceChat page={page} />}
+      {!previewId && !framed && <ServiceChat page={page} />}
     </div>
   );
 }
@@ -231,6 +237,7 @@ if (location.hash.startsWith("#/admin")) location.replace("/admin/");
 else
   createRoot(document.getElementById("root")).render(
     <ExperienceProvider>
+      <PublishedTheme />
       {location.pathname === "/thank-you" ? (
         <ThankYou />
       ) : location.pathname === "/portal" ? (

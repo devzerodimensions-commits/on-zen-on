@@ -15,7 +15,7 @@ const bundled = [...new Map([
  ...Object.values(photos), ...Object.values(marketing), ...sections,
 ].map(m=>[m.image,m])).values()];
 
-export function MediaSelect({label="Image",value,onChange,media,upload}) {
+export function MediaSelect({label="Image",value,onChange,media=[],upload}) {
  const [file,setFile]=useState(null),[description,setDescription]=useState(""),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const alive=useRef(true),input=useRef(null),change=useRef(onChange);
  change.current=onChange;

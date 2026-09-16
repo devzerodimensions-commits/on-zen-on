@@ -878,3 +878,188 @@ header b {
   outline-offset: -2px;
 }
 .experience-settings details{border:1px solid #dce4df;border-radius:10px;padding:18px;margin:14px 0}.experience-settings summary{cursor:pointer;font-weight:700}.experience-settings .feature-toggle{display:flex;align-items:center;gap:10px;margin:18px 0}.experience-settings .feature-toggle input{width:18px;height:18px;margin:0;flex:none}.experience-settings .feature-toggle span{margin:0}.experience-settings p{line-height:1.6;color:#607365}
+
+/* Sidebar entries carry a plain-language hint under the name. */
+nav button {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+nav button b {
+  display: grid;
+  gap: 2px;
+  font-weight: inherit;
+  min-width: 0;
+}
+nav button b small {
+  font-size: 10px;
+  line-height: 1.35;
+  color: #8b94ab;
+}
+nav .active b small {
+  color: #5b69b5;
+}
+@media (max-width: 900px) {
+  nav button b small {
+    display: none;
+  }
+}
+.panel-pointer {
+  border: 1px solid #dce1ec;
+  border-radius: 12px;
+  padding: 18px 20px;
+  background: #f8f9fd;
+  margin-top: 22px;
+}
+.panel-pointer h2 {
+  margin-bottom: 6px;
+}
+.panel-pointer p {
+  margin-bottom: 14px;
+  max-width: 480px;
+}
+
+/* Section controls and the visual section picker. */
+.section-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.section-controls button.warn {
+  border-color: #e7b93f;
+  background: #fff8e2;
+}
+.section-controls button.danger:hover {
+  border-color: #c0392b;
+  background: #fdecea;
+  color: #8f2418;
+}
+.block.is-hidden > summary {
+  opacity: 0.62;
+}
+.block.is-hidden > summary strong {
+  text-decoration: line-through;
+}
+.hidden-badge {
+  background: #fff3d6;
+  border-color: #e7c979;
+  color: #7a5c14;
+}
+.block-open {
+  margin-left: auto;
+  font-size: 11px;
+  color: #8b94ab;
+}
+.picker-dialog {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: min(940px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 30px 70px rgba(10, 20, 45, 0.3);
+}
+.picker-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.picker-tabs button.active {
+  background: #182daf;
+  border-color: #182daf;
+  color: #fff;
+}
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  overflow-y: auto;
+  padding: 2px;
+}
+button.picker-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  text-align: left;
+  padding: 14px;
+  border-radius: 12px;
+  height: 100%;
+}
+button.picker-card strong {
+  font-size: 14px;
+}
+button.picker-card small {
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.picker-thumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+  background: #f2f4fa;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 64px;
+}
+.picker-thumb i {
+  background: #c3cbe4;
+  border-radius: 3px;
+  height: 8px;
+  flex: 0 0 100%;
+}
+.picker-thumb i.wide {
+  height: 14px;
+  background: #97a3cd;
+}
+.picker-thumb i.short {
+  flex-basis: 55%;
+}
+.picker-thumb i.chip {
+  flex-basis: 34%;
+  height: 12px;
+  background: #182daf;
+}
+.picker-thumb i.grid {
+  flex: 1 1 42%;
+  height: 22px;
+}
+.picker-thumb i.row {
+  height: 11px;
+}
+
+/* Picture library. */
+.panel.upload.dropping {
+  border-color: #182daf;
+  background: #f0f3ff;
+}
+.media-search {
+  padding: 10px 12px;
+  border: 1px solid #dce1ec;
+  border-radius: 8px;
+  min-width: 240px;
+  background: #fff;
+}
+.media-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.media-actions button {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+.media-actions button.danger:hover {
+  border-color: #c0392b;
+  background: #fdecea;
+  color: #8f2418;
+}
+.media-grid article div input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #dce1ec;
+  border-radius: 6px;
+}
