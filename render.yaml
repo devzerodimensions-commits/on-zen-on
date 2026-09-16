@@ -4,6 +4,8 @@ services:
     runtime: node
     region: singapore
     plan: free
+    # Every push to main builds and goes live without a dashboard visit.
+    autoDeploy: true
     buildCommand: npm ci && npm run build
     startCommand: npm run db:migrate && npm start
     healthCheckPath: /api/health
