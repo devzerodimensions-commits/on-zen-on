@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { PasswordField } from "./PasswordField.jsx";
-export function Management({ view, api, run }) {
+import { InquiryInbox } from "./InquiryInbox.jsx";
+export function Management(props) {
+  return props.view === "Inquiries" ? (
+    <InquiryInbox api={props.api} />
+  ) : (
+    <UserManagement {...props} />
+  );
+}
+function UserManagement({ view, api, run }) {
   const [rows, S] = useState([]);
   const users = view === "Users";
   const load = async () => S(await api(users ? "/users" : "/inquiries"));
