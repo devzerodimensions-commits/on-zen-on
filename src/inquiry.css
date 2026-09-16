@@ -1,0 +1,197 @@
+form.inquiry-card {
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff !important;
+  color: #123e34 !important;
+  border: 1px solid #d9e5df;
+  border-radius: 24px;
+  padding: clamp(24px, 4vw, 44px) !important;
+  box-shadow: 0 18px 65px #082f2320;
+  display: grid;
+  gap: 22px;
+  text-align: left;
+}
+.inquiry-card-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.inquiry-card-top > span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #f8cf13;
+  color: #153a31;
+  font-size: 28px;
+}
+.inquiry-card small {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #537268;
+}
+.inquiry-card h3 {
+  font-size: clamp(20px, 2vw, 25px) !important;
+  color: #123e34 !important;
+  margin: 6px 0 0 !important;
+  line-height: 1.25;
+}
+.inquiry-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.inquiry-card label {
+  display: grid !important;
+  gap: 9px;
+  color: #214f43 !important;
+  font-size: 13px;
+  font-weight: 650;
+  margin: 0 !important;
+}
+.inquiry-card input,
+.inquiry-card textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #d3dfd9 !important;
+  background: #f7faf8 !important;
+  color: #183d32 !important;
+  border-radius: 10px !important;
+  padding: 14px 15px !important;
+  font: inherit;
+  font-weight: 400;
+  outline-offset: 3px;
+}
+.inquiry-card input:focus,
+.inquiry-card textarea:focus {
+  outline: 2px solid #257f61;
+  border-color: #257f61 !important;
+}
+.inquiry-card textarea {
+  resize: vertical;
+  min-height: 125px;
+}
+.inquiry-card .inquiry-note {
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  color: #637b72 !important;
+  margin: 0 !important;
+}
+.inquiry-card button {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 17px 20px !important;
+  border: 0;
+  border-radius: 10px !important;
+  background: #125640 !important;
+  color: white !important;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.inquiry-card button:hover {
+  background: #0b3e2e !important;
+}
+.inquiry-card button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.inquiry-card .inquiry-feedback {
+  font-size: 14px !important;
+  color: #963c16 !important;
+  margin: 0 !important;
+}
+.inquiry-thanks {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at top right, #cde6d2, transparent 65%), #f5f8f3;
+  padding: 40px 24px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 30px;
+}
+.inquiry-thanks > a img {
+  width: 160px;
+}
+.inquiry-thanks-card {
+  max-width: 670px;
+  text-align: center;
+  background: white;
+  border: 1px solid #d8e5dc;
+  border-radius: 28px;
+  padding: clamp(28px, 6vw, 64px);
+  box-shadow: 0 24px 70px #0d493518;
+}
+.inquiry-check {
+  display: grid;
+  place-items: center;
+  background: #eaf4e7;
+  color: #176448;
+  width: 70px;
+  height: 70px;
+  font-size: 36px;
+  border-radius: 50%;
+  margin: 0 auto 25px;
+}
+.inquiry-thanks .inquiry-kicker {
+  font-size: 11px !important;
+  letter-spacing: 2px;
+  color: #557a62 !important;
+}
+.inquiry-thanks h1 {
+  font-size: clamp(30px, 5vw, 48px) !important;
+  line-height: 1.15;
+  color: #153f31 !important;
+  margin: 18px 0;
+}
+.inquiry-thanks p {
+  color: #60756a !important;
+  line-height: 1.8 !important;
+}
+.inquiry-thanks-card > div {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+.inquiry-thanks-card a {
+  padding: 14px 20px;
+  border-radius: 10px;
+  background: #15533d;
+  color: white;
+  text-decoration: none;
+}
+.inquiry-thanks-card a + a {
+  background: #edf3ec;
+  color: #15533d;
+}
+@media (max-width: 600px) {
+  .inquiry-fields {
+    grid-template-columns: 1fr;
+  }
+  .inquiry-card-top {
+    align-items: flex-start;
+  }
+}
+
+#contact form.inquiry-card label,
+.oz-services form.inquiry-card label {
+  color: #214f43 !important;
+}
+
+#contact form.inquiry-card input::placeholder,
+#contact form.inquiry-card textarea::placeholder,
+form.inquiry-card input::placeholder,
+form.inquiry-card textarea::placeholder {
+  color: #637b72 !important;
+  opacity: 1;
+}

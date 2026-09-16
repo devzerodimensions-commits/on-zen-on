@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { InquiryForm, ThankYou } from "./InquiryForm.jsx";
+import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { OriginalTemplate } from "./OriginalTemplates.jsx";
 import { ServicesPage } from "./ServicesPage.jsx";
-import {BlogPage,BlogCards} from "./BlogPage.jsx";
+import { BlogPage, BlogCards } from "./BlogPage.jsx";
 import { templateDefaults } from "../shared/templates.js";
 import "./styles.css";
 import "./tech-theme.css";
@@ -17,9 +18,9 @@ import { BrandIntro } from "./BrandIntro.jsx";
 import { ServiceChat } from "./ServiceChat.jsx";
 import { ExperienceTools } from "./ExperienceTools.jsx";
 import { Portal } from "./Portal.jsx";
-import {ExperienceProvider} from "./ExperienceContext.jsx";
+import { ExperienceProvider } from "./ExperienceContext.jsx";
 function GenericBlock({ content: b, submit, formState }) {
-  if(b.type==="updates")return <BlogCards block={b}/>;
+  if (b.type === "updates") return <BlogCards block={b} />;
   return (
     <section
       id={b.anchor || undefined}
@@ -56,27 +57,13 @@ function GenericBlock({ content: b, submit, formState }) {
         </a>
       )}
       {b.type === "contact" && (
-        <form className="cms-contact-form" onSubmit={submit}>
-          <label>
-            Name
-            <input name="name" required maxLength={150} />
-          </label>
-          <label>
-            Email
-            <input name="email" type="email" required maxLength={254} />
-          </label>
-          <label>
-            Message
-            <textarea name="message" required maxLength={10000} />
-          </label>
-          <button className="button">Send inquiry ↗</button>
-          <p role="status">{formState}</p>
-        </form>
+        <InquiryForm submit={submit} formState={formState} />
       )}
     </section>
   );
 }
 function App() {
+  const sending = useRef(false);
   const [page, P] = useState(null),
     [site, S] = useState(null),
     [error, E] = useState(""),
@@ -130,19 +117,36 @@ function App() {
       F("Preview only — inquiries are not sent.");
       return;
     }
+    if (sending.current) return;
+    sending.current = true;
     const form = e.currentTarget;
+    const payload = Object.fromEntries(new FormData(form));
     F("Sending…");
     try {
       const r = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify(payload),
       });
-      if (!r.ok) throw Error();
-      form.reset();
-      F("Thanks—your inquiry has been received.");
-    } catch {
-      F("Your inquiry could not be sent. Please try again shortly.");
+      const result = await r.json().catch(() => ({}));
+      if (!r.ok || !result.ok)
+        throw Error(
+          result.error ||
+            (r.status === 429
+              ? "Too many attempts. Please try again in 15 minutes."
+              : "Your inquiry could not be sent. Please try again shortly."),
+        );
+      try {
+        sessionStorage.setItem("inquiry-received", "yes");
+      } catch {}
+      location.assign("/thank-you");
+    } catch (err) {
+      F(
+        err.message ||
+          "Your inquiry could not be sent. Please try again shortly.",
+      );
+    } finally {
+      sending.current = false;
     }
   };
   if (error)
@@ -197,7 +201,9 @@ function App() {
       <OriginalTemplate content={header} {...props} />
       {!previewId && <ExperienceTools />}
       <main id="home">
-        {page.path==="/tech-updates"||page.path.startsWith("/blog/")?<BlogPage page={page}/>:page.path === "/services" || page.path.startsWith("/services/") ? (
+        {page.path === "/tech-updates" || page.path.startsWith("/blog/") ? (
+          <BlogPage page={page} />
+        ) : page.path === "/services" || page.path.startsWith("/services/") ? (
           <ServicesPage
             page={page}
             submit={submit}
@@ -222,4 +228,15 @@ function App() {
   );
 }
 if (location.hash.startsWith("#/admin")) location.replace("/admin/");
-else createRoot(document.getElementById("root")).render(<ExperienceProvider>{location.pathname==="/portal"?<Portal/>:<App />}</ExperienceProvider>);
+else
+  createRoot(document.getElementById("root")).render(
+    <ExperienceProvider>
+      {location.pathname === "/thank-you" ? (
+        <ThankYou />
+      ) : location.pathname === "/portal" ? (
+        <Portal />
+      ) : (
+        <App />
+      )}
+    </ExperienceProvider>,
+  );

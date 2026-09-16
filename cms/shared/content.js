@@ -145,7 +145,7 @@ export const pageSchema = z
       .max(200)
       .regex(/^\/$|^\/[a-z0-9]+(?:[\/-][a-z0-9]+)*$/)
       .refine(
-        (v) => !/^\/(admin|api|media|assets|portal)(\/|$)/.test(v),
+        (v) => !/^\/(admin|api|media|assets|portal|thank-you)(\/|$)/.test(v),
         "Reserved path",
       ),
     seo: z

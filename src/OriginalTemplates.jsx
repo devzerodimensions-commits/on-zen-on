@@ -1,3 +1,4 @@
+import { InquiryForm } from "./InquiryForm.jsx";
 // Extracted from the original website. Original classes, layout and decorative elements are preserved.
 import React from "react";
 import { menuDefaults } from "../shared/templates.js";
@@ -653,35 +654,16 @@ export function OriginalTemplate({
             </h2>
             <p>{content.fields["text_4"]}</p>
           </div>
-          <form onSubmit={submit}>
-            {formState && <p className="success">{formState}</p>}
-            <label>
-              {content.fields["text_5"]}
-              <input required name="name" placeholder="Your name" />
-            </label>
-            <label>
-              {content.fields["text_6"]}
-              <input
-                required
-                type="email"
-                name="email"
-                placeholder="you@company.com"
-              />
-            </label>
-            <label>
-              {content.fields["text_7"]}
-              <textarea
-                required
-                name="message"
-                placeholder="Tell us a little about your project"
-                rows="3"
-              />
-            </label>
-            <button className="button" type="submit">
-              {content.fields["text_8"]}
-              <b>↗</b>
-            </button>
-          </form>
+          <InquiryForm
+            submit={submit}
+            formState={formState}
+            labels={{
+              name: content.fields.text_5,
+              email: content.fields.text_6,
+              message: content.fields.text_7,
+              button: content.fields.text_8,
+            }}
+          />
         </section>
       );
     case "site-header":

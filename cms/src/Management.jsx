@@ -6,10 +6,38 @@ export function Management({ view, api, run }) {
   const load = async () => S(await api(users ? "/users" : "/inquiries"));
   useEffect(() => {
     run(load);
+    if (users) return;
+    let active = true;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      run(async () => {
+        const latest = await api("/inquiries");
+        if (active)
+          S((current) => [
+            ...latest.filter(
+              (row) => !current.some((old) => old.id === row.id),
+            ),
+            ...current,
+          ]);
+      });
+    }, 30000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
   }, [view]);
   return (
     <div className="panel">
       <h2>{view}</h2>
+      {!users && (
+        <div className="row">
+          <p>
+            Website inquiries · newest first · new inquiries appear every 30
+            seconds. Open an inquiry below to update its status and notes.
+          </p>
+          <button onClick={() => run(load)}>Refresh inquiries</button>
+        </div>
+      )}
       {users && (
         <form
           onSubmit={(e) => {
