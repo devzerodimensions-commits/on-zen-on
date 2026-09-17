@@ -4,7 +4,10 @@ import request from "supertest";
 import { openDb } from "../cms/server/db.js";
 import { seedCms, stableId } from "../server/seed-cms.js";
 import { createWebsite } from "../server/website.js";
-import { migrateCompanyPages } from "../server/company-pages.js";
+import {
+  migrateCompanyPages,
+  migrateProcessSteps,
+} from "../server/company-pages.js";
 import { pageSchema } from "../cms/shared/content.js";
 
 const origin = "http://localhost:3100";
@@ -141,6 +144,70 @@ test("the website guide can answer from the new pages", async () => {
       !answer.text.startsWith("I could not find that"),
       "the guide could not use the new About content",
     );
+  } finally {
+    await db.close();
+  }
+});
+
+test("step numbers live in the timeline, not typed into the headings", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const page = await published(db, "/about");
+    const steps = page.blocks.find((b) => b.type === "process").items;
+    for (const step of steps)
+      assert.ok(
+        !/^\s*\d/.test(step.title),
+        `"${step.title}" still carries its own number, which the timeline also draws`,
+      );
+  } finally {
+    await db.close();
+  }
+});
+
+test("a page seeded before the timeline loses its doubled numbers", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const [row] = await db.query(
+      "SELECT id FROM documents WHERE public_key='page:/about'",
+    );
+    /* Put the page back the way the first version seeded it, then check the
+       migration corrects content that is already in the database. */
+    const page = await published(db, "/about");
+    const steps = page.blocks.find((b) => b.type === "process").items;
+    steps.forEach((step, i) => {
+      step.title = `${String(i + 1).padStart(2, "0")} — ${step.title}`;
+    });
+    const renamed = "Grow with us";
+    steps[steps.length - 1].title = renamed;
+    const body = JSON.stringify(page);
+    await db.query("UPDATE documents SET draft=$1,published=$2 WHERE id=$3", [
+      body,
+      body,
+      row.id,
+    ]);
+    await db.query("DELETE FROM cms_migrations WHERE id=$1", [
+      "company-process-numbering-v1",
+    ]);
+    await migrateProcessSteps(db);
+
+    for (const field of ["draft", "published"]) {
+      const [after] = await db.query(
+        `SELECT ${field} FROM documents WHERE id=$1`,
+        [row.id],
+      );
+      const items = JSON.parse(after[field]).blocks.find(
+        (b) => b.type === "process",
+      ).items;
+      assert.deepEqual(
+        items.slice(0, 4).map((i) => i.title),
+        ["Understand", "Shape", "Build", "Launch"],
+        `${field} still has numbers in the headings`,
+      );
+      /* A heading the editor rewrote is theirs, so it is left alone. */
+      assert.equal(items[4].title, renamed);
+    }
   } finally {
     await db.close();
   }

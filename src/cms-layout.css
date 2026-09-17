@@ -350,13 +350,15 @@
   counter-reset: step;
   margin-top: 46px;
 }
+/* The theme paints card backgrounds, borders and shadows with !important, so
+   undoing them for a timeline step has to be just as forceful. */
 .cms-section.cms-process .service-grid .service-card {
   counter-increment: step;
   position: relative;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   padding: 66px 26px 0 0;
   gap: 8px;
   transform: none;

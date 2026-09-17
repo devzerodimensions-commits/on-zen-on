@@ -442,6 +442,51 @@ const menuMoves = new Map([
 ]);
 const contactMoves = new Set(["/#contact", "#contact"]);
 
+/* The first version of the process section typed its step numbers into the
+   headings ("01 — Understand"). The timeline draws the number itself, so a
+   page seeded before that change shows it twice. Seeded content does not
+   update when the source changes — the insert is skipped once the row exists
+   — so the correction needs a migration of its own. Only the exact pattern is
+   removed, leaving a heading an editor has since rewritten alone. */
+const stepNumber = /^\s*\d{1,2}\s*[—–-]\s+/;
+export async function migrateProcessSteps(db) {
+  await db.transaction(async (q) => {
+    const marker = await q.query(
+      "INSERT INTO cms_migrations (id) VALUES ($1) ON CONFLICT(id) DO NOTHING RETURNING id",
+      ["company-process-numbering-v1"],
+    );
+    if (!marker.length) return;
+    for (const row of await q.query(
+      "SELECT id,draft,published FROM documents WHERE kind='page'",
+    )) {
+      const next = { ...row };
+      let changed = false;
+      for (const field of ["draft", "published"]) {
+        if (!row[field]) continue;
+        const data = JSON.parse(row[field]);
+        let touched = false;
+        for (const b of data.blocks || []) {
+          if (b.type !== "process") continue;
+          for (const item of b.items || []) {
+            if (!stepNumber.test(item.title)) continue;
+            item.title = item.title.replace(stepNumber, "");
+            touched = true;
+          }
+        }
+        if (touched) {
+          next[field] = JSON.stringify(schemas.page.parse(data));
+          changed = true;
+        }
+      }
+      if (changed)
+        await q.query(
+          "UPDATE documents SET draft=$1,published=$2,version=version+1,updated=$3 WHERE id=$4",
+          [next.draft, next.published, Date.now(), row.id],
+        );
+    }
+  });
+}
+
 export async function migrateCompanyPages(db, stableId) {
   await db.transaction(async (q) => {
     const marker = await q.query(
