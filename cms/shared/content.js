@@ -2,6 +2,7 @@ import { themeSchema } from "../../shared/theme.js";
 import { z } from "zod";
 import { experienceSchema } from "../../shared/experience-settings.js";
 import { templateManifest } from "../../shared/templates.js";
+import { sectionStyleOptions } from "../../shared/section-style.js";
 const short = z.string().max(250);
 export const safeLink = z
   .string()
@@ -25,6 +26,12 @@ export const templateSchema = z
     tone: z
       .enum(["default", "white", "tint", "brand", "dark", "accent"])
       .default("default"),
+    align: z.enum(["left", "center", "right"]).default("left"),
+    headingScale: z
+      .enum(["small", "normal", "large", "xlarge"])
+      .default("normal"),
+    spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
+    hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
     fields: z.record(z.string(), z.string().max(15000)),
   })
   .strict()
@@ -124,6 +131,12 @@ export const blockSchema = z
     tone: z
       .enum(["default", "white", "tint", "brand", "dark", "accent"])
       .default("default"),
+    align: z.enum(["left", "center", "right"]).default("left"),
+    headingScale: z
+      .enum(["small", "normal", "large", "xlarge"])
+      .default("normal"),
+    spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
+    hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
     anchor: z
       .string()
       .max(80)

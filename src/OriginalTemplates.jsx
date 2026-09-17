@@ -25,10 +25,7 @@ export function OriginalTemplate({
   formState,
 }) {
   /* A branded section can be recoloured from the admin like any other. */
-  const tone =
-    content.tone && content.tone !== "default"
-      ? ` cms-tone-${content.tone}`
-      : "";
+  const tone = sectionClasses(content);
   switch (content.template) {
     case "hero":
       return (

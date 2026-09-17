@@ -15,6 +15,11 @@ import {
   blockSchema,
 } from "../cms/shared/content.js";
 import { starterBlock } from "../cms/shared/starters.js";
+import {
+  sectionClasses,
+  sectionStyleDefaults,
+  sectionStyleOptions,
+} from "../shared/section-style.js";
 import { schemas } from "../cms/shared/content.js";
 import { templateManifest } from "../shared/templates.js";
 import {
@@ -597,4 +602,57 @@ test("every kind of section can be recoloured, branded ones included", () => {
   /* And it defaults to leaving the section alone. */
   const { tone, ...without } = branded;
   assert.equal(schemas.section.parse(without).tone, "default");
+});
+
+test("style choices reach the page, and nothing else does", () => {
+  /* Defaults add no classes at all, so a page nobody has styled renders
+     exactly as it did before and the stylesheet has nothing extra to fight. */
+  assert.equal(sectionClasses(sectionStyleDefaults), "");
+  assert.equal(sectionClasses({}), "");
+  assert.equal(sectionClasses(null), "");
+
+  const styled = sectionClasses({
+    tone: "dark",
+    align: "center",
+    headingScale: "xlarge",
+    spacing: "roomy",
+    hideOn: "mobile",
+  });
+  for (const expected of [
+    "cms-tone-dark",
+    "cms-align-center",
+    "cms-scale-xlarge",
+    "cms-space-roomy",
+    "cms-hide-mobile",
+  ])
+    assert.ok(styled.includes(expected), `${expected} never reached the page`);
+
+  /* A value that is not one of the offered choices is dropped rather than
+     written into the class attribute. */
+  assert.equal(
+    sectionClasses({ tone: '"><script>alert(1)</script>', align: "sideways" }),
+    "",
+  );
+});
+
+test("every style choice offered in the admin is one the schema accepts", () => {
+  /* The dropdowns and the schema have to agree, or a choice an editor makes
+     is rejected when they try to save it. */
+  for (const [field, options] of Object.entries(sectionStyleOptions)) {
+    for (const [value] of options) {
+      const parsed = blockSchema.safeParse({
+        ...blankBlock(),
+        [field]: value,
+      });
+      assert.ok(
+        parsed.success,
+        `${field}="${value}" is offered in the admin but rejected on save`,
+      );
+      assert.equal(parsed.data[field], value);
+    }
+    assert.ok(
+      options.some(([value]) => value === sectionStyleDefaults[field]),
+      `${field} has no option matching its own default`,
+    );
+  }
 });

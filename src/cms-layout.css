@@ -520,3 +520,87 @@
     animation: none;
   }
 }
+
+/* ---- per-section Style and Advanced choices ---------------------------- */
+/* Each of these is a named step chosen in the admin, not a free value, so a
+   section can be restyled without anyone being able to produce a page that
+   overlaps, disappears or cannot be read. */
+
+/* Alignment */
+.cms-align-center {
+  text-align: center;
+  justify-items: center;
+}
+.cms-align-center > .cms-body,
+.cms-align-center > h1,
+.cms-align-center > h2 {
+  margin-inline: auto;
+}
+.cms-align-center > .button {
+  justify-self: center;
+}
+.cms-align-right {
+  text-align: right;
+  justify-items: end;
+}
+.cms-align-right > .button {
+  justify-self: end;
+}
+/* Card text stays readable left-aligned however the section is aligned. */
+.cms-align-center .service-card,
+.cms-align-right .service-card,
+.cms-align-center .cms-cases article > div,
+.cms-align-right .cms-cases article > div,
+.cms-align-center .cms-faq,
+.cms-align-right .cms-faq {
+  text-align: left;
+}
+
+/* Heading size */
+.cms-scale-small > :is(h1, h2) {
+  font-size: clamp(24px, 3vw, 34px);
+}
+.cms-scale-large > :is(h1, h2) {
+  font-size: clamp(36px, 5.4vw, 62px);
+}
+.cms-scale-xlarge > :is(h1, h2) {
+  font-size: clamp(42px, 7vw, 86px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+/* Space above and below */
+.cms-space-compact {
+  padding-top: 46px !important;
+  padding-bottom: 46px !important;
+}
+.cms-space-roomy {
+  padding-top: 140px !important;
+  padding-bottom: 140px !important;
+}
+.cms-space-none {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+@media (max-width: 700px) {
+  .cms-space-roomy {
+    padding-top: 88px !important;
+    padding-bottom: 88px !important;
+  }
+  .cms-space-compact {
+    padding-top: 34px !important;
+    padding-bottom: 34px !important;
+  }
+}
+
+/* Show on some screens only */
+@media (max-width: 800px) {
+  .cms-hide-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 801px) {
+  .cms-hide-desktop {
+    display: none !important;
+  }
+}

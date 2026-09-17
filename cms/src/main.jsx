@@ -9,6 +9,10 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
 import { starterBlock } from "../shared/starters.js";
+import {
+  sectionStyleDefaults,
+  sectionStyleOptions,
+} from "../../shared/section-style.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
@@ -120,91 +124,152 @@ function MediaSelect(props) {
     <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
   );
 }
-function ToneSelect({ value, onChange }) {
+function StyleChoice({ label, hint, field, block, set }) {
   return (
     <label className="field">
-      <span>Section colour</span>
+      <span>{label}</span>
       <select
-        value={value || "default"}
-        onChange={(e) => onChange(e.target.value)}
+        value={block[field] ?? sectionStyleDefaults[field]}
+        onChange={(e) => set(field, e.target.value)}
       >
-        {[
-          ["default", "Page default"],
-          ["white", "White"],
-          ["tint", "Soft brand tint"],
-          ["brand", "Brand colour"],
-          ["dark", "Dark"],
-          ["accent", "Highlight"],
-        ].map(([key, text]) => (
+        {sectionStyleOptions[field].map(([key, text]) => (
           <option key={key} value={key}>
             {text}
           </option>
         ))}
       </select>
-      <small>
-        Colours this one section only. The text colour is chosen for you so it
-        always stays readable, whichever colour theme you publish.
-      </small>
+      {hint && <small>{hint}</small>}
     </label>
   );
 }
+
+/* Style and Advanced for one section. Every control offers a choice between
+   designed outcomes rather than a free value, so restyling a section cannot
+   produce a page that overlaps, disappears or cannot be read. */
+function SectionStyle({ block, set, advanced }) {
+  const choice = (label, field, hint) => (
+    <StyleChoice
+      label={label}
+      hint={hint}
+      field={field}
+      block={block}
+      set={set}
+    />
+  );
+  return advanced ? (
+    <div className="two">
+      {choice(
+        "Space above and below",
+        "spacing",
+        "How much room this section has around its content.",
+      )}
+      {choice(
+        "Show this section on",
+        "hideOn",
+        "Hide a section on phones or on computers without deleting it.",
+      )}
+    </div>
+  ) : (
+    <>
+      {choice(
+        "Section colour",
+        "tone",
+        "Colours this one section only. The text colour is chosen for you so it always stays readable, whichever colour theme you publish.",
+      )}
+      <div className="two">
+        {choice("Text alignment", "align")}
+        {choice("Heading size", "headingScale")}
+      </div>
+    </>
+  );
+}
+
+function SectionTabs({ pane, setPane }) {
+  return (
+    <div className="section-tabs">
+      {["Content", "Style", "Advanced"].map((name) => (
+        <button
+          type="button"
+          key={name}
+          className={pane === name ? "active" : ""}
+          onClick={() => setPane(name)}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
+  const [pane, setPane] = useState("Content");
+  const tabs = <SectionTabs pane={pane} setPane={setPane} />;
+  const styling =
+    pane === "Style" ? (
+      <SectionStyle block={block} set={set} />
+    ) : pane === "Advanced" ? (
+      <SectionStyle block={block} set={set} advanced />
+    ) : null;
   if (block.type === "template")
     return (
       <>
-        <p className="note">
-          Original {templateManifest[block.template].label} layout. Edit the
-          content below; the design stays consistent.
-        </p>
-        <ToneSelect value={block.tone} onChange={(v) => set("tone", v)} />
-        {[
-          ["text", "Text content"],
-          ["image", "Images"],
-          ["link", "Buttons and links"],
-        ].map(([kind, title]) => {
-          const fields = Object.entries(
-            templateManifest[block.template].fields,
-          ).filter(([, field]) => field.kind === kind);
-          return fields.length ? (
-            <details
-              className="template-group"
-              key={kind}
-              open={kind === "text"}
-            >
-              <summary>
-                {title} <small>({fields.length})</small>
-              </summary>
-              {fields.map(([key, field], i) =>
-                kind === "image" ? (
-                  <MediaSelect
-                    key={key}
-                    label={"Image " + (i + 1) + " — " + field.label}
-                    value={block.fields[key]}
-                    media={media}
-                    onChange={(v) =>
-                      set("fields", { ...block.fields, [key]: v })
-                    }
-                  />
-                ) : (
-                  <Field
-                    key={key}
-                    label={
-                      kind === "link"
-                        ? "Link " + (i + 1) + " — destination"
-                        : field.label
-                    }
-                    value={block.fields[key]}
-                    area={kind === "text" && block.fields[key].length > 80}
-                    onChange={(v) =>
-                      set("fields", { ...block.fields, [key]: v })
-                    }
-                  />
-                ),
-              )}
-            </details>
-          ) : null;
-        })}
+        {tabs}
+        {styling}
+        {pane === "Content" && (
+          <p className="note">
+            Original {templateManifest[block.template].label} layout. Edit the
+            content below; the design stays consistent.
+          </p>
+        )}
+        {pane === "Content" &&
+          [
+            ["text", "Text content"],
+            ["image", "Images"],
+            ["link", "Buttons and links"],
+          ].map(([kind, title]) => {
+            const fields = Object.entries(
+              templateManifest[block.template].fields,
+            ).filter(([, field]) => field.kind === kind);
+            return fields.length ? (
+              <details
+                className="template-group"
+                key={kind}
+                open={kind === "text"}
+              >
+                <summary>
+                  {title} <small>({fields.length})</small>
+                </summary>
+                {fields.map(([key, field], i) =>
+                  kind === "image" ? (
+                    <MediaSelect
+                      key={key}
+                      label={"Image " + (i + 1) + " — " + field.label}
+                      value={block.fields[key]}
+                      media={media}
+                      onChange={(v) =>
+                        set("fields", { ...block.fields, [key]: v })
+                      }
+                    />
+                  ) : (
+                    <Field
+                      key={key}
+                      label={
+                        kind === "link"
+                          ? "Link " + (i + 1) + " — destination"
+                          : field.label
+                      }
+                      value={block.fields[key]}
+                      area={kind === "text" && block.fields[key].length > 80}
+                      onChange={(v) =>
+                        set("fields", { ...block.fields, [key]: v })
+                      }
+                    />
+                  ),
+                )}
+              </details>
+            ) : null;
+          })}
       </>
     );
   if (block.type === "shared")
@@ -229,8 +294,16 @@ function BlockEditor({ block, onChange, media, sections }) {
         </small>
       </label>
     );
+  if (pane !== "Content")
+    return (
+      <>
+        {tabs}
+        {styling}
+      </>
+    );
   return (
     <>
+      {tabs}
       <div className="two">
         <label className="field">
           <span>Section type</span>
@@ -252,7 +325,6 @@ function BlockEditor({ block, onChange, media, sections }) {
           placeholder="e.g. services"
         />
       </div>
-      <ToneSelect value={block.tone} onChange={(v) => set("tone", v)} />
       <Field
         label="Small heading above the title"
         value={block.eyebrow}

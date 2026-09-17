@@ -6,6 +6,7 @@ import { OriginalTemplate } from "./OriginalTemplates.jsx";
 import { ServicesPage } from "./ServicesPage.jsx";
 import { BlogPage, BlogCards } from "./BlogPage.jsx";
 import { templateDefaults } from "../shared/templates.js";
+import { sectionClasses } from "../shared/section-style.js";
 import "./styles.css";
 import "./tech-theme.css";
 import "./growth-layout.css";
@@ -26,9 +27,7 @@ function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
       id={b.anchor || undefined}
-      className={`section cms-section cms-${b.type}${
-        b.tone && b.tone !== "default" ? ` cms-tone-${b.tone}` : ""
-      }`}
+      className={`section cms-section cms-${b.type}${sectionClasses(b)}`}
     >
       <p className="eyebrow">{b.eyebrow}</p>
       {b.type === "hero" ? <h1>{b.heading}</h1> : <h2>{b.heading}</h2>}
