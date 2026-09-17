@@ -9,7 +9,14 @@ import sharp from "sharp";
 import { openDb } from "../cms/server/db.js";
 import { createApp } from "../cms/server/app.js";
 import { createUser } from "../cms/server/auth.js";
-import { blankBlock } from "../cms/shared/content.js";
+import {
+  blankBlock,
+  sectionTypes,
+  blockSchema,
+} from "../cms/shared/content.js";
+import { starterBlock } from "../cms/shared/starters.js";
+import { schemas } from "../cms/shared/content.js";
+import { templateManifest } from "../shared/templates.js";
 import {
   themeDefaults,
   themeCss,
@@ -541,4 +548,53 @@ test("cards with their own dark panel do not take the pale section's text colour
       );
     }
   }
+});
+
+test("a new section arrives filled in, not as an empty box", () => {
+  /* Adding a section used to drop "New section" onto the page with nothing in
+     it, leaving the editor to invent a heading, a body and every card. */
+  for (const type of sectionTypes) {
+    const block = starterBlock(type);
+    assert.ok(blockSchema.safeParse(block).success, `${type} is not valid`);
+    assert.notEqual(block.heading, "New section", `${type} is still empty`);
+    assert.ok(block.heading.length > 3, `${type} has no heading`);
+    /* Types that show a list of cards arrive with cards to rename. */
+    if (
+      [
+        "services",
+        "industries",
+        "features",
+        "process",
+        "faq",
+        "casestudies",
+      ].includes(type)
+    ) {
+      assert.ok(block.items.length >= 3, `${type} arrived with no cards`);
+      for (const item of block.items)
+        assert.ok(item.title && item.text, `${type} has a blank card`);
+    }
+  }
+});
+
+test("every kind of section can be recoloured, branded ones included", () => {
+  /* The colour control only reached sections built from generic blocks; the
+     branded layouts, which are most of the home page, had no way to change. */
+  const branded = {
+    id: randomUUID(),
+    type: "template",
+    template: "hero",
+    tone: "dark",
+    fields: Object.fromEntries(
+      Object.keys(templateManifest.hero.fields).map((key) => [
+        key,
+        templateManifest.hero.fields[key].label,
+      ]),
+    ),
+  };
+  const parsed = schemas.section.safeParse(branded);
+  assert.ok(parsed.success, "a branded section cannot carry a tone");
+  assert.equal(parsed.data.tone, "dark");
+  /* And it defaults to leaving the section alone. */
+  const { tone, ...without } = branded;
+  assert.equal(schemas.section.parse(without).tone, "default");
 });

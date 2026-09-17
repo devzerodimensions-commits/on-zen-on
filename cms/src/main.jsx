@@ -8,6 +8,7 @@ import "./editor-guide.css";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
+import { starterBlock } from "../shared/starters.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
@@ -119,6 +120,34 @@ function MediaSelect(props) {
     <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
   );
 }
+function ToneSelect({ value, onChange }) {
+  return (
+    <label className="field">
+      <span>Section colour</span>
+      <select
+        value={value || "default"}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {[
+          ["default", "Page default"],
+          ["white", "White"],
+          ["tint", "Soft brand tint"],
+          ["brand", "Brand colour"],
+          ["dark", "Dark"],
+          ["accent", "Highlight"],
+        ].map(([key, text]) => (
+          <option key={key} value={key}>
+            {text}
+          </option>
+        ))}
+      </select>
+      <small>
+        Colours this one section only. The text colour is chosen for you so it
+        always stays readable, whichever colour theme you publish.
+      </small>
+    </label>
+  );
+}
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
   if (block.type === "template")
@@ -128,6 +157,7 @@ function BlockEditor({ block, onChange, media, sections }) {
           Original {templateManifest[block.template].label} layout. Edit the
           content below; the design stays consistent.
         </p>
+        <ToneSelect value={block.tone} onChange={(v) => set("tone", v)} />
         {[
           ["text", "Text content"],
           ["image", "Images"],
@@ -222,30 +252,7 @@ function BlockEditor({ block, onChange, media, sections }) {
           placeholder="e.g. services"
         />
       </div>
-      <label className="field">
-        <span>Section colour</span>
-        <select
-          value={block.tone || "default"}
-          onChange={(e) => set("tone", e.target.value)}
-        >
-          {[
-            ["default", "Page default"],
-            ["white", "White"],
-            ["tint", "Soft brand tint"],
-            ["brand", "Brand colour"],
-            ["dark", "Dark"],
-            ["accent", "Highlight"],
-          ].map(([value, text]) => (
-            <option key={value} value={value}>
-              {text}
-            </option>
-          ))}
-        </select>
-        <small>
-          Colours this one section only. The text colour is chosen for you so it
-          always stays readable, whichever colour theme you publish.
-        </small>
-      </label>
+      <ToneSelect value={block.tone} onChange={(v) => set("tone", v)} />
       <Field
         label="Small heading above the title"
         value={block.eyebrow}
@@ -657,7 +664,7 @@ function App() {
           onPick={(choice) => {
             const added =
               choice.kind === "basic"
-                ? blankBlock(choice.type)
+                ? starterBlock(choice.type)
                 : choice.kind === "branded"
                   ? {
                       ...structuredClone(templateDefaults[choice.template]),

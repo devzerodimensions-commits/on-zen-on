@@ -22,6 +22,9 @@ export const templateSchema = z
     type: z.literal("template"),
     template: z.enum(Object.keys(templateManifest)),
     hidden: z.boolean().default(false),
+    tone: z
+      .enum(["default", "white", "tint", "brand", "dark", "accent"])
+      .default("default"),
     fields: z.record(z.string(), z.string().max(15000)),
   })
   .strict()
