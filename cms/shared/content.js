@@ -24,7 +24,20 @@ export const templateSchema = z
     template: z.enum(Object.keys(templateManifest)),
     hidden: z.boolean().default(false),
     tone: z
-      .enum(["default", "white", "tint", "brand", "dark", "accent"])
+      .enum([
+        "default",
+        "white",
+        "tint",
+        "brand",
+        "dark",
+        "accent",
+        "green",
+        "yellow",
+        "blue",
+        "purple",
+        "red",
+        "teal",
+      ])
       .default("default"),
     align: z.enum(["left", "center", "right"]).default("left"),
     headingScale: z
@@ -146,7 +159,20 @@ export const blockSchema = z
        published theme with its text chosen to stay readable, so a section can
        be recoloured without anyone being able to make it unreadable. */
     tone: z
-      .enum(["default", "white", "tint", "brand", "dark", "accent"])
+      .enum([
+        "default",
+        "white",
+        "tint",
+        "brand",
+        "dark",
+        "accent",
+        "green",
+        "yellow",
+        "blue",
+        "purple",
+        "red",
+        "teal",
+      ])
       .default("default"),
     align: z.enum(["left", "center", "right"]).default("left"),
     headingScale: z

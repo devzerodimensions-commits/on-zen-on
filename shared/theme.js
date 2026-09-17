@@ -480,6 +480,15 @@ export function themeCss(value) {
      section can be recoloured without anyone being able to make it
      unreadable. */
   const link0 = t.linkColor || t.primary;
+  /* Fixed colours offered alongside the theme-derived tones. */
+  const fixedTones = [
+    ["green", "#0f6b3c"],
+    ["yellow", "#f2c200"],
+    ["blue", "#17459c"],
+    ["purple", "#5a2f9e"],
+    ["red", "#a8243a"],
+    ["teal", "#0d6a72"],
+  ];
   const toneRules = (name, background) => {
     const ink = readableOn(background);
     const body = soften(ink, background, 0.22);
@@ -502,6 +511,38 @@ export function themeCss(value) {
       `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
       `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span){color:${t.muted}!important}`,
       `${scope} :is(.service-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
+    ].join("\n");
+  };
+  /* Dark mode. Every rule above is scoped to light mode, so with dark mode on
+     the site fell back to a half-finished stylesheet: eleven of fifteen home
+     page sections measured under 4.5, several near 1.0 with two keeping white
+     backgrounds entirely. These mirror the light rules with dark surfaces and
+     the brand colours deepened to sit on them. */
+  const dark = 'html[data-theme="dark"] body';
+  const darkPage = "#0f1720";
+  const darkPanel = "#18242f";
+  const darkRaised = "#1f2c38";
+  const darkInk = "#e9eff6";
+  const darkMuted = "#a9b8c6";
+  const darkBrand = mix(t.primary, "#000000", 0.42);
+  const darkSecond = mix(t.secondary, "#000000", 0.42);
+  const onDarkBrand = readableOn(darkBrand);
+  const onDarkSecond = readableOn(darkSecond);
+  const darkCta = reachable(t.accent, darkBrand);
+  const paleSections =
+    ".intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase,.technology,.industries-showcase,.blog-listing,.trust-bar";
+  const cardSelector =
+    ".service-card,.outcome-grid div,.floating-card,.cms-cases article,.cms-quotes figure,.cms-faq,.inquiry-card";
+  const darkToneRules = (name, background) => {
+    const ink = readableOn(background);
+    const scope = `${dark} .cms-tone-${name}`;
+    return [
+      `${scope}{background:${background}!important}`,
+      `${scope} :is(h1,h2,h3,h4,strong,summary,cite){color:${ink}!important}`,
+      `${scope} :is(p,li,small,span,label,blockquote,.cms-body){color:${soften(ink, background, 0.22)}!important}`,
+      `${scope} :is(${cardSelector}){background:${mix(background, ink, 0.1)}!important;border-color:${mix(background, ink, 0.22)}!important}`,
+      `${scope} :is(${cardSelector}) :is(h1,h2,h3,strong,summary,cite){color:${ink}!important}`,
+      `${scope} :is(${cardSelector}) :is(p,li,small,span){color:${soften(ink, background, 0.28)}!important}`,
     ].join("\n");
   };
   const headingCase =
@@ -622,8 +663,55 @@ ${[
   ["brand", t.primary],
   ["dark", t.footerBackground],
   ["accent", t.accent],
+  ...fixedTones,
 ]
   .map(([name, background]) => toneRules(name, background))
+  .join("\n")}
+${dark}{background:${darkPage}!important;color:${darkInk}!important}
+${dark} :is(${paleSections}){background:${darkPanel}!important;color:${darkInk}!important}
+${dark} :is(${paleSections}) :is(h1,h2,h3,h4,strong,summary,cite){color:${darkInk}!important}
+${dark} :is(${paleSections}) :is(p,li,small,span,label,.cms-body){color:${darkMuted}!important}
+${dark} :is(${paleSections}) :is(.section-head,.split>div) p{color:${darkMuted}!important}
+${dark} :is(.hero,.services,.contact){background:${darkBrand}!important}
+${dark} :is(.ticker,.oz-service-hero){background:${darkSecond}!important}
+${dark} :is(.hero,.services,.contact) :is(h1,h2,h3,h4,strong,label){color:${onDarkBrand}!important}
+${dark} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${soften(onDarkBrand, darkBrand, 0.2)}!important}
+${dark} :is(.ticker,.oz-service-hero) :is(h1,h2,h3,p,span,b,li){color:${onDarkSecond}!important}
+${dark} :is(${cardSelector}){background:${darkRaised}!important;border-color:${mix(darkRaised, darkInk, 0.2)}!important;box-shadow:none!important}
+${dark} :is(${cardSelector}) :is(h1,h2,h3,h4,strong,summary,cite){color:${darkInk}!important}
+${dark} :is(${cardSelector}) :is(p,li,small,span){color:${darkMuted}!important}
+${dark} :is(${cardSelector}) a:not(.button):not(.oz-action){color:${reachable(t.accent, darkRaised)}!important}
+${dark} :is(.button,.oz-action,.inquiry-card button,.contact form button){background:${darkCta}!important;color:${readableOn(darkCta)}!important;border-color:${darkCta}!important}
+${dark} .public-site-header{background:${darkPanel}!important;color:${darkInk}!important}
+${dark} .public-site-header :is(a:not(.button):not(.oz-action),nav a,span:not(.pulse)){color:${darkInk}!important}
+${dark} footer{background:${mix(darkPage, "#000000", 0.4)}!important;color:${darkMuted}!important}
+${dark} footer :is(p,a,small,span,li,.footer-brand p,.footer-tagline,.reach-us p){color:${darkMuted}!important}
+${dark} footer :is(strong,b,h2,h3,h4){color:${reachable(t.accent, mix(darkPage, "#000000", 0.4))}!important}
+${dark} main a:not(.button):not(.oz-action):not(.blog-button){color:${reachable(t.accent, darkPanel)}!important}
+${dark} :is(.hero h1 em,.hero .eyebrow,.services .eyebrow,.contact .eyebrow,.oz-service-hero .eyebrow){color:${reachable(t.accent, darkBrand)}!important}
+/* Small chips kept their own pale pill, leaving light text on white. */
+${dark} :is(${paleSections}) :is(.trust-bar span,.industry-tags span,.stack-heading span){background:${darkRaised}!important;border-color:${mix(darkRaised, darkInk, 0.25)}!important;color:${darkInk}!important}
+/* A button's arrow follows its label rather than the body colour. */
+${dark} :is(.button,.oz-action,.blog-button) :is(span,b,i){color:inherit!important}
+${dark} .blog-button{background:${darkCta}!important;color:${readableOn(darkCta)}!important}
+${dark} .text-link span{color:${reachable(t.accent, darkPanel)}!important}
+${dark} .result-cards article{background:${darkBrand}!important}
+${dark} .result-cards article:nth-child(2){background:${darkSecond}!important}
+${dark} .result-cards article :is(strong,h3){color:${onDarkBrand}!important}
+${dark} .result-cards article p{color:${soften(onDarkBrand, darkBrand, 0.18)}!important}
+${dark} .result-cards article b{color:${reachable(t.accent, darkBrand)}!important}
+${dark} .result-cards article:nth-child(2) :is(strong,h3){color:${onDarkSecond}!important}
+${dark} .result-cards article:nth-child(2) p{color:${soften(onDarkSecond, darkSecond, 0.18)}!important}
+${dark} .result-cards article:nth-child(2) b{color:${reachable(t.accent, darkSecond)}!important}
+${[
+  ["white", darkPanel],
+  ["tint", darkRaised],
+  ["brand", darkBrand],
+  ["dark", mix(darkPage, "#000000", 0.5)],
+  ["accent", t.accent],
+  ...fixedTones.map(([name, colour]) => [name, mix(colour, "#000000", 0.3)]),
+]
+  .map(([name, background]) => darkToneRules(name, background))
   .join("\n")}
 @media(max-width:800px){html body .public-site-header{height:${t.mobileLogoSize + 16}px!important}html body .public-site-header .brand{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important;flex-basis:${t.mobileLogoSize}px!important}html body .public-site-header .brand img{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important}html body main>section,html body .oz-services>section,html body .section{padding-top:${Math.round(t.sectionSpacing * 0.65)}px!important;padding-bottom:${Math.round(t.sectionSpacing * 0.65)}px!important}}
 `;

@@ -35,6 +35,20 @@ import {
 let db, app, dir, admin, csrf;
 const origin = "http://localhost:3100";
 const pass = "test-only-password-very-long";
+/* Every section colour offered in the admin. */
+const tones = [
+  "white",
+  "tint",
+  "brand",
+  "dark",
+  "accent",
+  "green",
+  "yellow",
+  "blue",
+  "purple",
+  "red",
+  "teal",
+];
 const write = (method, path, body) =>
   admin[method](path)
     .set("Origin", origin)
@@ -485,7 +499,6 @@ test("a section can be recoloured on its own, and stays readable", () => {
   /* Changing a colour in the theme changed every section at once. A section now
      carries its own named tone, and each tone derives its text from its own
      background, so no combination can be made unreadable. */
-  const tones = ["white", "tint", "brand", "dark", "accent"];
   for (const [name, preset] of Object.entries(colorPresets)) {
     const css = themeCss({
       ...themeDefaults,
@@ -727,4 +740,48 @@ test("a colour the editor never set writes no rule", () => {
   const block = { ...blankBlock() };
   assert.equal(sectionCustomCss(block), "");
   assert.equal(pageCustomCss([block, { ...blankBlock() }]), "");
+});
+
+test("dark mode is generated for every section and every colour", () => {
+  /* Every rule was scoped to light mode, so with dark mode on the site fell
+     back to a half-finished stylesheet: eleven of fifteen home page sections
+     measured under 4.5, several near 1.0, and two kept white backgrounds. */
+  for (const [name, preset] of Object.entries(colorPresets)) {
+    const css = themeCss({
+      ...themeDefaults,
+      ...preset.colors,
+      enabled: true,
+    }).split(String.fromCharCode(10));
+    const dark = css.filter((l) => l.startsWith('html[data-theme="dark"]'));
+    assert.ok(dark.length > 30, `${name}: only ${dark.length} dark rules`);
+
+    /* The page itself must actually be dark. */
+    const page = dark
+      .find((l) => l.startsWith('html[data-theme="dark"] body{'))
+      .match(/background:(#[0-9a-f]{6})/)[1];
+    assert.ok(
+      contrastRatio(page, "#ffffff") > 8,
+      `${name}: dark page background is ${page}`,
+    );
+
+    /* And every tone has readable text on it in dark mode too. */
+    for (const tone of tones) {
+      const bg = dark
+        .find((l) =>
+          l.startsWith(`html[data-theme="dark"] body .cms-tone-${tone}{`),
+        )
+        .match(/background:(#[0-9a-f]{6})/)[1];
+      const text = dark
+        .find((l) =>
+          l.startsWith(
+            `html[data-theme="dark"] body .cms-tone-${tone} :is(p,li,`,
+          ),
+        )
+        .match(/color:(#[0-9a-f]{6})/)[1];
+      assert.ok(
+        contrastRatio(text, bg) >= 4.5,
+        `${name}/${tone} in dark mode is ${contrastRatio(text, bg)}:1`,
+      );
+    }
+  }
 });

@@ -43,6 +43,12 @@ export const sectionStyleOptions = {
     ["brand", "Brand colour"],
     ["dark", "Dark"],
     ["accent", "Highlight"],
+    ["green", "Green"],
+    ["yellow", "Yellow"],
+    ["blue", "Blue"],
+    ["purple", "Purple"],
+    ["red", "Red"],
+    ["teal", "Teal"],
   ],
   align: [
     ["left", "Left"],
