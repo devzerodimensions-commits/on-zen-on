@@ -437,3 +437,32 @@ test("neighbouring pale sections are told apart", () => {
     `bands differ by ${difference}`,
   );
 });
+
+test("an unreadable colour pairing is never rendered", () => {
+  /* The published site had a cream footer saved with pale footer text: 1.2:1,
+     invisible. The studio warns below 4.5, but nothing may RENDER below 3. */
+  const css = themeCss({
+    ...themeDefaults,
+    ...colorPresets.original.colors,
+    enabled: true,
+    footerBackground: "#f9f8f1",
+    footerTextColor: "#dbe6df",
+    text: "#f2f2f2",
+    background: "#ffffff",
+  });
+  const lines = css.split(String.fromCharCode(10));
+  const footer = lines.find((l) => l.startsWith("html body footer{"));
+  const footerColour = footer.match(/color:(#[0-9a-f]{6})/)[1];
+  assert.ok(
+    contrastRatio(footerColour, "#f9f8f1") >= 4.5,
+    `footer text rendered at ${contrastRatio(footerColour, "#f9f8f1")}:1`,
+  );
+  const body = lines.find((l) =>
+    l.includes("body{background:#ffffff!important"),
+  );
+  const bodyColour = body.match(/color:(#[0-9a-f]{6})/)[1];
+  assert.ok(
+    contrastRatio(bodyColour, "#ffffff") >= 4.5,
+    `body text rendered at ${contrastRatio(bodyColour, "#ffffff")}:1`,
+  );
+});

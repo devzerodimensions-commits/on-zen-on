@@ -90,9 +90,27 @@ export const fontKeys = Object.keys(fontCatalog);
 
 /* One-click colour themes, in the style of a WordPress theme picker. */
 export const colorPresets = {
+  signature: {
+    label: "On Zen On signature",
+    hint: "Recommended — the logo's blue, green and gold, tuned for readability",
+    colors: {
+      primary: "#17218c",
+      secondary: "#0b6b3c",
+      accent: "#f0b52a",
+      background: "#f7f7f3",
+      surface: "#ffffff",
+      text: "#101822",
+      muted: "#55636e",
+      buttonText: "#ffffff",
+      headerBackground: "#ffffff",
+      headerText: "#101822",
+      footerBackground: "#0b1226",
+      footerTextColor: "#cdd6e6",
+    },
+  },
   original: {
     label: "On Zen On original",
-    hint: "The current brand: blue, green and gold",
+    hint: "The colours the website launched with",
     colors: {
       primary: "#1119a5",
       secondary: "#08723b",
@@ -467,6 +485,18 @@ export function themeCss(value) {
      that same brand colour, or the button disappears and only its text shows.
      The accent is used when it stands out enough, otherwise plain black or
      white, whichever reads better on the section. */
+  /* A published combination can still be unreadable — a cream footer was saved
+     with pale footer text at 1.2:1, invisible on the live site. The studio warns
+     below 4.5, but nothing may actually RENDER below 3, so any pairing that bad
+     falls back to plain black or white on that background. */
+  const legible = (foreground, background) =>
+    contrastRatio(foreground, background) >= 3
+      ? foreground
+      : readableOn(background);
+  const bodyText = legible(t.text, t.background);
+  const mutedText = legible(t.muted, t.surface);
+  const headText = legible(t.headerText, t.headerBackground);
+  const footText = legible(t.footerTextColor, t.footerBackground);
   const ctaBackground =
     contrastRatio(t.accent, t.primary) >= 3 ? t.accent : readableOn(t.primary);
   const ctaText = readableOn(ctaBackground);
@@ -484,13 +514,14 @@ html body :is(.button,.oz-action,.inquiry-card button,.inquiry-thanks-card a,.co
 html body :is(.button,.oz-action):hover{filter:brightness(1.07)}
 html body :is(.service-card,.oz-service-card,.inquiry-card,.inquiry-thanks-card,.outcome-grid div,.floating-card){border-radius:${t.radius}px!important;box-shadow:${shadows[t.cardShadow]}!important}
 html body main>section,html body .oz-services>section,html body .section{padding-top:${t.sectionSpacing}px!important;padding-bottom:${t.sectionSpacing}px!important}
-html body .public-site-header{height:${t.logoSize + 16}px!important;background:${t.headerBackground}!important;color:${t.headerText}!important}
-html body .public-site-header :is(a,nav a,span:not(.pulse)){color:${t.headerText}!important}
+html body .public-site-header{height:${t.logoSize + 16}px!important;background:${t.headerBackground}!important;color:${headText}!important}
+html body .public-site-header :is(a,nav a,span:not(.pulse)){color:${headText}!important}
 html body .public-site-header .brand{width:${t.logoSize}px!important;height:${t.logoSize}px!important;flex-basis:${t.logoSize}px!important}
 html body .public-site-header .brand img{width:${t.logoSize}px!important;height:${t.logoSize}px!important}
-html body footer{background:${t.footerBackground}!important;color:${t.footerTextColor}!important}
-html body footer :is(p,a,small,span){color:${t.footerTextColor}!important}
-${light}{background:${t.background}!important;color:${t.text}!important}
+html body footer{background:${t.footerBackground}!important;color:${footText}!important}
+html body footer :is(p,a,small,span,li,.footer-brand p,.footer-tagline,.reach-us p){color:${footText}!important}
+html body footer :is(strong,b,h2,h3,h4,.footer-heading){color:${legible(t.accent, t.footerBackground)}!important}
+${light}{background:${t.background}!important;color:${bodyText}!important}
 ${light} :is(.hero,.services,.contact,.notice){background:${t.primary}!important}
 ${light} :is(.ticker,.oz-service-hero){background:${t.secondary}!important}
 ${light} :is(.intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase){background:${band}!important;color:${t.text}!important}
@@ -498,7 +529,7 @@ ${light} :is(${pale.join(",")}){background:${t.surface}!important;color:${t.text
 ${light} :is(.intro,.outcomes,.results,.showcase,${pale.join(",")}){border-top:1px solid ${mix(t.background, t.text, 0.08)}}
 ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surface}!important}
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(h1,h2,h3,p){color:${t.text}!important}
-${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.cms-body,.split>div p,.section-head>p){color:${t.muted}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.cms-body,.split>div p,.section-head>p){color:${mutedText}!important}
 ${light} :is(.hero,.services,.contact) :is(.button,.oz-action,.contact form button){background:${t.buttonStyle === "outline" ? "transparent" : ctaBackground}!important;color:${t.buttonStyle === "outline" ? ctaBackground : ctaText}!important;border-color:${ctaBackground}!important;box-shadow:${t.buttonShadow && t.buttonStyle !== "outline" ? `4px 4px 0 ${mix(ctaBackground, "#000000", 0.45)}` : "none"}!important}
 ${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
 ${light} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${onPrimarySoft}!important}
