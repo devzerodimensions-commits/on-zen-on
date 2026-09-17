@@ -418,6 +418,18 @@ const tint = (hex, lightness) => {
     )
     .join("")}`;
 };
+/* Lift a colour towards readable on its background until it clears the target,
+   rather than discarding it: the accent stays recognisably the accent instead
+   of collapsing to plain white the moment it is a little too dark. */
+const reachable = (fg, bg, target = 4.5) => {
+  if (contrastRatio(fg, bg) >= target) return fg;
+  const toward = readableOn(bg);
+  for (let amount = 0.1; amount < 1; amount += 0.1) {
+    const blended = mix(fg, toward, amount);
+    if (contrastRatio(blended, bg) >= target) return blended;
+  }
+  return toward;
+};
 const mix = (hex, other, amount) => {
   const a = hexToRgb(hex),
     b = hexToRgb(other);
@@ -567,6 +579,18 @@ ${light} :is(.intro,.cms-section,.oz-service-section,.outcomes,.results,.showcas
 ${light} :is(${pale.join(",")}){background:${t.surface}!important;color:${t.text}!important}
 ${light} :is(.intro,.outcomes,.results,.showcase,${pale.join(",")}){border-top:1px solid ${mix(t.background, t.text, 0.08)}}
 ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surface}!important}
+/* The result cards paint their own dark panels inside a pale section, so the
+   rule colouring text for that pale section was reaching in and making their
+   text dark on dark. The theme owns the panels now, and each one works its own
+   text out from the colour it actually sits on. */
+${light} .result-cards article{background:${t.primary}!important;border-bottom-color:${t.accent}!important}
+${light} .result-cards article:nth-child(2){background:${t.secondary}!important}
+${light} .result-cards article :is(strong,h3){color:${readableOn(t.primary)}!important}
+${light} .result-cards article p{color:${soften(readableOn(t.primary), t.primary, 0.18)}!important}
+${light} .result-cards article b{color:${reachable(t.accent, t.primary)}!important}
+${light} .result-cards article:nth-child(2) :is(strong,h3){color:${readableOn(t.secondary)}!important}
+${light} .result-cards article:nth-child(2) p{color:${soften(readableOn(t.secondary), t.secondary, 0.18)}!important}
+${light} .result-cards article:nth-child(2) b{color:${reachable(t.accent, t.secondary)}!important}
 ${serviceCard}{position:relative;overflow:hidden;transition:transform .28s cubic-bezier(.2,.7,.3,1),box-shadow .28s ease}
 ${serviceCard}:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,${t.primary},${t.accent});opacity:.9}
 ${serviceCard}:hover{transform:translateY(-6px);box-shadow:0 26px 52px rgba(9,26,43,.20)!important}

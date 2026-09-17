@@ -508,3 +508,37 @@ test("a section can be recoloured on its own, and stays readable", () => {
     }
   }
 });
+
+test("cards with their own dark panel do not take the pale section's text colour", () => {
+  /* The result cards paint dark panels inside a pale section. The rule
+     colouring text for that pale section reached inside them, so their text
+     rendered dark on dark and could not be read. Each panel now works its own
+     text out from the colour it actually sits on. */
+  for (const [name, preset] of Object.entries(colorPresets)) {
+    const css = themeCss({
+      ...themeDefaults,
+      ...preset.colors,
+      enabled: true,
+    }).split(String.fromCharCode(10));
+    const pick = (selector) =>
+      css.find((l) => l.includes(selector)).match(/color:(#[0-9a-f]{6})/)[1];
+    const panels = [
+      [".result-cards article :is(strong,h3)", preset.colors.primary],
+      [".result-cards article p", preset.colors.primary],
+      [".result-cards article b", preset.colors.primary],
+      [
+        ".result-cards article:nth-child(2) :is(strong,h3)",
+        preset.colors.secondary,
+      ],
+      [".result-cards article:nth-child(2) p", preset.colors.secondary],
+      [".result-cards article:nth-child(2) b", preset.colors.secondary],
+    ];
+    for (const [selector, background] of panels) {
+      const colour = pick(selector);
+      assert.ok(
+        contrastRatio(colour, background) >= 4.5,
+        `${name}: ${selector} is ${contrastRatio(colour, background)}:1 on its panel`,
+      );
+    }
+  }
+});
