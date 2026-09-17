@@ -12,7 +12,9 @@ import { starterBlock } from "../shared/starters.js";
 import {
   sectionStyleDefaults,
   sectionStyleOptions,
+  sectionTypeDefaults,
 } from "../../shared/section-style.js";
+import { fontCatalog, fontKeys, contrastRatio } from "../../shared/theme.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
@@ -124,6 +126,191 @@ function MediaSelect(props) {
     <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
   );
 }
+/* A colour with a live reading of how it will look against the section behind
+   it. The reading is advice, not a veto: the colour chosen is the colour used. */
+function ColourField({ label, field, block, set, against }) {
+  const value = block[field] ?? "";
+  const ratio = value && against ? contrastRatio(value, against) : null;
+  return (
+    <div className="type-colour">
+      <span className="type-colour-label">{label}</span>
+      <input
+        type="color"
+        value={value || against || "#000000"}
+        onChange={(e) => set(field, e.target.value)}
+      />
+      <div>
+        <small>{value || "Automatic"}</small>
+        {ratio !== null && (
+          <small className={ratio < 4.5 ? "type-warn" : "type-ok"}>
+            {ratio < 3
+              ? `${ratio}:1 — very hard to read`
+              : ratio < 4.5
+                ? `${ratio}:1 — hard to read at small sizes`
+                : `${ratio}:1 — reads well`}
+          </small>
+        )}
+      </div>
+      {value && (
+        <button type="button" onClick={() => set(field, "")}>
+          Automatic
+        </button>
+      )}
+    </div>
+  );
+}
+
+function NumberField({ label, field, block, set, min, max, step = 1, unit }) {
+  const value = block[field] ?? sectionTypeDefaults[field];
+  return (
+    <label className="field">
+      <span>
+        {label}
+        {value ? ` — ${value}${unit || ""}` : " — automatic"}
+      </span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => set(field, Number(e.target.value))}
+      />
+      {Boolean(value) && (
+        <button type="button" onClick={() => set(field, 0)}>
+          Back to automatic
+        </button>
+      )}
+    </label>
+  );
+}
+
+function PickField({ label, field, block, set, options }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <select
+        value={block[field] ?? ""}
+        onChange={(e) => set(field, e.target.value)}
+      >
+        {options.map(([key, text]) => (
+          <option key={key} value={key}>
+            {text}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/* Typography and colour for one section. Anything left on automatic follows
+   the published theme, so a section nobody has touched keeps doing so. */
+function SectionTypography({ block, set }) {
+  return (
+    <>
+      <h4 className="type-group">Typography</h4>
+      <PickField
+        label="Font family"
+        field="fontFamily"
+        block={block}
+        set={set}
+        options={[
+          ["", "Follow the theme"],
+          ...fontKeys.map((key) => [key, fontCatalog[key].label]),
+        ]}
+      />
+      <div className="two">
+        <NumberField
+          label="Heading size"
+          field="headingSize"
+          block={block}
+          set={set}
+          min={0}
+          max={140}
+          unit="px"
+        />
+        <NumberField
+          label="Heading weight"
+          field="fontWeight"
+          block={block}
+          set={set}
+          min={0}
+          max={900}
+          step={100}
+        />
+      </div>
+      <div className="two">
+        <PickField
+          label="Capitals"
+          field="textTransform"
+          block={block}
+          set={set}
+          options={[
+            ["", "Automatic"],
+            ["none", "As typed"],
+            ["capitalize", "First Letter Capital"],
+            ["uppercase", "ALL CAPITALS"],
+            ["lowercase", "all lowercase"],
+          ]}
+        />
+        <PickField
+          label="Style"
+          field="fontStyle"
+          block={block}
+          set={set}
+          options={[
+            ["", "Automatic"],
+            ["normal", "Normal"],
+            ["italic", "Italic"],
+          ]}
+        />
+      </div>
+      <PickField
+        label="Underline"
+        field="textDecoration"
+        block={block}
+        set={set}
+        options={[
+          ["", "Automatic"],
+          ["none", "No underline"],
+          ["underline", "Underlined"],
+        ]}
+      />
+      <div className="two">
+        <NumberField
+          label="Line height"
+          field="lineHeight"
+          block={block}
+          set={set}
+          min={0}
+          max={2.6}
+          step={0.02}
+        />
+        <NumberField
+          label="Letter spacing"
+          field="letterSpacing"
+          block={block}
+          set={set}
+          min={-5}
+          max={20}
+          step={0.1}
+          unit="px"
+        />
+      </div>
+      <NumberField
+        label="Word spacing"
+        field="wordSpacing"
+        block={block}
+        set={set}
+        min={-5}
+        max={40}
+        step={0.5}
+        unit="px"
+      />
+    </>
+  );
+}
+
 function StyleChoice({ label, hint, field, block, set }) {
   return (
     <label className="field">
@@ -146,7 +333,19 @@ function StyleChoice({ label, hint, field, block, set }) {
 /* Style and Advanced for one section. Every control offers a choice between
    designed outcomes rather than a free value, so restyling a section cannot
    produce a page that overlaps, disappears or cannot be read. */
+/* Roughly what the section sits on, so the contrast reading means something.
+   The exact shade comes from the published theme; these are close enough to
+   tell an editor whether a colour will read. */
+const toneBehind = {
+  default: "#f7f7f3",
+  white: "#ffffff",
+  tint: "#f2f2fb",
+  brand: "#17218c",
+  dark: "#0b1226",
+  accent: "#f0b52a",
+};
 function SectionStyle({ block, set, advanced }) {
+  const behind = toneBehind[block.tone || "default"];
   const choice = (label, field, hint) => (
     <StyleChoice
       label={label}
@@ -180,6 +379,22 @@ function SectionStyle({ block, set, advanced }) {
         {choice("Text alignment", "align")}
         {choice("Heading size", "headingScale")}
       </div>
+      <h4 className="type-group">Colour</h4>
+      <ColourField
+        label="Heading colour"
+        field="headingColor"
+        block={block}
+        set={set}
+        against={behind}
+      />
+      <ColourField
+        label="Text colour"
+        field="textColor"
+        block={block}
+        set={set}
+        against={behind}
+      />
+      <SectionTypography block={block} set={set} />
     </>
   );
 }

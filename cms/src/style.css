@@ -1090,3 +1090,61 @@ button.picker-card small {
   border-bottom-color: #182daf;
   background: transparent;
 }
+
+/* Typography and colour controls inside a section's Style tab. */
+.type-group {
+  margin: 20px 0 2px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #4a5573;
+  border-top: 1px solid #e6eaf3;
+  padding-top: 16px;
+}
+.type-colour {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e6eaf3;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+}
+.type-colour input[type="color"] {
+  width: 42px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #dce1ec;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.type-colour-label {
+  font-size: 13px;
+  font-weight: 700;
+  flex: 0 0 110px;
+}
+.type-colour > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.type-colour button {
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.type-ok {
+  color: #2c7a4b;
+}
+.type-warn {
+  color: #b0421e;
+  font-weight: 700;
+}
+.field > button {
+  justify-self: start;
+  margin-top: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+}

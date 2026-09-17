@@ -19,6 +19,8 @@ import {
   sectionClasses,
   sectionStyleDefaults,
   sectionStyleOptions,
+  sectionCustomCss,
+  pageCustomCss,
 } from "../shared/section-style.js";
 import { schemas } from "../cms/shared/content.js";
 import { templateManifest } from "../shared/templates.js";
@@ -655,4 +657,74 @@ test("every style choice offered in the admin is one the schema accepts", () => 
       `${field} has no option matching its own default`,
     );
   }
+});
+
+test("typography set on one section reaches the page, scoped to it", async () => {
+  const styled = {
+    ...blankBlock(),
+    heading: "A styled section",
+    fontFamily: "poppins",
+    headingSize: 50,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    lineHeight: 1.16,
+    letterSpacing: -0.8,
+    wordSpacing: 2,
+    headingColor: "#ffffff",
+    textColor: "#d0d0d0",
+  };
+  const plain = { ...blankBlock(), heading: "An ordinary section" };
+
+  /* The schema has to accept every one of those fields. */
+  const created = await write("post", "/api/cms/documents", {
+    kind: "page",
+    data: {
+      schemaVersion: 1,
+      title: "Typography",
+      path: `/type-${randomUUID().slice(0, 8)}`,
+      seo: {
+        title: "Typography",
+        description: "Checks per-section typography survives publishing.",
+        canonical: "",
+        ogImage: "",
+        noindex: false,
+      },
+      blocks: [styled, plain],
+    },
+  }).expect(201);
+  const saved = created.body.draft.blocks[0];
+  assert.equal(saved.headingSize, 50);
+  assert.equal(saved.fontFamily, "poppins");
+  assert.equal(saved.headingColor, "#ffffff");
+
+  const live = await write(
+    "post",
+    `/api/cms/documents/${created.body.id}/publish`,
+    { version: created.body.version },
+  ).expect(200);
+  const blocks = live.body.published.blocks;
+
+  const css = pageCustomCss(blocks);
+  assert.match(css, /font-size:50px!important/);
+  assert.match(css, /Poppins/);
+  assert.match(css, /text-transform:uppercase!important/);
+  assert.match(css, /letter-spacing:-0\.8px!important/);
+  assert.match(css, /color:#d0d0d0!important/);
+
+  /* Every rule is scoped to the styled section, and the plain one beside it
+     produces nothing at all. */
+  const scope = `.cms-s-${blocks[0].id}`;
+  for (const rule of css.split(String.fromCharCode(10)))
+    assert.ok(rule.startsWith(scope), `a rule escaped its section: ${rule}`);
+  assert.equal(sectionCustomCss(blocks[1]), "");
+  assert.equal(sectionClasses(blocks[1]), "");
+  assert.ok(sectionClasses(blocks[0]).includes(`cms-s-${blocks[0].id}`));
+});
+
+test("a colour the editor never set writes no rule", () => {
+  /* Automatic has to mean automatic: an untouched section must not start
+     emitting colour rules that fight the published theme. */
+  const block = { ...blankBlock() };
+  assert.equal(sectionCustomCss(block), "");
+  assert.equal(pageCustomCss([block, { ...blankBlock() }]), "");
 });

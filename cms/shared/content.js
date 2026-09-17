@@ -32,6 +32,23 @@ export const templateSchema = z
       .default("normal"),
     spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
     hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
+    headingColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    textColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    fontFamily: z.string().max(20).default(""),
+    headingSize: z.number().int().min(0).max(160).default(0),
+    fontWeight: z.number().int().min(0).max(900).default(0),
+    textTransform: z
+      .enum(["", "none", "uppercase", "capitalize", "lowercase"])
+      .default(""),
+    fontStyle: z.enum(["", "normal", "italic"]).default(""),
+    textDecoration: z.enum(["", "none", "underline"]).default(""),
+    lineHeight: z.number().min(0).max(3).default(0),
+    letterSpacing: z.number().min(-5).max(20).default(0),
+    wordSpacing: z.number().min(-5).max(40).default(0),
     fields: z.record(z.string(), z.string().max(15000)),
   })
   .strict()
@@ -137,6 +154,23 @@ export const blockSchema = z
       .default("normal"),
     spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
     hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
+    headingColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    textColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    fontFamily: z.string().max(20).default(""),
+    headingSize: z.number().int().min(0).max(160).default(0),
+    fontWeight: z.number().int().min(0).max(900).default(0),
+    textTransform: z
+      .enum(["", "none", "uppercase", "capitalize", "lowercase"])
+      .default(""),
+    fontStyle: z.enum(["", "normal", "italic"]).default(""),
+    textDecoration: z.enum(["", "none", "underline"]).default(""),
+    lineHeight: z.number().min(0).max(3).default(0),
+    letterSpacing: z.number().min(-5).max(20).default(0),
+    wordSpacing: z.number().min(-5).max(40).default(0),
     anchor: z
       .string()
       .max(80)

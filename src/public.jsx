@@ -6,7 +6,7 @@ import { OriginalTemplate } from "./OriginalTemplates.jsx";
 import { ServicesPage } from "./ServicesPage.jsx";
 import { BlogPage, BlogCards } from "./BlogPage.jsx";
 import { templateDefaults } from "../shared/templates.js";
-import { sectionClasses } from "../shared/section-style.js";
+import { sectionClasses, pageCustomCss } from "../shared/section-style.js";
 import "./styles.css";
 import "./tech-theme.css";
 import "./growth-layout.css";
@@ -293,8 +293,11 @@ function App() {
         footer.fields[key] = `mailto:${site.settings.email}`;
     }
   }
+  /* Typography and colour set on individual sections, scoped to each one. */
+  const custom = pageCustomCss(shown.blocks);
   return (
     <div className={page.path === "/" ? "homepage" : undefined}>
+      {custom && <style>{custom}</style>}
       {builder && (
         <style>{`
 [data-oz-block]{cursor:pointer}
