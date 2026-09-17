@@ -130,3 +130,26 @@ test("structured data survives a page with no company settings saved", () => {
   assert.ok(org.name.length > 0);
   assert.ok(!("email" in org));
 });
+
+test("published customer quotes are offered to search engines as reviews", () => {
+  const data = structuredData(
+    page({
+      blocks: [
+        {
+          type: "testimonials",
+          items: [
+            { title: "A named customer", text: "What they actually said." },
+            { title: "No quote yet", text: "" },
+          ],
+        },
+      ],
+    }),
+    settings,
+    origin,
+  );
+  const reviews = data["@graph"].filter((e) => e["@type"] === "Review");
+  assert.equal(reviews.length, 1, "a quote with no text is skipped");
+  assert.equal(reviews[0].author.name, "A named customer");
+  assert.equal(reviews[0].reviewBody, "What they actually said.");
+  assert.equal(reviews[0].itemReviewed["@id"], `${origin}/#organization`);
+});

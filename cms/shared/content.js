@@ -85,6 +85,7 @@ export const sectionTypes = [
   "gallery",
   "faq",
   "testimonials",
+  "casestudies",
   "cta",
   "contact",
 ];

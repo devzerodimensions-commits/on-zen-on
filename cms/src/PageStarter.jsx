@@ -12,6 +12,7 @@ export const sectionNames = {
   gallery: "Image gallery",
   faq: "Questions and answers",
   testimonials: "Customer reviews",
+  casestudies: "Case studies",
   cta: "Call-to-action",
   contact: "Inquiry form",
 };

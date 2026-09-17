@@ -19,7 +19,10 @@ const sectionHelp = {
   updates: "Cards that link to your blog posts or news articles.",
   gallery: "A set of pictures with short captions.",
   faq: "Questions with answers that open and close when clicked.",
-  testimonials: "Quotes from your customers, one card each.",
+  testimonials:
+    "Quotes from real customers, one card each. Use the customer's real name and words — never invent a review.",
+  casestudies:
+    "Real projects you have finished: what the customer needed, what you built and what changed. Each one can link to a longer page.",
   cta: "A short, bold invitation with one button. Use it to push visitors to act.",
   contact: "A message form. Anything a visitor sends arrives in Inquiries.",
 };
@@ -36,6 +39,7 @@ const shapes = {
   gallery: ["grid", "grid", "grid", "grid"],
   faq: ["row", "row", "row"],
   testimonials: ["grid", "grid"],
+  casestudies: ["grid", "grid", "grid"],
   cta: ["bar", "chip"],
   contact: ["bar", "row", "row", "chip"],
 };

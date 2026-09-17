@@ -31,27 +31,55 @@ function GenericBlock({ content: b, submit, formState }) {
       {b.type === "hero" ? <h1>{b.heading}</h1> : <h2>{b.heading}</h2>}
       <p className="cms-body">{b.body}</p>
       {b.image && <img className="cms-image" src={b.image} alt={b.alt} />}
-      {b.items.length > 0 && (
-        <div className={b.type === "faq" ? "cms-faq" : "service-grid"}>
-          {b.items.map((it, i) =>
-            b.type === "faq" ? (
-              <details key={i}>
-                <summary>{it.title}</summary>
-                <p>{it.text}</p>
-              </details>
-            ) : (
-              <article className="service-card" key={i}>
-                {it.image && (
-                  <img className="cms-image" src={it.image} alt={it.alt} />
-                )}
-                <h3>{it.title}</h3>
-                <p>{it.text}</p>
-                {it.href && <a href={it.href}>Learn more ↗</a>}
-              </article>
-            ),
-          )}
+      {b.items.length > 0 && b.type === "testimonials" && (
+        <div className="cms-quotes">
+          {b.items.map((it, i) => (
+            <figure key={i}>
+              <blockquote>{it.text}</blockquote>
+              <figcaption>
+                {it.image && <img src={it.image} alt={it.alt} loading="lazy" />}
+                <cite>{it.title}</cite>
+              </figcaption>
+            </figure>
+          ))}
         </div>
       )}
+      {b.items.length > 0 && b.type === "casestudies" && (
+        <div className="cms-cases">
+          {b.items.map((it, i) => (
+            <article key={i}>
+              {it.image && <img src={it.image} alt={it.alt} loading="lazy" />}
+              <div>
+                <h3>{it.title}</h3>
+                <p>{it.text}</p>
+                {it.href && <a href={it.href}>Read the full story ↗</a>}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {b.items.length > 0 &&
+        !["testimonials", "casestudies"].includes(b.type) && (
+          <div className={b.type === "faq" ? "cms-faq" : "service-grid"}>
+            {b.items.map((it, i) =>
+              b.type === "faq" ? (
+                <details key={i}>
+                  <summary>{it.title}</summary>
+                  <p>{it.text}</p>
+                </details>
+              ) : (
+                <article className="service-card" key={i}>
+                  {it.image && (
+                    <img className="cms-image" src={it.image} alt={it.alt} />
+                  )}
+                  <h3>{it.title}</h3>
+                  <p>{it.text}</p>
+                  {it.href && <a href={it.href}>Learn more ↗</a>}
+                </article>
+              ),
+            )}
+          </div>
+        )}
       {b.buttonLabel && b.href && (
         <a className="button" href={b.href}>
           {b.buttonLabel} ↗

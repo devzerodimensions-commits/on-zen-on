@@ -346,3 +346,43 @@ test("card text beats the brand-section text rule that surrounds it", () => {
     "the card rule must be nested inside the same sections to match their specificity",
   );
 });
+
+test("a case studies section saves and publishes like any other", async () => {
+  const created = await write("post", "/api/cms/documents", {
+    kind: "page",
+    data: {
+      schemaVersion: 1,
+      title: "Our work",
+      path: `/work-${randomUUID().slice(0, 8)}`,
+      seo: {
+        title: "Our work",
+        description: "Projects we have delivered.",
+        canonical: "",
+        ogImage: "",
+        noindex: false,
+      },
+      blocks: [
+        {
+          ...blankBlock("casestudies"),
+          heading: "Selected projects",
+          items: [
+            {
+              title: "A project name",
+              text: "What the customer needed and what changed.",
+              href: "/services",
+              image: "",
+              alt: "",
+            },
+          ],
+        },
+      ],
+    },
+  }).expect(201);
+  assert.equal(created.body.draft.blocks[0].type, "casestudies");
+  const live = await write(
+    "post",
+    `/api/cms/documents/${created.body.id}/publish`,
+    { version: created.body.version },
+  ).expect(200);
+  assert.equal(live.body.published.blocks[0].items[0].title, "A project name");
+});
