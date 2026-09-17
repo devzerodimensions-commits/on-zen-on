@@ -222,6 +222,30 @@ function BlockEditor({ block, onChange, media, sections }) {
           placeholder="e.g. services"
         />
       </div>
+      <label className="field">
+        <span>Section colour</span>
+        <select
+          value={block.tone || "default"}
+          onChange={(e) => set("tone", e.target.value)}
+        >
+          {[
+            ["default", "Page default"],
+            ["white", "White"],
+            ["tint", "Soft brand tint"],
+            ["brand", "Brand colour"],
+            ["dark", "Dark"],
+            ["accent", "Highlight"],
+          ].map(([value, text]) => (
+            <option key={value} value={value}>
+              {text}
+            </option>
+          ))}
+        </select>
+        <small>
+          Colours this one section only. The text colour is chosen for you so it
+          always stays readable, whichever colour theme you publish.
+        </small>
+      </label>
       <Field
         label="Small heading above the title"
         value={block.eyebrow}

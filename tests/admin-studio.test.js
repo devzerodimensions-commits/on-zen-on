@@ -466,3 +466,45 @@ test("an unreadable colour pairing is never rendered", () => {
     `body text rendered at ${contrastRatio(bodyColour, "#ffffff")}:1`,
   );
 });
+
+test("a section can be recoloured on its own, and stays readable", () => {
+  /* Changing a colour in the theme changed every section at once. A section now
+     carries its own named tone, and each tone derives its text from its own
+     background, so no combination can be made unreadable. */
+  const tones = ["white", "tint", "brand", "dark", "accent"];
+  for (const [name, preset] of Object.entries(colorPresets)) {
+    const css = themeCss({
+      ...themeDefaults,
+      ...preset.colors,
+      enabled: true,
+    }).split(String.fromCharCode(10));
+    for (const tone of tones) {
+      const background = css
+        .find((l) => l.includes(`.cms-tone-${tone}{`))
+        .match(/background:(#[0-9a-f]{6})/)[1];
+      const heading = css
+        .find((l) => l.includes(`.cms-tone-${tone} :is(h1,`))
+        .match(/color:(#[0-9a-f]{6})/)[1];
+      const body = css
+        .find((l) => l.includes(`.cms-tone-${tone} :is(p,li,`))
+        .match(/color:(#[0-9a-f]{6})/)[1];
+      assert.ok(
+        contrastRatio(heading, background) >= 4.5,
+        `${name}/${tone}: heading is ${contrastRatio(heading, background)}:1`,
+      );
+      assert.ok(
+        contrastRatio(body, background) >= 4.5,
+        `${name}/${tone}: body is ${contrastRatio(body, background)}:1`,
+      );
+      /* A card has to be visible against the section it sits on. */
+      const card = css
+        .find((l) => l.includes(`.cms-tone-${tone} :is(.service-card`))
+        .match(/background:(#[0-9a-f]{6})/)[1];
+      assert.notEqual(
+        card,
+        background,
+        `${name}/${tone}: card matches section`,
+      );
+    }
+  }
+});

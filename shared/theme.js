@@ -463,6 +463,35 @@ export function themeCss(value) {
     t.buttonShadow && t.buttonStyle !== "outline"
       ? `4px 4px 0 ${mix(t.primary, "#000000", 0.35)}`
       : "none";
+  /* Each section can carry its own tone, chosen in the admin. The background
+     comes from the published theme and the text is derived from it, so a
+     section can be recoloured without anyone being able to make it
+     unreadable. */
+  const link0 = t.linkColor || t.primary;
+  const toneRules = (name, background) => {
+    const ink = readableOn(background);
+    const body = soften(ink, background, 0.22);
+    const link = contrastRatio(t.accent, background) >= 4.5 ? t.accent : ink;
+    const scope = `${light} .cms-tone-${name}`;
+    return [
+      `${scope}{background:${background}!important}`,
+      `${scope} :is(h1,h2,h3,h4,strong,summary,cite){color:${ink}!important}`,
+      `${scope} :is(p,li,small,span,label,blockquote,.cms-body){color:${body}!important}`,
+      `${scope} .eyebrow{color:${link}!important}`,
+      `${scope} a:not(.button):not(.oz-action){color:${link}!important}`,
+      /* Cards inside a coloured section keep their own pale surface. */
+      /* Cards sit on the section, so they take the pale surface — unless the
+         section is already that colour, where a soft tint separates them. */
+      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq){background:${
+        contrastRatio(t.surface, background) < 1.05
+          ? tint(t.primary, 0.96)
+          : t.surface
+      }!important;border-color:${mix(background, ink, 0.18)}!important}`,
+      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
+      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span){color:${t.muted}!important}`,
+      `${scope} :is(.service-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
+    ].join("\n");
+  };
   const headingCase =
     t.headingCase === "none"
       ? ""
@@ -563,6 +592,15 @@ ${cardIn} :is(p,small,span,a){color:${t.muted}!important}
 ${cardIn} a{color:${link}!important}
 ${light} main a:not(.button):not(.oz-action){color:${link}}
 html body :is(.hero h1 em,.hero .eyebrow,.services .eyebrow,.contact .eyebrow){color:${t.accent}!important}
+${[
+  ["white", t.surface],
+  ["tint", band],
+  ["brand", t.primary],
+  ["dark", t.footerBackground],
+  ["accent", t.accent],
+]
+  .map(([name, background]) => toneRules(name, background))
+  .join("\n")}
 @media(max-width:800px){html body .public-site-header{height:${t.mobileLogoSize + 16}px!important}html body .public-site-header .brand{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important;flex-basis:${t.mobileLogoSize}px!important}html body .public-site-header .brand img{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important}html body main>section,html body .oz-services>section,html body .section{padding-top:${Math.round(t.sectionSpacing * 0.65)}px!important;padding-bottom:${Math.round(t.sectionSpacing * 0.65)}px!important}}
 `;
 }

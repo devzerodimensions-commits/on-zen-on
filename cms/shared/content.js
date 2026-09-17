@@ -115,6 +115,12 @@ export const blockSchema = z
     id: z.string().uuid(),
     type: z.enum(sectionTypes),
     hidden: z.boolean().default(false),
+    /* A named tone rather than a free colour: each one is derived from the
+       published theme with its text chosen to stay readable, so a section can
+       be recoloured without anyone being able to make it unreadable. */
+    tone: z
+      .enum(["default", "white", "tint", "brand", "dark", "accent"])
+      .default("default"),
     anchor: z
       .string()
       .max(80)
@@ -224,6 +230,7 @@ export function blankBlock(type = "hero") {
     id: crypto.randomUUID(),
     type,
     hidden: false,
+    tone: "default",
     anchor: "",
     eyebrow: "",
     heading: "New section",

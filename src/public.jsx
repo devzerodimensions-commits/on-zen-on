@@ -26,7 +26,9 @@ function GenericBlock({ content: b, submit, formState }) {
   return (
     <section
       id={b.anchor || undefined}
-      className={`section cms-section cms-${b.type}`}
+      className={`section cms-section cms-${b.type}${
+        b.tone && b.tone !== "default" ? ` cms-tone-${b.tone}` : ""
+      }`}
     >
       <p className="eyebrow">{b.eyebrow}</p>
       {b.type === "hero" ? <h1>{b.heading}</h1> : <h2>{b.heading}</h2>}
