@@ -386,3 +386,54 @@ test("a case studies section saves and publishes like any other", async () => {
   ).expect(200);
   assert.equal(live.body.published.blocks[0].items[0].title, "A project name");
 });
+
+test("a call to action stays visible on a brand-coloured section", () => {
+  /* The generic button rule paints buttons in the brand colour. On the hero,
+     services and contact sections the background IS the brand colour, so the
+     button vanished into it and only its text showed — measured at 1.0:1 on
+     the published site. */
+  for (const [name, preset] of Object.entries(colorPresets)) {
+    const css = themeCss({ ...themeDefaults, ...preset.colors, enabled: true });
+    const rule = css
+      .split(String.fromCharCode(10))
+      .find((line) =>
+        line.includes(":is(.hero,.services,.contact) :is(.button"),
+      );
+    assert.ok(rule, `${name}: no call-to-action rule for brand sections`);
+    const background = rule.match(/background:(#[0-9a-f]{6})/)[1];
+    const text = rule.match(/!important;color:(#[0-9a-f]{6})/)[1];
+    assert.ok(
+      contrastRatio(background, preset.colors.primary) >= 3,
+      `${name}: button is ${contrastRatio(background, preset.colors.primary)}:1 against the section behind it`,
+    );
+    assert.ok(
+      contrastRatio(text, background) >= 4.5,
+      `${name}: button text is ${contrastRatio(text, background)}:1 on the button`,
+    );
+  }
+});
+
+test("neighbouring pale sections are told apart", () => {
+  /* Six near-white sections ran together down the page. Alternating white with
+     a brand-tinted band gives the middle of the page a rhythm. */
+  const css = themeCss({
+    ...themeDefaults,
+    ...colorPresets.original.colors,
+    enabled: true,
+  });
+  const lines = css.split(String.fromCharCode(10));
+  const white = lines.find((l) =>
+    l.includes(".technology,.industries-showcase"),
+  );
+  const tinted = lines.find((l) => l.includes(".outcomes,.results,.showcase"));
+  assert.ok(white && tinted, "both halves of the alternation must exist");
+  const a = white.match(/background:(#[0-9a-f]{6})/)[1];
+  const b = tinted.match(/background:(#[0-9a-f]{6})/)[1];
+  assert.notEqual(a, b, "alternating sections must not share a background");
+  /* Different enough to see, close enough not to fight the content. */
+  const difference = contrastRatio(a, b);
+  assert.ok(
+    difference > 1.03 && difference < 1.6,
+    `bands differ by ${difference}`,
+  );
+});

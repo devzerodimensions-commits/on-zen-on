@@ -363,6 +363,43 @@ const soften = (fg, bg, amount) => {
   }
   return fg;
 };
+/* A very pale wash of a colour, keeping its hue instead of mixing towards it.
+   Blending a warm cream towards a blue just desaturates to grey; taking the
+   brand hue at a high lightness gives a band that still reads as the brand. */
+const tint = (hex, lightness) => {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b),
+    d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  const sum = max + min;
+  const saturation = d ? d / (sum > 1 ? 2 - sum : sum || 1) : 0;
+  const s2 = Math.min(saturation, 0.5);
+  const c = (1 - Math.abs(2 * lightness - 1)) * s2;
+  const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
+  const m = lightness - c / 2;
+  const seg = Math.floor(h * 6) % 6;
+  const rgb = [
+    [c, x, 0],
+    [x, c, 0],
+    [0, c, x],
+    [0, x, c],
+    [x, 0, c],
+    [c, 0, x],
+  ][seg];
+  return `#${rgb
+    .map((v) =>
+      Math.round((v + m) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+};
 const mix = (hex, other, amount) => {
   const a = hexToRgb(hex),
     b = hexToRgb(other);
@@ -420,6 +457,19 @@ export function themeCss(value) {
   /* Cards keep their own pale surface even inside a brand-coloured section, so
      their text is matched to the card, and the selector is deliberately as
      specific as the section rule above it so it wins on source order. */
+  /* Six near-white sections run back to back down the page, close enough in
+     tone to read as one flat stretch. Alternating plain white with a band
+     tinted by the brand colour gives that run a rhythm without repainting the
+     site: turning the custom design off restores the original tones. */
+  const pale = [".technology", ".industries-showcase", ".blog-listing"];
+  const band = tint(t.primary, 0.965);
+  /* A call to action sitting on a brand-coloured section must not be painted in
+     that same brand colour, or the button disappears and only its text shows.
+     The accent is used when it stands out enough, otherwise plain black or
+     white, whichever reads better on the section. */
+  const ctaBackground =
+    contrastRatio(t.accent, t.primary) >= 3 ? t.accent : readableOn(t.primary);
+  const ctaText = readableOn(ctaBackground);
   const cardIn = `${light} :is(.hero,.services,.contact,.intro,.outcomes,.cms-section) :is(.service-card,.outcome-grid div,.floating-card)`;
   return `${fontUrl ? `@import url('${fontUrl}');\n` : ""}
 html body{font-family:${body}!important;font-size:${t.bodySize}px;--logo-blue:${t.primary};--logo-green:${t.secondary};--logo-gold:${t.accent};--cream:${t.background};--logo-ink:${t.text};--blue:${t.primary};--green:${t.secondary};--yellow:${t.accent};--mist:${t.background};--ink:${t.text};--oz-surface:${t.surface};--oz-muted:${t.muted}}
@@ -443,10 +493,13 @@ html body footer :is(p,a,small,span){color:${t.footerTextColor}!important}
 ${light}{background:${t.background}!important;color:${t.text}!important}
 ${light} :is(.hero,.services,.contact,.notice){background:${t.primary}!important}
 ${light} :is(.ticker,.oz-service-hero){background:${t.secondary}!important}
-${light} :is(.intro,.cms-section,.oz-service-section,.outcomes){background:${t.background}!important;color:${t.text}!important}
+${light} :is(.intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase){background:${band}!important;color:${t.text}!important}
+${light} :is(${pale.join(",")}){background:${t.surface}!important;color:${t.text}!important}
+${light} :is(.intro,.outcomes,.results,.showcase,${pale.join(",")}){border-top:1px solid ${mix(t.background, t.text, 0.08)}}
 ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surface}!important}
-${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(h1,h2,h3,p){color:${t.text}!important}
-${light} :is(.cms-section,.intro,.oz-service-section,.outcomes) :is(.cms-body,.split>div p,.section-head>p){color:${t.muted}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(h1,h2,h3,p){color:${t.text}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.cms-body,.split>div p,.section-head>p){color:${t.muted}!important}
+${light} :is(.hero,.services,.contact) :is(.button,.oz-action,.contact form button){background:${t.buttonStyle === "outline" ? "transparent" : ctaBackground}!important;color:${t.buttonStyle === "outline" ? ctaBackground : ctaText}!important;border-color:${ctaBackground}!important;box-shadow:${t.buttonShadow && t.buttonStyle !== "outline" ? `4px 4px 0 ${mix(ctaBackground, "#000000", 0.45)}` : "none"}!important}
 ${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
 ${light} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${onPrimarySoft}!important}
 ${light} :is(.hero,.services,.contact) :is(.section-head,.split>div) p{color:${onPrimarySoft}!important}
