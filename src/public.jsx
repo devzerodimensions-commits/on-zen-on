@@ -15,6 +15,7 @@ import "./stack-showcase.css";
 import "./showcase.css";
 import "./dynamic.css";
 import "./homepage-logo.css";
+import "./cms-layout.css";
 import { BrandIntro } from "./BrandIntro.jsx";
 import { ServiceChat } from "./ServiceChat.jsx";
 import { ExperienceTools } from "./ExperienceTools.jsx";
@@ -52,7 +53,11 @@ function GenericBlock({ content: b, submit, formState }) {
               <div>
                 <h3>{it.title}</h3>
                 <p>{it.text}</p>
-                {it.href && <a href={it.href}>Read the full story ↗</a>}
+                {it.href && (
+                  <a href={it.href}>
+                    {b.cardLinkLabel || "Read the full story"} ↗
+                  </a>
+                )}
               </div>
             </article>
           ))}
