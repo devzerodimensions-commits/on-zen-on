@@ -500,6 +500,10 @@ export function themeCss(value) {
   const ctaBackground =
     contrastRatio(t.accent, t.primary) >= 3 ? t.accent : readableOn(t.primary);
   const ctaText = readableOn(ctaBackground);
+  /* Service cards carry the section's identity, so they get the brand bar,
+     a lift on hover and an arrow that steps out — decoration only, nothing
+     that moves content or changes what the card says. */
+  const serviceCard = `${light} :is(.hero,.services,.contact,.intro,.outcomes,.cms-section) .service-card`;
   const cardIn = `${light} :is(.hero,.services,.contact,.intro,.outcomes,.cms-section) :is(.service-card,.outcome-grid div,.floating-card)`;
   return `${fontUrl ? `@import url('${fontUrl}');\n` : ""}
 html body{font-family:${body}!important;font-size:${t.bodySize}px;--logo-blue:${t.primary};--logo-green:${t.secondary};--logo-gold:${t.accent};--cream:${t.background};--logo-ink:${t.text};--blue:${t.primary};--green:${t.secondary};--yellow:${t.accent};--mist:${t.background};--ink:${t.text};--oz-surface:${t.surface};--oz-muted:${t.muted}}
@@ -515,7 +519,8 @@ html body :is(.button,.oz-action):hover{filter:brightness(1.07)}
 html body :is(.service-card,.oz-service-card,.inquiry-card,.inquiry-thanks-card,.outcome-grid div,.floating-card){border-radius:${t.radius}px!important;box-shadow:${shadows[t.cardShadow]}!important}
 html body main>section,html body .oz-services>section,html body .section{padding-top:${t.sectionSpacing}px!important;padding-bottom:${t.sectionSpacing}px!important}
 html body .public-site-header{height:${t.logoSize + 16}px!important;background:${t.headerBackground}!important;color:${headText}!important}
-html body .public-site-header :is(a,nav a,span:not(.pulse)){color:${headText}!important}
+html body .public-site-header :is(a:not(.button):not(.oz-action),nav a,span:not(.pulse)){color:${headText}!important}
+html body .public-site-header :is(.button,.oz-action){background:${t.primary}!important;color:${legible(t.buttonText, t.primary)}!important;border-color:${t.primary}!important}
 html body .public-site-header .brand{width:${t.logoSize}px!important;height:${t.logoSize}px!important;flex-basis:${t.logoSize}px!important}
 html body .public-site-header .brand img{width:${t.logoSize}px!important;height:${t.logoSize}px!important}
 html body footer{background:${t.footerBackground}!important;color:${footText}!important}
@@ -528,6 +533,14 @@ ${light} :is(.intro,.cms-section,.oz-service-section,.outcomes,.results,.showcas
 ${light} :is(${pale.join(",")}){background:${t.surface}!important;color:${t.text}!important}
 ${light} :is(.intro,.outcomes,.results,.showcase,${pale.join(",")}){border-top:1px solid ${mix(t.background, t.text, 0.08)}}
 ${light} :is(.service-card,.outcome-grid div,.floating-card){background:${t.surface}!important}
+${serviceCard}{position:relative;overflow:hidden;transition:transform .28s cubic-bezier(.2,.7,.3,1),box-shadow .28s ease}
+${serviceCard}:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,${t.primary},${t.accent});opacity:.9}
+${serviceCard}:hover{transform:translateY(-6px);box-shadow:0 26px 52px rgba(9,26,43,.20)!important}
+${serviceCard} a{transition:transform .22s ease;display:inline-block}
+${serviceCard}:hover a{transform:translateX(5px)}
+${serviceCard} .service-icon{transition:transform .28s ease}
+${serviceCard}:hover .service-icon{transform:scale(1.12) rotate(-4deg)}
+@media(prefers-reduced-motion:reduce){${serviceCard},${serviceCard} a,${serviceCard} .service-icon{transition:none}${serviceCard}:hover{transform:none}${serviceCard}:hover a{transform:none}${serviceCard}:hover .service-icon{transform:none}}
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(h1,h2,h3,p){color:${t.text}!important}
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.cms-body,.split>div p,.section-head>p){color:${mutedText}!important}
 ${light} :is(.hero,.services,.contact) :is(.button,.oz-action,.contact form button){background:${t.buttonStyle === "outline" ? "transparent" : ctaBackground}!important;color:${t.buttonStyle === "outline" ? ctaBackground : ctaText}!important;border-color:${ctaBackground}!important;box-shadow:${t.buttonShadow && t.buttonStyle !== "outline" ? `4px 4px 0 ${mix(ctaBackground, "#000000", 0.45)}` : "none"}!important}
