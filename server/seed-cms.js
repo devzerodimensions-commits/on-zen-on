@@ -5,6 +5,7 @@ import {
   migrateProcessSteps,
   migrateIndustriesPage,
   migrateEnquiryForms,
+  migrateSectionTones,
 } from "./company-pages.js";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
@@ -434,6 +435,7 @@ export async function seedCms(db) {
   await migrateProcessSteps(db);
   await migrateIndustriesPage(db, stableId);
   await migrateEnquiryForms(db, stableId);
+  await migrateSectionTones(db);
 }
 
 async function updateServiceMenuLinks(db) {

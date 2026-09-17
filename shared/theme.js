@@ -604,6 +604,7 @@ html body main h2,html body .section h2{font-size:clamp(24px,4.4vw,${t.headingSi
 html body main h3,html body .service-card h3{font-size:clamp(17px,2.4vw,${t.h3Size}px)!important}
 html body :is(.button,.oz-action,.inquiry-card button,.inquiry-thanks-card a,.contact form button){${buttonFace};border-radius:${buttonRadius}px!important;padding:${buttonPadding[t.buttonSize]}!important;box-shadow:${buttonShadow}!important}
 html body :is(.button,.oz-action):hover{filter:brightness(1.07)}
+html body :is(.button,.oz-action,.blog-button) :is(span,b,i){color:inherit!important}
 html body :is(.service-card,.oz-service-card,.inquiry-card,.inquiry-thanks-card,.outcome-grid div,.floating-card){border-radius:${t.radius}px!important;box-shadow:${shadows[t.cardShadow]}!important}
 html body main>section,html body .oz-services>section,html body .section{padding-top:${t.sectionSpacing}px!important;padding-bottom:${t.sectionSpacing}px!important}
 html body .public-site-header{height:${t.logoSize + 16}px!important;background:${t.headerBackground}!important;color:${headText}!important}
@@ -641,7 +642,8 @@ ${serviceCard} .service-icon{transition:transform .28s ease}
 ${serviceCard}:hover .service-icon{transform:scale(1.12) rotate(-4deg)}
 @media(prefers-reduced-motion:reduce){${serviceCard},${serviceCard} a,${serviceCard} .service-icon{transition:none}${serviceCard}:hover{transform:none}${serviceCard}:hover a{transform:none}${serviceCard}:hover .service-icon{transform:none}}
 ${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(h1,h2,h3,p){color:${t.text}!important}
-${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.cms-body,.split>div p,.section-head>p){color:${mutedText}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) .cms-body{color:${mutedText}!important}
+${light} :is(.cms-section,.intro,.oz-service-section,.outcomes,.results,.showcase,${pale.join(",")}) :is(.section-head,.split>div) p{color:${mutedText}!important}
 ${light} :is(.hero,.services,.contact) :is(.button,.oz-action,.contact form button){background:${t.buttonStyle === "outline" ? "transparent" : ctaBackground}!important;color:${t.buttonStyle === "outline" ? ctaBackground : ctaText}!important;border-color:${ctaBackground}!important;box-shadow:${t.buttonShadow && t.buttonStyle !== "outline" ? `4px 4px 0 ${mix(ctaBackground, "#000000", 0.45)}` : "none"}!important}
 ${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
 ${light} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${onPrimarySoft}!important}

@@ -740,6 +740,75 @@ export async function migrateEnquiryForms(db, stableId) {
   });
 }
 
+/* Colour across the inner pages.
+
+   Every section on About, Portfolio, Contact, Industries and the service pages
+   drew on the same pale background, so those pages read as one flat column
+   however good the wording was. Each page now alternates white with a brand
+   tint and is punctuated by a yellow band and a brand-coloured close, which is
+   the rhythm the home page already had and these pages did not.
+
+   The home page is left alone: it is built from branded layouts that carry
+   their own colours, and repainting them would undo that design.
+
+   A section an editor has already coloured keeps their choice. The pattern
+   only fills sections still on the default, so running this can never discard
+   a decision somebody made in the admin. */
+const tonePattern = [
+  "white",
+  "tint",
+  "white",
+  "yellow",
+  "white",
+  "tint",
+  "white",
+  "brand",
+];
+const tonedPaths = (path) =>
+  ["/about", "/portfolio", "/contact", "/industries", "/services"].includes(
+    path,
+  ) || path.startsWith("/services/");
+
+export async function migrateSectionTones(db) {
+  await db.transaction(async (q) => {
+    const marker = await q.query(
+      "INSERT INTO cms_migrations (id) VALUES ($1) ON CONFLICT(id) DO NOTHING RETURNING id",
+      ["section-tones-v1"],
+    );
+    if (!marker.length) return;
+    for (const row of await q.query(
+      "SELECT id,draft,published FROM documents WHERE kind='page'",
+    )) {
+      const next = { ...row };
+      let changed = false;
+      for (const field of ["draft", "published"]) {
+        if (!row[field]) continue;
+        const data = JSON.parse(row[field]);
+        if (!tonedPaths(data.path)) continue;
+        let touched = false;
+        let step = 0;
+        for (const [index, block] of (data.blocks || []).entries()) {
+          /* The opening section keeps whatever it already looks like. */
+          if (index === 0) continue;
+          if (block.tone && block.tone !== "default") continue;
+          block.tone = tonePattern[step % tonePattern.length];
+          step += 1;
+          touched = true;
+        }
+        if (touched) {
+          next[field] = JSON.stringify(schemas.page.parse(data));
+          changed = true;
+        }
+      }
+      if (changed)
+        await q.query(
+          "UPDATE documents SET draft=$1,published=$2,version=version+1,updated=$3 WHERE id=$4",
+          [next.draft, next.published, Date.now(), row.id],
+        );
+    }
+  });
+}
+
 export async function migrateCompanyPages(db, stableId) {
   await db.transaction(async (q) => {
     const marker = await q.query(
