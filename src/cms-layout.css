@@ -221,13 +221,43 @@
   justify-self: center;
 }
 
-/* ---- contact: details on the left, form on the right -------------------- */
-.cms-contact {
-  grid-template-columns: min(1180px, 100%);
+/* ---- contact: what you are asked for on the left, the form on the right -- */
+/* Reading the reason and filling the form should happen side by side; stacked,
+   the form sat so far below the explanation that the two stopped relating. */
+.cms-section.cms-contact {
+  display: grid;
+  justify-content: center;
+  align-items: start;
+  grid-template-columns: minmax(0, 500px) minmax(0, 560px);
+  column-gap: 56px;
+  row-gap: 4px;
 }
-.cms-contact .inquiry-card {
-  margin-top: 30px;
-  max-width: 720px;
+.cms-section.cms-contact > * {
+  grid-column: 1;
+  max-width: 500px;
+}
+.cms-section.cms-contact > .inquiry-card {
+  grid-column: 2;
+  grid-row: 1 / span 30;
+  align-self: start;
+  max-width: 560px;
+  width: 100%;
+  margin: 0;
+}
+@media (max-width: 1000px) {
+  .cms-section.cms-contact {
+    grid-template-columns: min(680px, 100%);
+    justify-content: start;
+  }
+  .cms-section.cms-contact > *,
+  .cms-section.cms-contact > .inquiry-card {
+    grid-column: 1;
+    max-width: 100%;
+  }
+  .cms-section.cms-contact > .inquiry-card {
+    grid-row: auto;
+    margin-top: 26px;
+  }
 }
 
 /* ---- narrower screens --------------------------------------------------- */
@@ -443,4 +473,50 @@
   margin-inline: auto;
   width: 100%;
   text-align: left;
+}
+
+/* ---- hero artwork with depth ------------------------------------------- */
+/* The hero render is a flat image. Tilting it slowly on two axes, with the
+   orbit rings turning against it, reads as an object with depth rather than a
+   picture pasted on the page. Real rotation would need a 3D model file. */
+.hero-art {
+  perspective: 1400px;
+}
+.hero-art img {
+  animation: oz-hero-turn 14s ease-in-out infinite;
+  transform-origin: 50% 55%;
+  will-change: transform;
+}
+@keyframes oz-hero-turn {
+  0%,
+  100% {
+    transform: rotateY(-7deg) rotateX(2.5deg) translateY(0);
+  }
+  50% {
+    transform: rotateY(7deg) rotateX(-2.5deg) translateY(-14px);
+  }
+}
+.hero-art .orbit {
+  animation: oz-orbit-one 26s linear infinite;
+}
+.hero-art .orbit-two {
+  animation: oz-orbit-two 34s linear infinite reverse;
+}
+@keyframes oz-orbit-one {
+  to {
+    transform: rotate(338deg);
+  }
+}
+@keyframes oz-orbit-two {
+  to {
+    transform: rotate(392deg);
+  }
+}
+/* Anyone who has asked their system for less movement gets none of it. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-art img,
+  .hero-art .orbit,
+  .hero-art .orbit-two {
+    animation: none;
+  }
 }
