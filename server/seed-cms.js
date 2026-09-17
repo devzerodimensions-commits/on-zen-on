@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { migrateBlogs } from "./blog-pages.js";
-import { migrateCompanyPages, migrateProcessSteps } from "./company-pages.js";
+import {
+  migrateCompanyPages,
+  migrateProcessSteps,
+  migrateIndustriesPage,
+  migrateEnquiryForms,
+} from "./company-pages.js";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
@@ -427,6 +432,8 @@ export async function seedCms(db) {
   await migrateBlogs(db, stableId);
   await migrateCompanyPages(db, stableId);
   await migrateProcessSteps(db);
+  await migrateIndustriesPage(db, stableId);
+  await migrateEnquiryForms(db, stableId);
 }
 
 async function updateServiceMenuLinks(db) {

@@ -472,6 +472,12 @@ export function themeCss(value) {
   const onPrimary = readableOn(t.primary);
   const onPrimarySoft = soften(onPrimary, t.primary, 0.18);
   const onSecondary = readableOn(t.secondary);
+  /* The services banner runs from the brand colour into the second colour, so
+     its text has to read against whichever of the two is harder. */
+  const onBanner =
+    contrastRatio("#ffffff", t.primary) < contrastRatio("#ffffff", t.secondary)
+      ? readableOn(t.primary)
+      : readableOn(t.secondary);
   /* Cards keep their own pale surface even inside a brand-coloured section, so
      their text is matched to the card, and the selector is deliberately as
      specific as the section rule above it so it wins on source order. */
@@ -528,7 +534,6 @@ html body footer :is(p,a,small,span,li,.footer-brand p,.footer-tagline,.reach-us
 html body footer :is(strong,b,h2,h3,h4,.footer-heading){color:${legible(t.accent, t.footerBackground)}!important}
 ${light}{background:${t.background}!important;color:${bodyText}!important}
 ${light} :is(.hero,.services,.contact,.notice){background:${t.primary}!important}
-${light} :is(.ticker,.oz-service-hero){background:${t.secondary}!important}
 ${light} :is(.intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase){background:${band}!important;color:${t.text}!important}
 ${light} :is(${pale.join(",")}){background:${t.surface}!important;color:${t.text}!important}
 ${light} :is(.intro,.outcomes,.results,.showcase,${pale.join(",")}){border-top:1px solid ${mix(t.background, t.text, 0.08)}}
@@ -547,7 +552,12 @@ ${light} :is(.hero,.services,.contact) :is(.button,.oz-action,.contact form butt
 ${light} :is(.hero,.services,.contact) :is(h1,h2,h3,strong,label){color:${onPrimary}!important}
 ${light} :is(.hero,.services,.contact) :is(p,li,small,.hero-text,.cms-body){color:${onPrimarySoft}!important}
 ${light} :is(.hero,.services,.contact) :is(.section-head,.split>div) p{color:${onPrimarySoft}!important}
-${light} :is(.ticker,.oz-service-hero) :is(h1,h2,h3,p,span,b){color:${onSecondary}!important}
+${light} .ticker{background:${t.secondary}!important}
+/* A flat band of the second colour made the services banner heavy; the brand
+   gradient gives it depth and ties it back to the home page hero. */
+${light} .oz-service-hero{background:linear-gradient(125deg,${t.primary} 0%,${mix(t.primary, t.secondary, 0.5)} 55%,${t.secondary} 100%)!important}
+${light} :is(.ticker,.oz-service-hero) :is(h1,h2,h3,p,span,b,li){color:${onBanner}!important}
+${light} .oz-service-hero :is(.eyebrow,em){color:${t.accent}!important}
 ${cardIn} :is(h1,h2,h3,strong){color:${t.text}!important}
 ${cardIn} :is(p,small,span,a){color:${t.muted}!important}
 ${cardIn} a{color:${link}!important}

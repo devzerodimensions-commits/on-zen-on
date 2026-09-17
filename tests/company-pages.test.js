@@ -53,8 +53,7 @@ test("the menus point at the new pages instead of home-page anchors", async () =
     assert.equal(href("about"), "/about");
     assert.equal(href("portfolio"), "/portfolio");
     assert.equal(href("contact"), "/contact");
-    /* There is no industries page, so that link keeps its anchor. */
-    assert.equal(href("industries"), "/#industries");
+    assert.equal(href("industries"), "/industries");
   } finally {
     await db.close();
   }
@@ -208,6 +207,115 @@ test("a page seeded before the timeline loses its doubled numbers", async () => 
       /* A heading the editor rewrote is theirs, so it is left alone. */
       assert.equal(items[4].title, renamed);
     }
+  } finally {
+    await db.close();
+  }
+});
+
+test("the industries page covers every sector, and the menu points at it", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const page = await published(db, "/industries");
+    assert.ok(page, "the industries page was not published");
+    const sectors = page.blocks.find((b) => b.type === "industries").items;
+    assert.deepEqual(
+      sectors.map((s) => s.title),
+      [
+        "E-commerce",
+        "Healthcare",
+        "Education",
+        "Real estate",
+        "Finance",
+        "Travel",
+        "SaaS",
+        "Manufacturing",
+        "Startups",
+      ],
+    );
+    /* Each sector points at the service that serves it. */
+    for (const sector of sectors)
+      assert.match(
+        sector.href,
+        /^\/services\//,
+        `${sector.title} has no service link`,
+      );
+    const [header] = await db.query(
+      "SELECT published FROM documents WHERE public_key='menu:header'",
+    );
+    const link = JSON.parse(header.published).items.find((i) =>
+      /industries/i.test(i.label),
+    );
+    assert.equal(link.href, "/industries");
+  } finally {
+    await db.close();
+  }
+});
+
+test("a database that already ran the earlier migrations still gets the new page", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    /* Put the database back to how a site seeded before this looked. */
+    await db.query("DELETE FROM documents WHERE public_key=$1", [
+      "page:/industries",
+    ]);
+    await db.query("DELETE FROM cms_migrations WHERE id=$1", [
+      "company-industries-v1",
+    ]);
+    const { migrateIndustriesPage } =
+      await import("../server/company-pages.js");
+    await migrateIndustriesPage(db, stableId);
+    assert.ok(await published(db, "/industries"));
+  } finally {
+    await db.close();
+  }
+});
+
+test("every page a buyer reads can take an enquiry", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const rows = await db.query(
+      "SELECT published FROM documents WHERE kind='page' AND published IS NOT NULL",
+    );
+    const pages = rows.map((r) => JSON.parse(r.published));
+    /* Articles and the blog index are for reading, not buying. */
+    const selling = pages.filter(
+      (p) =>
+        !p.path.startsWith("/blog/") &&
+        p.path !== "/tech-updates" &&
+        p.path !== "/",
+    );
+    for (const page of selling)
+      assert.ok(
+        page.blocks.some((b) => b.type === "contact" && !b.hidden),
+        `${page.path} has no enquiry form`,
+      );
+  } finally {
+    await db.close();
+  }
+});
+
+test("an enquiry sent from one of these pages reaches the admin", async () => {
+  const db = await openDb({ url: null, path: ":memory:" });
+  try {
+    await seedCms(db);
+    const app = await createWebsite(db, { production: false, origin });
+    await request(app)
+      .post("/api/inquiries")
+      .set("Origin", origin)
+      .send({
+        name: "A visitor",
+        email: "visitor@example.test",
+        message: "Sent from the industries page.",
+      })
+      .expect(201);
+    const [saved] = await db.query(
+      "SELECT name,email,message,status FROM inquiries ORDER BY id DESC",
+    );
+    assert.equal(saved.email, "visitor@example.test");
+    assert.equal(saved.status, "new");
   } finally {
     await db.close();
   }

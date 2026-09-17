@@ -422,11 +422,165 @@ function contactPage(stableId) {
   };
 }
 
+function industriesPage(stableId) {
+  const b = (key, ...rest) => block(stableId, `industries-${key}`, ...rest);
+  return {
+    schemaVersion: 1,
+    title: "Industries",
+    path: "/industries",
+    seo: {
+      title: "Industries We Work With | On Zen On Private Limited",
+      description:
+        "On Zen On builds websites, apps, automation and marketing for e-commerce, healthcare, education, real estate, finance, travel, SaaS, manufacturing and startups.",
+      canonical: "/industries",
+      ogImage: "/assets/service-fullstack-studio.webp",
+      noindex: false,
+    },
+    blocks: [
+      b(
+        "lead",
+        "hero",
+        "Whatever you do, we make it digital-first.",
+        "The technology changes very little between industries. What changes is the customer, the rules you work under, and the moment that decides whether someone buys. We start there, then build.",
+        [],
+        {
+          eyebrow: "INDUSTRIES",
+          image: "/assets/service-fullstack-studio.webp",
+          alt: "A studio working across several industry projects",
+          buttonLabel: "Discuss your sector",
+          href: "/contact",
+        },
+      ),
+      b(
+        "sectors",
+        "industries",
+        "Sectors we work in",
+        "Nine areas we build for most often, and what each one usually needs first.",
+        [
+          [
+            "E-commerce",
+            "Catalogue, search and a checkout that works on a phone, with the analytics to see exactly where buyers drop out.",
+            "/services/frontend-development",
+          ],
+          [
+            "Healthcare",
+            "Appointment booking, clear service information, and careful handling of anything a patient sends you.",
+            "/services/secure-experience-design",
+          ],
+          [
+            "Education",
+            "Course and programme pages built to be found, enquiry flows for admissions, and portals for students and staff.",
+            "/services/ui-ux-product-design",
+          ],
+          [
+            "Real estate",
+            "Property listings with real search and filtering, enquiries routed to the right agent, and pages that load fast on mobile data.",
+            "/services/frontend-development",
+          ],
+          [
+            "Finance",
+            "Trust-first design, protected actions and access control, with content that explains a product without overclaiming.",
+            "/services/cybersecurity",
+          ],
+          [
+            "Travel",
+            "Availability and booking, itineraries people can actually read, and pages that survive a seasonal traffic spike.",
+            "/services/cloud-api-devops",
+          ],
+          [
+            "SaaS",
+            "Marketing site, documentation and signup working as one, with an API and integrations customers can build on.",
+            "/services/backend-development",
+          ],
+          [
+            "Manufacturing",
+            "Product and capability catalogues, dealer enquiry routing, and automation for the quoting that eats the week.",
+            "/services/ai-workflow-automation",
+          ],
+          [
+            "Startups",
+            "A first product that proves the idea without painting you into a corner, in a scope you can afford to be wrong about.",
+            "/services/software-engineering",
+          ],
+        ],
+        { eyebrow: "WHERE WE WORK", cardLinkLabel: "Relevant service" },
+      ),
+      b(
+        "common",
+        "features",
+        "What every sector asks for",
+        "Different industries, the same underlying problems.",
+        [
+          [
+            "Be found",
+            "Ranking for what customers actually search, and being described correctly by search engines and AI assistants.",
+          ],
+          [
+            "Convert",
+            "A clear path from arriving to enquiring or buying, without the dead ends that lose people halfway.",
+          ],
+          [
+            "Handle what arrives",
+            "Enquiries, bookings and orders reaching the right person, with nothing lost between inbox and follow-up.",
+          ],
+          [
+            "Work on a phone",
+            "Most visitors arrive on mobile data. Speed and layout there decide whether the rest matters.",
+          ],
+          [
+            "Keep data safe",
+            "Access control and protected actions, especially anywhere a customer trusts you with personal detail.",
+          ],
+          [
+            "Stay editable",
+            "Your own team changing content and prices without waiting on a developer.",
+          ],
+        ],
+        { eyebrow: "COMMON GROUND" },
+      ),
+      b(
+        "questions",
+        "faq",
+        "Working with your industry",
+        "",
+        [
+          [
+            "You have not listed my industry \u2014 can you still help?",
+            "Almost certainly. The nine above are where we work most often, not a limit. Tell us what your customers need to do and we will say honestly whether we are a good fit.",
+          ],
+          [
+            "Do you understand our regulations?",
+            "We ask about them early and design around them, and we will say plainly when something needs your compliance advisor rather than our opinion. We do not claim to certify anything.",
+          ],
+          [
+            "Have you built something like ours before?",
+            "Ask us for examples in your sector. We will share relevant work and what was involved, with permission from the client concerned.",
+          ],
+          [
+            "Can you work with our existing systems?",
+            "Usually. Most projects connect to something already in place, such as a booking system, an ERP or a CRM, and we scope that integration before quoting.",
+          ],
+        ],
+        { eyebrow: "QUESTIONS" },
+      ),
+      b(
+        "next",
+        "cta",
+        "Tell us about your sector.",
+        "Describe your customers and the action you need them to take. We will come back with what we would build and why.",
+        [],
+        { buttonLabel: "Start the conversation", href: "/contact" },
+      ),
+    ],
+  };
+}
+
 export function companyPages(stableId) {
   return [
     ["about-page", "page", aboutPage(stableId), "page:/about"],
     ["portfolio-page", "page", portfolioPage(stableId), "page:/portfolio"],
     ["contact-page", "page", contactPage(stableId), "page:/contact"],
+    ["industries-page", "page", industriesPage(stableId), "page:/industries"],
   ];
 }
 
@@ -439,6 +593,8 @@ const menuMoves = new Map([
   ["/#work", "/portfolio"],
   ["#work", "/portfolio"],
   ["/#portfolio", "/portfolio"],
+  ["/#industries", "/industries"],
+  ["#industries", "/industries"],
 ]);
 const contactMoves = new Set(["/#contact", "#contact"]);
 
@@ -477,6 +633,103 @@ export async function migrateProcessSteps(db) {
           next[field] = JSON.stringify(schemas.page.parse(data));
           changed = true;
         }
+      }
+      if (changed)
+        await q.query(
+          "UPDATE documents SET draft=$1,published=$2,version=version+1,updated=$3 WHERE id=$4",
+          [next.draft, next.published, Date.now(), row.id],
+        );
+    }
+  });
+}
+
+/* The Industries page arrived after the first three, and a database that has
+   already run that migration skips its insert, so it needs a marker of its own.
+   The menu link is moved here too, for the same reason. */
+export async function migrateIndustriesPage(db, stableId) {
+  await db.transaction(async (q) => {
+    const marker = await q.query(
+      "INSERT INTO cms_migrations (id) VALUES ($1) ON CONFLICT(id) DO NOTHING RETURNING id",
+      ["company-industries-v1"],
+    );
+    if (!marker.length) return;
+    const body = JSON.stringify(schemas.page.parse(industriesPage(stableId)));
+    await q.query(
+      "INSERT INTO documents (id,kind,draft,published,public_key,updated) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING",
+      [
+        stableId("industries-page"),
+        "page",
+        body,
+        body,
+        "page:/industries",
+        Date.now(),
+      ],
+    );
+    for (const row of await q.query(
+      "SELECT id,draft,published FROM documents WHERE kind='menu'",
+    )) {
+      const next = { ...row };
+      let changed = false;
+      for (const field of ["draft", "published"]) {
+        if (!row[field]) continue;
+        const data = JSON.parse(row[field]);
+        let touched = false;
+        for (const item of data.items)
+          if (["/#industries", "#industries"].includes(item.href)) {
+            item.href = "/industries";
+            touched = true;
+          }
+        if (touched) {
+          next[field] = JSON.stringify(schemas.menu.parse(data));
+          changed = true;
+        }
+      }
+      if (changed)
+        await q.query(
+          "UPDATE documents SET draft=$1,published=$2,version=version+1,updated=$3 WHERE id=$4",
+          [next.draft, next.published, Date.now(), row.id],
+        );
+    }
+  });
+}
+
+/* About, Portfolio and Industries each ended with a button to the contact page.
+   Every service page already carries the enquiry form itself, and these are the
+   pages a visitor reads when they are closest to asking, so sending them away
+   for a second click loses some of them. The form posts to the same place as
+   every other: it lands in Inquiries in the admin. */
+const formPages = new Set(["/about", "/portfolio", "/industries"]);
+export async function migrateEnquiryForms(db, stableId) {
+  await db.transaction(async (q) => {
+    const marker = await q.query(
+      "INSERT INTO cms_migrations (id) VALUES ($1) ON CONFLICT(id) DO NOTHING RETURNING id",
+      ["company-enquiry-forms-v1"],
+    );
+    if (!marker.length) return;
+    for (const row of await q.query(
+      "SELECT id,draft,published FROM documents WHERE kind='page'",
+    )) {
+      const next = { ...row };
+      let changed = false;
+      for (const field of ["draft", "published"]) {
+        if (!row[field]) continue;
+        const data = JSON.parse(row[field]);
+        if (!formPages.has(data.path)) continue;
+        /* A page that already asks for an enquiry is left as it is. */
+        if (data.blocks.some((b) => b.type === "contact")) continue;
+        data.blocks.push(
+          block(
+            stableId,
+            `${data.path.slice(1)}-enquiry`,
+            "contact",
+            "Tell us what you need",
+            "Send it here and it reaches the team directly. If you would rather talk it through, say so and we will call instead.",
+            [],
+            { eyebrow: "SEND AN ENQUIRY" },
+          ),
+        );
+        next[field] = JSON.stringify(schemas.page.parse(data));
+        changed = true;
       }
       if (changed)
         await q.query(

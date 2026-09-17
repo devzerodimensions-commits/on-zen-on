@@ -428,3 +428,19 @@
     height: auto;
   }
 }
+
+/* ---- questions sit in the middle -------------------------------------- */
+/* A list of questions reads better centred under a centred heading than
+   pushed to one side of a wide section. */
+.cms-section.cms-faq {
+  justify-items: center;
+  text-align: center;
+}
+.cms-section.cms-faq > .cms-body {
+  margin-inline: auto;
+}
+.cms-section.cms-faq .cms-faq {
+  margin-inline: auto;
+  width: 100%;
+  text-align: left;
+}
