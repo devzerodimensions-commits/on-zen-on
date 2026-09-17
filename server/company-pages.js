@@ -104,23 +104,23 @@ function aboutPage(stableId) {
         "A predictable shape, so you always know what happens next.",
         [
           [
-            "01 — Understand",
+            "Understand",
             "We start with the business result, not the feature list: who you need to reach, what they should do, and what success would look like in numbers.",
           ],
           [
-            "02 — Shape",
+            "Shape",
             "Scope, structure and priorities agreed in writing, with the trade-offs explained. You see what is included before anything is built.",
           ],
           [
-            "03 — Build",
+            "Build",
             "Design and engineering run together in short cycles, with something reviewable early rather than a reveal at the end.",
           ],
           [
-            "04 — Launch",
+            "Launch",
             "Testing across devices, search setup, analytics and a handover so your team can run the site themselves.",
           ],
           [
-            "05 — Grow",
+            "Grow",
             "Measure what visitors actually do, then improve content, campaigns and conversion against that evidence.",
           ],
         ],

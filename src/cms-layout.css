@@ -336,3 +336,93 @@
 .cms-section .service-grid:has(> :nth-child(4):last-child) {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
 }
+
+/* ---- process as a timeline ---------------------------------------------- */
+/* Steps read as a sequence, so they are drawn as one: numbered nodes on a rail
+   rather than five separate cards of uneven height. The number comes from a
+   counter, so adding or removing a step renumbers the rest automatically.
+   These selectors carry an extra class so they outrank the card treatment the
+   theme applies, which would otherwise own the same pseudo-element. */
+.cms-section.cms-process .service-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  counter-reset: step;
+  margin-top: 46px;
+}
+.cms-section.cms-process .service-grid .service-card {
+  counter-increment: step;
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 66px 26px 0 0;
+  gap: 8px;
+  transform: none;
+}
+.cms-section.cms-process .service-grid .service-card:hover {
+  transform: none;
+  box-shadow: none !important;
+}
+/* the node */
+.cms-section.cms-process .service-grid .service-card:before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--logo-blue, #17218c);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  height: 44px;
+  z-index: 1;
+}
+/* the rail, drawn from this node across to the next */
+.cms-section.cms-process .service-grid .service-card:after {
+  content: "";
+  position: absolute;
+  top: 21px;
+  left: 54px;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.22;
+}
+.cms-section.cms-process .service-grid .service-card:last-child:after {
+  display: none;
+}
+.cms-section.cms-process .service-grid .service-card h3 {
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  opacity: 1;
+  margin: 0;
+}
+.cms-section.cms-process .service-grid .service-card p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Below five-across the rail turns and runs down the side instead. */
+@media (max-width: 1000px) {
+  .cms-section.cms-process .service-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cms-section.cms-process .service-grid .service-card {
+    padding: 0 0 30px 64px;
+  }
+  .cms-section.cms-process .service-grid .service-card:after {
+    top: 54px;
+    left: 21px;
+    right: auto;
+    bottom: 6px;
+    width: 2px;
+    height: auto;
+  }
+}
