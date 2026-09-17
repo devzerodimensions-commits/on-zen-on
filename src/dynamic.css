@@ -19,3 +19,18 @@
 .cms-cases p{margin:0;font-size:14px;line-height:1.75;color:#52656b}
 .cms-cases a{font-weight:800;font-size:13px;color:var(--logo-green,#08723b)}
 @media(max-width:760px){.cms-cases article{grid-template-columns:1fr}.cms-cases article>div{padding:22px}}
+
+/* Cards on a page built in the admin sit on a pale section, but the brand
+   stylesheet colours card text for the blue services band (#d1d8ff) and card
+   links gold, which measured 1.32:1 here. Sections with their own dark
+   treatment above carry an id and keep winning on specificity. */
+.cms-section .service-card p,.cms-section .service-card small{color:#4a5a66!important}
+.cms-section .service-card h3{color:#141c26!important}
+.cms-section .service-card>span{color:#5c6f65!important}
+.cms-section .service-card a{color:#08723b!important}
+.cms-section .cms-faq details p{color:#4a5a66!important}
+.cms-section .cms-faq summary{color:#141c26!important}
+.cms-section>.cms-body,.cms-section>p:not(.eyebrow){color:#4a5a66!important;font-weight:400!important}
+.cms-section .cms-quotes blockquote{color:#33414b!important;font-weight:400!important}
+.cms-section .cms-cases p{color:#4a5a66!important;font-weight:400!important}
+.cms-section .cms-cases h3{color:#141c26!important}

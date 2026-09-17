@@ -195,3 +195,6 @@ form.inquiry-card textarea::placeholder {
   color: #637b72 !important;
   opacity: 1;
 }
+
+/* 12px small print needs the full AA ratio; this sat at 4.28:1 on the card. */
+.inquiry-note { color: #4f6359; }

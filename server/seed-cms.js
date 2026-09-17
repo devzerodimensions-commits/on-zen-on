@@ -1,9 +1,14 @@
 import { createHash } from "node:crypto";
-import {migrateBlogs} from "./blog-pages.js";
+import { migrateBlogs } from "./blog-pages.js";
+import { migrateCompanyPages } from "./company-pages.js";
 import { templateDefaults, menuDefaults } from "../shared/templates.js";
 import { schemas } from "../cms/shared/content.js";
 import { servicePages } from "./service-pages.js";
-import { mainServicePages, connectMainServices, migrateMainServices } from "./main-service-pages.js";
+import {
+  mainServicePages,
+  connectMainServices,
+  migrateMainServices,
+} from "./main-service-pages.js";
 import {
   addOfferingCatalog,
   migrateOfferingCatalogs,
@@ -14,7 +19,10 @@ import {
 } from "./service-detail-content.js";
 import { applyServicePhotos, migrateServicePhotos } from "./service-photos.js";
 import { migrateMarketingImages } from "./marketing-images.js";
-import { applyServiceSectionImages, migrateServiceSectionImages } from "./service-section-images.js";
+import {
+  applyServiceSectionImages,
+  migrateServiceSectionImages,
+} from "./service-section-images.js";
 export const stableId = (name) => {
   const h = createHash("sha256").update(`onzenon-cms-v1:${name}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
@@ -416,7 +424,8 @@ export async function seedCms(db) {
   await migrateMarketingImages(db);
   await migrateServiceSectionImages(db);
   await migrateMainServices(db, stableId);
-  await migrateBlogs(db,stableId);
+  await migrateBlogs(db, stableId);
+  await migrateCompanyPages(db, stableId);
 }
 
 async function updateServiceMenuLinks(db) {
