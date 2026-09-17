@@ -2,6 +2,7 @@ import { InquiryForm } from "./InquiryForm.jsx";
 // Extracted from the original website. Original classes, layout and decorative elements are preserved.
 import React from "react";
 import { menuDefaults } from "../shared/templates.js";
+import { sectionClasses } from "../shared/section-style.js";
 function menuLinks(location, menus) {
   return (
     menus?.find((m) => m.location === location)?.items || menuDefaults[location]
