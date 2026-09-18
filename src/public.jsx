@@ -1,4 +1,5 @@
 import { ServiceIcon } from "./ServiceIcon.jsx";
+import { PortfolioGallery } from "./PortfolioGallery.jsx";
 import "./inner-pages.css";
 import { SectionMotion } from "./SectionMotion.jsx";
 import { PublishedTheme } from "./PublishedTheme.jsx";
@@ -25,7 +26,7 @@ import { ServiceChat } from "./ServiceChat.jsx";
 import { ExperienceTools } from "./ExperienceTools.jsx";
 import { Portal } from "./Portal.jsx";
 import { ExperienceProvider } from "./ExperienceContext.jsx";
-function GenericBlock({ content: b, submit, formState }) {
+function GenericBlock({ content: b, submit, formState, portfolio }) {
   if (b.type === "updates") return <BlogCards block={b} />;
   return (
     <section
@@ -62,7 +63,10 @@ function GenericBlock({ content: b, submit, formState }) {
           ))}
         </div>
       )}
-      {b.items.length > 0 && b.type === "casestudies" && (
+      {b.items.length > 0 && b.type === "casestudies" && portfolio && (
+        <PortfolioGallery items={b.items} />
+      )}
+      {b.items.length > 0 && b.type === "casestudies" && !portfolio && (
         <div className="cms-cases">
           {b.items.map((it, i) => (
             <article key={i}>
@@ -346,7 +350,12 @@ function App() {
             b.type === "template" ? (
               <OriginalTemplate key={b.id} content={b} {...props} />
             ) : (
-              <GenericBlock key={b.id} content={b} {...props} />
+              <GenericBlock
+                key={b.id}
+                content={b}
+                portfolio={page.path === "/portfolio"}
+                {...props}
+              />
             ),
           )
         )}

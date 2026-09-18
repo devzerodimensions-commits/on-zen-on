@@ -1,4 +1,5 @@
 import { migrateInnerPageDesign } from "./inner-page-design.js";
+import { migratePortfolioShowcase } from "./portfolio-showcase.js";
 import { createHash } from "node:crypto";
 import { migrateBlogs } from "./blog-pages.js";
 import {
@@ -438,6 +439,7 @@ export async function seedCms(db) {
   await migrateEnquiryForms(db, stableId);
   await migrateSectionTones(db);
   await migrateInnerPageDesign(db);
+  await migratePortfolioShowcase(db);
 }
 
 async function updateServiceMenuLinks(db) {

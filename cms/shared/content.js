@@ -15,7 +15,7 @@ export const safeLink = z
 const image = z
   .string()
   .regex(
-    /^$|^\/media\/[a-f0-9-]+\.webp$|^\/assets\/[a-zA-Z0-9._-]+\.(png|webp|jpg|jpeg)$/,
+    /^$|^\/media\/[a-f0-9-]+\.webp$|^\/assets\/[a-zA-Z0-9._-]+\.(png|webp|jpg|jpeg|svg)$/,
   );
 export const templateSchema = z
   .object({
