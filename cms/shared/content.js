@@ -2,6 +2,7 @@ import { themeSchema } from "../../shared/theme.js";
 import { z } from "zod";
 import { experienceSchema } from "../../shared/experience-settings.js";
 import { templateManifest } from "../../shared/templates.js";
+import { sectionStyleOptions } from "../../shared/section-style.js";
 const short = z.string().max(250);
 export const safeLink = z
   .string()
@@ -21,6 +22,46 @@ export const templateSchema = z
     id: z.string().uuid(),
     type: z.literal("template"),
     template: z.enum(Object.keys(templateManifest)),
+    hidden: z.boolean().default(false),
+    tone: z
+      .enum([
+        "default",
+        "white",
+        "tint",
+        "brand",
+        "dark",
+        "accent",
+        "green",
+        "yellow",
+        "blue",
+        "purple",
+        "red",
+        "teal",
+      ])
+      .default("default"),
+    align: z.enum(["left", "center", "right"]).default("left"),
+    headingScale: z
+      .enum(["small", "normal", "large", "xlarge"])
+      .default("normal"),
+    spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
+    hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
+    headingColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    textColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    fontFamily: z.string().max(20).default(""),
+    headingSize: z.number().int().min(0).max(160).default(0),
+    fontWeight: z.number().int().min(0).max(900).default(0),
+    textTransform: z
+      .enum(["", "none", "uppercase", "capitalize", "lowercase"])
+      .default(""),
+    fontStyle: z.enum(["", "normal", "italic"]).default(""),
+    textDecoration: z.enum(["", "none", "underline"]).default(""),
+    lineHeight: z.number().min(0).max(3).default(0),
+    letterSpacing: z.number().min(-5).max(20).default(0),
+    wordSpacing: z.number().min(-5).max(40).default(0),
     fields: z.record(z.string(), z.string().max(15000)),
   })
   .strict()
@@ -84,6 +125,7 @@ export const sectionTypes = [
   "gallery",
   "faq",
   "testimonials",
+  "casestudies",
   "cta",
   "contact",
 ];
@@ -112,6 +154,49 @@ export const blockSchema = z
   .object({
     id: z.string().uuid(),
     type: z.enum(sectionTypes),
+    hidden: z.boolean().default(false),
+    /* A named tone rather than a free colour: each one is derived from the
+       published theme with its text chosen to stay readable, so a section can
+       be recoloured without anyone being able to make it unreadable. */
+    tone: z
+      .enum([
+        "default",
+        "white",
+        "tint",
+        "brand",
+        "dark",
+        "accent",
+        "green",
+        "yellow",
+        "blue",
+        "purple",
+        "red",
+        "teal",
+      ])
+      .default("default"),
+    align: z.enum(["left", "center", "right"]).default("left"),
+    headingScale: z
+      .enum(["small", "normal", "large", "xlarge"])
+      .default("normal"),
+    spacing: z.enum(["compact", "normal", "roomy", "none"]).default("normal"),
+    hideOn: z.enum(["none", "mobile", "desktop"]).default("none"),
+    headingColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    textColor: z
+      .union([z.literal(""), z.string().regex(/^#[0-9a-fA-F]{6}$/)])
+      .default(""),
+    fontFamily: z.string().max(20).default(""),
+    headingSize: z.number().int().min(0).max(160).default(0),
+    fontWeight: z.number().int().min(0).max(900).default(0),
+    textTransform: z
+      .enum(["", "none", "uppercase", "capitalize", "lowercase"])
+      .default(""),
+    fontStyle: z.enum(["", "normal", "italic"]).default(""),
+    textDecoration: z.enum(["", "none", "underline"]).default(""),
+    lineHeight: z.number().min(0).max(3).default(0),
+    letterSpacing: z.number().min(-5).max(20).default(0),
+    wordSpacing: z.number().min(-5).max(40).default(0),
     anchor: z
       .string()
       .max(80)
@@ -134,6 +219,7 @@ const reference = z
   .object({
     id: z.string().uuid(),
     type: z.literal("shared"),
+    hidden: z.boolean().default(false),
     sectionId: z.string().uuid(),
   })
   .strict();
@@ -219,6 +305,8 @@ export function blankBlock(type = "hero") {
   return {
     id: crypto.randomUUID(),
     type,
+    hidden: false,
+    tone: "default",
     anchor: "",
     eyebrow: "",
     heading: "New section",

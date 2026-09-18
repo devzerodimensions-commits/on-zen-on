@@ -12,10 +12,11 @@ export const sectionNames = {
   gallery: "Image gallery",
   faq: "Questions and answers",
   testimonials: "Customer reviews",
+  casestudies: "Case studies",
   cta: "Call-to-action",
   contact: "Inquiry form",
 };
-export function PageStarter({ onCreate, onCancel, busy, error }) {
+export function PageStarter({ onCreate, onCancel, busy }) {
   const [title, T] = useState(""),
     [path, P] = useState(""),
     [layout, L] = useState("service");
@@ -27,7 +28,6 @@ export function PageStarter({ onCreate, onCancel, busy, error }) {
         aria-modal="true"
         aria-labelledby="starter-title"
       >
-        {error && <p role="alert">{error}</p>}
         <h2 id="starter-title">Create a new page</h2>
         <p>
           Choose a starting layout, then edit each section. Your new page stays

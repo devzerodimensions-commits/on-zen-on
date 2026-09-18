@@ -13,7 +13,12 @@ export function SectionMotion() {
     return () => q.removeEventListener("change", update);
   }, []);
   useEffect(() => {
-    if (!motionEnabled || reduced || !("IntersectionObserver" in window))
+    if (
+      window.parent !== window ||
+      !motionEnabled ||
+      reduced ||
+      !("IntersectionObserver" in window)
+    )
       return;
     const seen = new WeakSet();
     const observer = new IntersectionObserver(

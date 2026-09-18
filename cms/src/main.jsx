@@ -1,9 +1,20 @@
-import { ThemeEditor } from "./ThemeEditor.jsx";
+import { ThemeStudio } from "./ThemeStudio.jsx";
+import "./studio.css";
 import { PageStarter, sectionNames } from "./PageStarter.jsx";
+import { SectionPicker } from "./SectionPicker.jsx";
+import { MediaLibrary } from "./MediaLibrary.jsx";
+import { PageBuilder } from "./PageBuilder.jsx";
 import "./editor-guide.css";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
+import { starterBlock } from "../shared/starters.js";
+import {
+  sectionStyleDefaults,
+  sectionStyleOptions,
+  sectionTypeDefaults,
+} from "../../shared/section-style.js";
+import { fontCatalog, fontKeys, contrastRatio } from "../../shared/theme.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
@@ -58,6 +69,37 @@ const defaults = (kind) =>
             email: "hello@onzenon.com",
             phone: "",
           };
+const navItems = [
+  { name: "Overview", icon: "◈", hint: "Start here" },
+  { name: "Pages", icon: "▤", hint: "Text, images and sections" },
+  { name: "Appearance", icon: "✻", hint: "Fonts, colours and theme" },
+  {
+    name: "Reusable sections",
+    icon: "▦",
+    hint: "Header, footer, shared blocks",
+  },
+  { name: "Menus", icon: "☷", hint: "Website navigation links" },
+  { name: "Media library", icon: "▧", hint: "Your pictures" },
+  { name: "Site settings", icon: "⚙", hint: "Business name, email, phone" },
+  {
+    name: "Inquiries",
+    icon: "✉",
+    hint: "Messages from visitors",
+    adminOnly: true,
+  },
+  {
+    name: "Requests",
+    icon: "☎",
+    hint: "Service and appointment requests",
+    adminOnly: true,
+  },
+  {
+    name: "Users",
+    icon: "♙",
+    hint: "Who can edit the website",
+    adminOnly: true,
+  },
+];
 function Field({ label, value, onChange, area = false, ...props }) {
   return (
     <label className="field">
@@ -84,62 +126,365 @@ function MediaSelect(props) {
     <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
   );
 }
+/* A colour with a live reading of how it will look against the section behind
+   it. The reading is advice, not a veto: the colour chosen is the colour used. */
+function ColourField({ label, field, block, set, against }) {
+  const value = block[field] ?? "";
+  const ratio = value && against ? contrastRatio(value, against) : null;
+  return (
+    <div className="type-colour">
+      <span className="type-colour-label">{label}</span>
+      <input
+        type="color"
+        value={value || against || "#000000"}
+        onChange={(e) => set(field, e.target.value)}
+      />
+      <div>
+        <small>{value || "Automatic"}</small>
+        {ratio !== null && (
+          <small className={ratio < 4.5 ? "type-warn" : "type-ok"}>
+            {ratio < 3
+              ? `${ratio}:1 — very hard to read`
+              : ratio < 4.5
+                ? `${ratio}:1 — hard to read at small sizes`
+                : `${ratio}:1 — reads well`}
+          </small>
+        )}
+      </div>
+      {value && (
+        <button type="button" onClick={() => set(field, "")}>
+          Automatic
+        </button>
+      )}
+    </div>
+  );
+}
+
+function NumberField({ label, field, block, set, min, max, step = 1, unit }) {
+  const value = block[field] ?? sectionTypeDefaults[field];
+  return (
+    <label className="field">
+      <span>
+        {label}
+        {value ? ` — ${value}${unit || ""}` : " — automatic"}
+      </span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => set(field, Number(e.target.value))}
+      />
+      {Boolean(value) && (
+        <button type="button" onClick={() => set(field, 0)}>
+          Back to automatic
+        </button>
+      )}
+    </label>
+  );
+}
+
+function PickField({ label, field, block, set, options }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <select
+        value={block[field] ?? ""}
+        onChange={(e) => set(field, e.target.value)}
+      >
+        {options.map(([key, text]) => (
+          <option key={key} value={key}>
+            {text}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/* Typography and colour for one section. Anything left on automatic follows
+   the published theme, so a section nobody has touched keeps doing so. */
+function SectionTypography({ block, set }) {
+  return (
+    <>
+      <h4 className="type-group">Typography</h4>
+      <PickField
+        label="Font family"
+        field="fontFamily"
+        block={block}
+        set={set}
+        options={[
+          ["", "Follow the theme"],
+          ...fontKeys.map((key) => [key, fontCatalog[key].label]),
+        ]}
+      />
+      <div className="two">
+        <NumberField
+          label="Heading size"
+          field="headingSize"
+          block={block}
+          set={set}
+          min={0}
+          max={140}
+          unit="px"
+        />
+        <NumberField
+          label="Heading weight"
+          field="fontWeight"
+          block={block}
+          set={set}
+          min={0}
+          max={900}
+          step={100}
+        />
+      </div>
+      <div className="two">
+        <PickField
+          label="Capitals"
+          field="textTransform"
+          block={block}
+          set={set}
+          options={[
+            ["", "Automatic"],
+            ["none", "As typed"],
+            ["capitalize", "First Letter Capital"],
+            ["uppercase", "ALL CAPITALS"],
+            ["lowercase", "all lowercase"],
+          ]}
+        />
+        <PickField
+          label="Style"
+          field="fontStyle"
+          block={block}
+          set={set}
+          options={[
+            ["", "Automatic"],
+            ["normal", "Normal"],
+            ["italic", "Italic"],
+          ]}
+        />
+      </div>
+      <PickField
+        label="Underline"
+        field="textDecoration"
+        block={block}
+        set={set}
+        options={[
+          ["", "Automatic"],
+          ["none", "No underline"],
+          ["underline", "Underlined"],
+        ]}
+      />
+      <div className="two">
+        <NumberField
+          label="Line height"
+          field="lineHeight"
+          block={block}
+          set={set}
+          min={0}
+          max={2.6}
+          step={0.02}
+        />
+        <NumberField
+          label="Letter spacing"
+          field="letterSpacing"
+          block={block}
+          set={set}
+          min={-5}
+          max={20}
+          step={0.1}
+          unit="px"
+        />
+      </div>
+      <NumberField
+        label="Word spacing"
+        field="wordSpacing"
+        block={block}
+        set={set}
+        min={-5}
+        max={40}
+        step={0.5}
+        unit="px"
+      />
+    </>
+  );
+}
+
+function StyleChoice({ label, hint, field, block, set }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <select
+        value={block[field] ?? sectionStyleDefaults[field]}
+        onChange={(e) => set(field, e.target.value)}
+      >
+        {sectionStyleOptions[field].map(([key, text]) => (
+          <option key={key} value={key}>
+            {text}
+          </option>
+        ))}
+      </select>
+      {hint && <small>{hint}</small>}
+    </label>
+  );
+}
+
+/* Style and Advanced for one section. Every control offers a choice between
+   designed outcomes rather than a free value, so restyling a section cannot
+   produce a page that overlaps, disappears or cannot be read. */
+/* Roughly what the section sits on, so the contrast reading means something.
+   The exact shade comes from the published theme; these are close enough to
+   tell an editor whether a colour will read. */
+const toneBehind = {
+  default: "#f7f7f3",
+  white: "#ffffff",
+  tint: "#f2f2fb",
+  brand: "#17218c",
+  dark: "#0b1226",
+  accent: "#f0b52a",
+};
+function SectionStyle({ block, set, advanced }) {
+  const behind = toneBehind[block.tone || "default"];
+  const choice = (label, field, hint) => (
+    <StyleChoice
+      label={label}
+      hint={hint}
+      field={field}
+      block={block}
+      set={set}
+    />
+  );
+  return advanced ? (
+    <div className="two">
+      {choice(
+        "Space above and below",
+        "spacing",
+        "How much room this section has around its content.",
+      )}
+      {choice(
+        "Show this section on",
+        "hideOn",
+        "Hide a section on phones or on computers without deleting it.",
+      )}
+    </div>
+  ) : (
+    <>
+      {choice(
+        "Section colour",
+        "tone",
+        "Colours this one section only. The text colour is chosen for you so it always stays readable, whichever colour theme you publish.",
+      )}
+      <div className="two">
+        {choice("Text alignment", "align")}
+        {choice("Heading size", "headingScale")}
+      </div>
+      <h4 className="type-group">Colour</h4>
+      <ColourField
+        label="Heading colour"
+        field="headingColor"
+        block={block}
+        set={set}
+        against={behind}
+      />
+      <ColourField
+        label="Text colour"
+        field="textColor"
+        block={block}
+        set={set}
+        against={behind}
+      />
+      <SectionTypography block={block} set={set} />
+    </>
+  );
+}
+
+function SectionTabs({ pane, setPane }) {
+  return (
+    <div className="section-tabs">
+      {["Content", "Style", "Advanced"].map((name) => (
+        <button
+          type="button"
+          key={name}
+          className={pane === name ? "active" : ""}
+          onClick={() => setPane(name)}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
+  const [pane, setPane] = useState("Content");
+  const tabs = <SectionTabs pane={pane} setPane={setPane} />;
+  const styling =
+    pane === "Style" ? (
+      <SectionStyle block={block} set={set} />
+    ) : pane === "Advanced" ? (
+      <SectionStyle block={block} set={set} advanced />
+    ) : null;
   if (block.type === "template")
     return (
       <>
-        <p className="note">
-          Original {templateManifest[block.template].label} layout. Edit the
-          content below; the design stays consistent.
-        </p>
-        {[
-          ["text", "Text content"],
-          ["image", "Images"],
-          ["link", "Buttons and links"],
-        ].map(([kind, title]) => {
-          const fields = Object.entries(
-            templateManifest[block.template].fields,
-          ).filter(([, field]) => field.kind === kind);
-          return fields.length ? (
-            <details
-              className="template-group"
-              key={kind}
-              open={kind === "text"}
-            >
-              <summary>
-                {title} <small>({fields.length})</small>
-              </summary>
-              {fields.map(([key, field], i) =>
-                kind === "image" ? (
-                  <MediaSelect
-                    key={key}
-                    label={"Image " + (i + 1) + " — " + field.label}
-                    value={block.fields[key]}
-                    media={media}
-                    onChange={(v) =>
-                      set("fields", { ...block.fields, [key]: v })
-                    }
-                  />
-                ) : (
-                  <Field
-                    key={key}
-                    label={
-                      kind === "link"
-                        ? "Link " + (i + 1) + " — destination"
-                        : field.label
-                    }
-                    value={block.fields[key]}
-                    area={kind === "text" && block.fields[key].length > 80}
-                    onChange={(v) =>
-                      set("fields", { ...block.fields, [key]: v })
-                    }
-                  />
-                ),
-              )}
-            </details>
-          ) : null;
-        })}
+        {tabs}
+        {styling}
+        {pane === "Content" && (
+          <p className="note">
+            Original {templateManifest[block.template].label} layout. Edit the
+            content below; the design stays consistent.
+          </p>
+        )}
+        {pane === "Content" &&
+          [
+            ["text", "Text content"],
+            ["image", "Images"],
+            ["link", "Buttons and links"],
+          ].map(([kind, title]) => {
+            const fields = Object.entries(
+              templateManifest[block.template].fields,
+            ).filter(([, field]) => field.kind === kind);
+            return fields.length ? (
+              <details
+                className="template-group"
+                key={kind}
+                open={kind === "text"}
+              >
+                <summary>
+                  {title} <small>({fields.length})</small>
+                </summary>
+                {fields.map(([key, field], i) =>
+                  kind === "image" ? (
+                    <MediaSelect
+                      key={key}
+                      label={"Image " + (i + 1) + " — " + field.label}
+                      value={block.fields[key]}
+                      media={media}
+                      onChange={(v) =>
+                        set("fields", { ...block.fields, [key]: v })
+                      }
+                    />
+                  ) : (
+                    <Field
+                      key={key}
+                      label={
+                        kind === "link"
+                          ? "Link " + (i + 1) + " — destination"
+                          : field.label
+                      }
+                      value={block.fields[key]}
+                      area={kind === "text" && block.fields[key].length > 80}
+                      onChange={(v) =>
+                        set("fields", { ...block.fields, [key]: v })
+                      }
+                    />
+                  ),
+                )}
+              </details>
+            ) : null;
+          })}
       </>
     );
   if (block.type === "shared")
@@ -164,8 +509,16 @@ function BlockEditor({ block, onChange, media, sections }) {
         </small>
       </label>
     );
+  if (pane !== "Content")
+    return (
+      <>
+        {tabs}
+        {styling}
+      </>
+    );
   return (
     <>
+      {tabs}
       <div className="two">
         <label className="field">
           <span>Section type</span>
@@ -395,7 +748,9 @@ function App() {
     [preview, P] = useState(null),
     [history, H] = useState([]),
     [search, Q] = useState(""),
-    [starter, SetStarter] = useState(false);
+    [starter, SetStarter] = useState(false),
+    [picker, SetPicker] = useState(false),
+    [spot, SetSpot] = useState("");
   useEffect(() => {
     const added = (e) =>
       M((current) => [
@@ -422,6 +777,15 @@ function App() {
       .catch(() => {})
       .finally(() => R(true));
   }, []);
+  /* Appearance is a friendly front door onto the site-settings document, so the
+     editor never has to know where the theme values are stored. */
+  useEffect(() => {
+    if (view !== "Appearance" || selected) return;
+    const settings = docs.find((d) => d.kind === "settings");
+    if (!settings) return;
+    S(settings);
+    F(structuredClone(settings.draft));
+  }, [view, selected, docs]);
   useEffect(() => {
     const fn = (e) => {
       if (dirty) {
@@ -448,7 +812,8 @@ function App() {
     if (dirty && !window.confirm("Discard unsaved changes?")) return;
     S(d);
     F(d ? structuredClone(d.draft) : null);
-    T("Content");
+    SetSpot("");
+    T(d?.kind === "page" ? "Builder" : "Content");
     P(null);
     H([]);
     E("");
@@ -571,10 +936,41 @@ function App() {
     <div className="app">
       {starter && (
         <PageStarter
-          error={message}
           busy={busy}
           onCancel={() => SetStarter(false)}
           onCreate={(data) => create("page", data)}
+        />
+      )}
+      {picker && draft?.blocks && (
+        <SectionPicker
+          usedTemplates={draft.blocks
+            .filter((b) => b.type === "template")
+            .map((b) => b.template)}
+          sections={docs.filter((d) => d.kind === "section")}
+          onCancel={() => SetPicker(false)}
+          onPick={(choice) => {
+            const added =
+              choice.kind === "basic"
+                ? starterBlock(choice.type)
+                : choice.kind === "branded"
+                  ? {
+                      ...structuredClone(templateDefaults[choice.template]),
+                      id: crypto.randomUUID(),
+                      hidden: false,
+                    }
+                  : {
+                      id: crypto.randomUUID(),
+                      type: "shared",
+                      hidden: false,
+                      sectionId: choice.sectionId,
+                    };
+            change("blocks", [...draft.blocks, added]);
+            SetSpot(added.id);
+            SetPicker(false);
+            E(
+              "Section added at the bottom of the page. Open it to add your content.",
+            );
+          }}
         />
       )}
       <aside>
@@ -590,35 +986,30 @@ function App() {
           <i /> Website workspace<small>on-zen-on.onrender.com</small>
         </div>
         <nav>
-          {[
-            "Overview",
-            "Pages",
-            "Reusable sections",
-            "Menus",
-            "Media library",
-            "Site settings",
-            ...(user.role === "admin"
-              ? ["Inquiries", "Requests", "Users"]
-              : []),
-          ].map((v, i) => (
-            <button
-              className={view === v ? "active" : ""}
-              key={v}
-              onClick={() => {
-                if (dirty && !window.confirm("Discard unsaved changes?"))
-                  return;
-                V(v);
-                S(null);
-                F(null);
-                P(null);
-                Q("");
-                E("");
-              }}
-            >
-              <span>{["◈", "▤", "▦", "☷", "▧", "⚙", "✉", "♙"][i]}</span>
-              {v}
-            </button>
-          ))}
+          {navItems
+            .filter((item) => !item.adminOnly || user.role === "admin")
+            .map((item) => (
+              <button
+                className={view === item.name ? "active" : ""}
+                key={item.name}
+                onClick={() => {
+                  if (dirty && !window.confirm("Discard unsaved changes?"))
+                    return;
+                  V(item.name);
+                  S(null);
+                  F(null);
+                  P(null);
+                  Q("");
+                  E("");
+                }}
+              >
+                <span>{item.icon}</span>
+                <b>
+                  {item.name}
+                  <small>{item.hint}</small>
+                </b>
+              </button>
+            ))}
         </nav>
         <div className="aside-bottom">
           <a href="/" target="_blank" rel="noreferrer">
@@ -664,36 +1055,35 @@ function App() {
             <div>
               <p className="eyebrow">YOUR WEBSITE, CONNECTED</p>
               <h1>
-                {selected
-                  ? draft.title ||
-                    draft.name ||
-                    draft.heading ||
-                    draft.siteName ||
-                    templateManifest[draft.template]?.label
-                  : view === "Overview"
-                    ? "A little clarity. A lot of possibility."
-                    : view}
+                {view === "Appearance"
+                  ? "Appearance"
+                  : selected
+                    ? draft.title ||
+                      draft.name ||
+                      draft.heading ||
+                      draft.siteName ||
+                      templateManifest[draft.template]?.label
+                    : view === "Overview"
+                      ? "A little clarity. A lot of possibility."
+                      : view}
               </h1>
               <p>
-                {selected
-                  ? "Shape your content. Your public design stays in place."
-                  : "Manage what’s next for On Zen On."}
+                {view === "Appearance"
+                  ? "Choose your fonts, colours and spacing, and watch the website change as you do."
+                  : selected
+                    ? "Shape your content. Your public design stays in place."
+                    : "Manage what’s next for On Zen On."}
               </p>
             </div>
-            {kinds[view] &&
-              !selected &&
-              !(
-                view === "Site settings" &&
-                docs.some((d) => d.kind === "settings")
-              ) && (
-                <button
-                  className="primary"
-                  disabled={busy}
-                  onClick={() => create(kinds[view])}
-                >
-                  + Create {kinds[view]}
-                </button>
-              )}
+            {kinds[view] && !selected && (
+              <button
+                className="primary"
+                disabled={busy}
+                onClick={() => create(kinds[view])}
+              >
+                + Create {kinds[view]}
+              </button>
+            )}
           </div>
           {message && (
             <div className="notice" role="status">
@@ -711,9 +1101,9 @@ function App() {
                     "Change text, images and sections",
                   ],
                   [
-                    "Change fonts & colors",
-                    "Site settings",
-                    "Theme, logo sizes and website settings",
+                    "Change fonts & colours",
+                    "Appearance",
+                    "Ready themes, fonts, colours and logo size",
                   ],
                   [
                     "Manage pictures",
@@ -843,47 +1233,71 @@ function App() {
               </p>
             </>
           )}
-          {kinds[view] &&
-            !selected &&
-            !(
-              view === "Site settings" &&
-              docs.some((d) => d.kind === "settings")
-            ) && (
-              <>
-                <Field
-                  label="Search content"
-                  value={search}
-                  onChange={Q}
-                  placeholder="Search by title…"
-                />
-                <div className="table">
-                  {visible.map((d) => (
-                    <button
-                      className="table-row"
-                      key={d.id}
-                      onClick={() => choose(d)}
-                    >
-                      <strong>
-                        {label(d)}
-                        <small>
-                          {d.draft.path || d.draft.location || d.kind}
-                        </small>
-                      </strong>
-                      <span className={d.published ? "badge live" : "badge"}>
-                        {d.published ? "Published" : "Draft"}
-                      </span>
-                      <span>Version {d.version} →</span>
-                    </button>
-                  ))}
+          {kinds[view] && !selected && (
+            <>
+              <Field
+                label="Search content"
+                value={search}
+                onChange={Q}
+                placeholder="Search by title…"
+              />
+              <div className="table">
+                {visible.map((d) => (
+                  <button
+                    className="table-row"
+                    key={d.id}
+                    onClick={() => choose(d)}
+                  >
+                    <strong>
+                      {label(d)}
+                      <small>
+                        {d.draft.path || d.draft.location || d.kind}
+                      </small>
+                    </strong>
+                    <span className={d.published ? "badge live" : "badge"}>
+                      {d.published ? "Published" : "Draft"}
+                    </span>
+                    <span>Version {d.version} →</span>
+                  </button>
+                ))}
+              </div>
+              {!visible.length && (
+                <div className="empty">
+                  No entries found. Create a {kinds[view]} to get started.
                 </div>
-                {!visible.length && (
-                  <div className="empty">
-                    No entries found. Create a {kinds[view]} to get started.
-                  </div>
-                )}
-              </>
+              )}
+            </>
+          )}
+          {view === "Appearance" &&
+            !docs.some((d) => d.kind === "settings") && (
+              <div className="empty">
+                Website settings have not been created yet. Create them under
+                Site settings first, then return here to choose your fonts and
+                colours.
+              </div>
             )}
-          {selected && (
+          {selected && view === "Appearance" && (
+            <ThemeStudio
+              value={draft.theme}
+              onChange={(v) => change("theme", v)}
+              busy={busy}
+              dirty={dirty}
+              canPublish={user.role === "admin"}
+              pages={docs
+                .filter((d) => d.kind === "page" && d.published)
+                .map((d) => d.published.path)}
+              onSave={() =>
+                run(async () => {
+                  await save();
+                  E(
+                    "Design saved. Select Publish design to put it on the website.",
+                  );
+                })
+              }
+              onPublish={publish}
+            />
+          )}
+          {selected && view !== "Appearance" && (
             <>
               <div className="toolbar">
                 <button onClick={() => choose(null)}>← All entries</button>
@@ -960,6 +1374,7 @@ function App() {
               </div>
               <div className="tabs">
                 {[
+                  ...(selected.kind === "page" ? ["Builder"] : []),
                   "Content",
                   ...(selected.kind === "page" ? ["SEO"] : []),
                   "History",
@@ -980,7 +1395,42 @@ function App() {
                 ))}
               </div>
               <fieldset className="edit-lock" disabled={busy}>
-                {tab === "History" ? (
+                {tab === "Builder" ? (
+                  <PageBuilder
+                    documentId={selected.id}
+                    draft={draft}
+                    selected={spot}
+                    onSelect={SetSpot}
+                    onChange={(blocks) => change("blocks", blocks)}
+                    onAddSection={() => SetPicker(true)}
+                    busy={busy}
+                    dirty={dirty}
+                    canPublish={user.role === "admin"}
+                    onSave={() =>
+                      run(async () => {
+                        await save();
+                        E("Page saved. Select Publish page to put it online.");
+                      })
+                    }
+                    onPublish={publish}
+                  >
+                    {draft.blocks.some((b) => b.id === spot) && (
+                      <BlockEditor
+                        block={draft.blocks.find((b) => b.id === spot)}
+                        media={media}
+                        sections={docs.filter((d) => d.kind === "section")}
+                        onChange={(value) =>
+                          change(
+                            "blocks",
+                            draft.blocks.map((b) =>
+                              b.id === spot ? value : b,
+                            ),
+                          )
+                        }
+                      />
+                    )}
+                  </PageBuilder>
+                ) : tab === "History" ? (
                   <div className="panel">
                     <h2>Revision history</h2>
                     <p>
@@ -1111,77 +1561,16 @@ function App() {
                           <h2>
                             Page sections <small>{draft.blocks.length}</small>
                           </h2>
-                          <div>
-                            <select
-                              aria-label="Add a section"
-                              value=""
-                              onChange={(e) => {
-                                if (e.target.value)
-                                  change("blocks", [
-                                    ...draft.blocks,
-                                    blankBlock(e.target.value),
-                                  ]);
-                              }}
-                            >
-                              <option value="">+ Add section</option>
-                              {sectionTypes.map((type) => (
-                                <option key={type} value={type}>
-                                  {sectionNames[type]}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              aria-label="Add an original layout"
-                              value=""
-                              onChange={(e) => {
-                                if (e.target.value)
-                                  change("blocks", [
-                                    ...draft.blocks,
-                                    {
-                                      ...structuredClone(
-                                        templateDefaults[e.target.value],
-                                      ),
-                                      id: crypto.randomUUID(),
-                                    },
-                                  ]);
-                              }}
-                            >
-                              <option value="">+ Branded section</option>
-                              {Object.entries(templateManifest)
-                                .filter(
-                                  ([key]) =>
-                                    !key.startsWith("site-") &&
-                                    !draft.blocks.some(
-                                      (b) => b.template === key,
-                                    ),
-                                )
-                                .map(([key, t]) => (
-                                  <option key={key} value={key}>
-                                    {t.label}
-                                  </option>
-                                ))}
-                            </select>
-                            <button
-                              onClick={() =>
-                                change("blocks", [
-                                  ...draft.blocks,
-                                  {
-                                    id: crypto.randomUUID(),
-                                    type: "shared",
-                                    sectionId:
-                                      docs.find((d) => d.kind === "section")
-                                        ?.id || "",
-                                  },
-                                ])
-                              }
-                            >
-                              + Reusable
-                            </button>
-                          </div>
+                          <button
+                            className="primary"
+                            onClick={() => SetPicker(true)}
+                          >
+                            + Add a section
+                          </button>
                         </div>
                         {draft.blocks.map((b, i) => (
                           <details
-                            className="block"
+                            className={b.hidden ? "block is-hidden" : "block"}
                             key={b.id}
                             open={draft.blocks.length === 1 ? true : undefined}
                           >
@@ -1200,13 +1589,20 @@ function App() {
                                     ? "Original design"
                                     : "Reusable section")}
                               </span>
+                              {b.hidden && (
+                                <span className="badge hidden-badge">
+                                  Hidden from visitors
+                                </span>
+                              )}
+                              <span className="block-open">Open to edit ▾</span>
                             </summary>
                             <div className="block-body">
                               <div className="row">
                                 <span>Section controls</span>
-                                <div>
+                                <div className="section-controls">
                                   <button
                                     disabled={!i}
+                                    title="Move this section higher up the page"
                                     onClick={() => {
                                       const a = [...draft.blocks];
                                       [a[i - 1], a[i]] = [a[i], a[i - 1]];
@@ -1217,6 +1613,7 @@ function App() {
                                   </button>
                                   <button
                                     disabled={i === draft.blocks.length - 1}
+                                    title="Move this section further down the page"
                                     onClick={() => {
                                       const a = [...draft.blocks];
                                       [a[i + 1], a[i]] = [a[i], a[i + 1]];
@@ -1226,14 +1623,64 @@ function App() {
                                     ↓ Move down
                                   </button>
                                   <button
+                                    title="Make an identical copy of this section"
+                                    onClick={() => {
+                                      const copy = {
+                                        ...structuredClone(b),
+                                        id: crypto.randomUUID(),
+                                      };
+                                      if (copy.anchor) copy.anchor = "";
+                                      /* Each branded layout may appear only once per page. */
+                                      if (copy.type === "template") {
+                                        E(
+                                          "Branded sections can be used once on a page. Add it to another page instead.",
+                                        );
+                                        return;
+                                      }
+                                      const a = [...draft.blocks];
+                                      a.splice(i + 1, 0, copy);
+                                      change("blocks", a);
+                                    }}
+                                  >
+                                    ⧉ Make a copy
+                                  </button>
+                                  <button
+                                    className={b.hidden ? "warn" : ""}
+                                    title={
+                                      b.hidden
+                                        ? "Show this section on the website again"
+                                        : "Keep this section but hide it from visitors"
+                                    }
                                     onClick={() =>
                                       change(
                                         "blocks",
-                                        draft.blocks.filter((_, j) => j !== i),
+                                        draft.blocks.map((x, j) =>
+                                          i === j
+                                            ? { ...x, hidden: !x.hidden }
+                                            : x,
+                                        ),
                                       )
                                     }
                                   >
-                                    Remove
+                                    {b.hidden ? "◉ Show again" : "◌ Hide"}
+                                  </button>
+                                  <button
+                                    className="danger"
+                                    title="Delete this section from the page"
+                                    onClick={() => {
+                                      if (
+                                        !window.confirm(
+                                          "Delete this section? Use Hide instead if you may want it back later.",
+                                        )
+                                      )
+                                        return;
+                                      change(
+                                        "blocks",
+                                        draft.blocks.filter((_, j) => j !== i),
+                                      );
+                                    }}
+                                  >
+                                    Delete
                                   </button>
                                 </div>
                               </div>
@@ -1384,10 +1831,22 @@ function App() {
                           />
                         ))}
                     {selected.kind === "settings" && (
-                      <ThemeEditor
-                        value={draft.theme}
-                        onChange={(v) => change("theme", v)}
-                      />
+                      <div className="panel-pointer">
+                        <h2>Fonts, colours and theme</h2>
+                        <p>
+                          Everything about how the website looks now lives in
+                          Appearance, with a live preview beside the controls.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            V("Appearance");
+                            T("Content");
+                          }}
+                        >
+                          Open Appearance ↗
+                        </button>
+                      </div>
                     )}
                     {selected.kind === "settings" && (
                       <ExperienceSettings
@@ -1405,72 +1864,14 @@ function App() {
           )}
           {view === "Requests" && <Requests api={api} run={run} />}
           {view === "Media library" && (
-            <>
-              <form
-                className="panel upload"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.currentTarget;
-                  const data = new FormData(form);
-                  run(async () => {
-                    await api("/media", "POST", data);
-                    await load();
-                    form.reset();
-                    E(
-                      "Image uploaded. It is available in section and SEO image selectors.",
-                    );
-                  });
-                }}
-              >
-                <h2>Add an image</h2>
-                <p>
-                  Public website assets only. PNG, JPEG or WebP · up to 8 MB.
-                  Images are resized and converted to WebP.
-                </p>
-                <div className="two">
-                  <label className="field">
-                    <span>Choose image</span>
-                    <input
-                      name="file"
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      required
-                    />
-                  </label>
-                  <label className="field">
-                    <span>Alternative text</span>
-                    <input
-                      name="alt"
-                      required
-                      maxLength={250}
-                      placeholder="Describe the image"
-                    />
-                  </label>
-                </div>
-                <button className="primary" disabled={busy}>
-                  Upload image ↗
-                </button>
-              </form>
-              <div className="media-grid">
-                {media.map((m) => (
-                  <article key={m.id}>
-                    <img src={m.url} alt={m.alt} />
-                    <div>
-                      <strong>{m.alt}</strong>
-                      <small>
-                        {m.width} × {m.height} · WebP
-                      </small>
-                      <small>{m.url}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              {!media.length && (
-                <div className="empty">
-                  Your media library is ready for its first image.
-                </div>
-              )}
-            </>
+            <MediaLibrary
+              media={media}
+              api={api}
+              run={run}
+              reload={load}
+              canDelete={user.role === "admin"}
+              notify={E}
+            />
           )}
           {preview && (
             <div

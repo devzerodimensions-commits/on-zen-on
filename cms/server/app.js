@@ -1,5 +1,5 @@
 import express from "express";
-import {getExperience} from "../../server/experience-settings.js";
+import { getExperience } from "../../server/experience-settings.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
@@ -44,7 +44,10 @@ export async function createApp(
   )
     throw Error("Production requires HTTPS APP_ORIGIN and DATABASE_URL");
   const app = express();
-  app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS || (production ? 1 : 0)));
+  app.set(
+    "trust proxy",
+    Number(process.env.TRUST_PROXY_HOPS || (production ? 1 : 0)),
+  );
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -207,7 +210,11 @@ export async function createApp(
           422,
           "Publish each reusable section before using it on a page",
         );
-      resolved.push({ ...JSON.parse(row.published), id: b.id });
+      resolved.push({
+        ...JSON.parse(row.published),
+        id: b.id,
+        hidden: b.hidden === true,
+      });
     }
     return pageSchema.parse({ ...data, blocks: resolved });
   }
@@ -353,28 +360,67 @@ export async function createApp(
       ),
     ),
   );
-  app.get("/api/cms/requests",admin,async(_req,res)=>res.json(await db.query("SELECT r.id,r.name,r.email,r.service,r.message,r.status,r.created,a.starts,a.status AS appointment_status FROM service_requests r LEFT JOIN appointment_requests a ON a.request_id=r.id ORDER BY r.created DESC LIMIT 200")));
-  app.patch("/api/cms/appointments/:id",admin,async(req,res)=>{
-    const id=idSchema.parse(req.params.id);
-    const {status}=z.object({status:z.enum(["confirmed","cancelled"])}).strict().parse(req.body);
-    await db.transaction(async q=>{
+  app.get("/api/cms/requests", admin, async (_req, res) =>
+    res.json(
+      await db.query(
+        "SELECT r.id,r.name,r.email,r.service,r.message,r.status,r.created,a.starts,a.status AS appointment_status FROM service_requests r LEFT JOIN appointment_requests a ON a.request_id=r.id ORDER BY r.created DESC LIMIT 200",
+      ),
+    ),
+  );
+  app.patch("/api/cms/appointments/:id", admin, async (req, res) => {
+    const id = idSchema.parse(req.params.id);
+    const { status } = z
+      .object({ status: z.enum(["confirmed", "cancelled"]) })
+      .strict()
+      .parse(req.body);
+    await db.transaction(async (q) => {
       await q.query("UPDATE scheduling_lock SET id=1 WHERE id=1");
-      const [row]=await q.query("SELECT starts FROM appointment_requests WHERE request_id=$1",[id]);
-      if(!row)throw fail(404,"Appointment not found");
-      const starts=Number(row.starts);
-      if(status==="confirmed"){
-        if(starts<=Date.now())throw fail(400,"This requested time has passed");
-        const overlap=await q.query("SELECT request_id FROM appointment_requests WHERE status='confirmed' AND request_id<>$1 AND starts>$2 AND starts<$3",[id,starts-1800000,starts+1800000]);
-        if(overlap.length)throw fail(409,"Another confirmed 30-minute appointment overlaps this time");
+      const [row] = await q.query(
+        "SELECT starts FROM appointment_requests WHERE request_id=$1",
+        [id],
+      );
+      if (!row) throw fail(404, "Appointment not found");
+      const starts = Number(row.starts);
+      if (status === "confirmed") {
+        if (starts <= Date.now())
+          throw fail(400, "This requested time has passed");
+        const overlap = await q.query(
+          "SELECT request_id FROM appointment_requests WHERE status='confirmed' AND request_id<>$1 AND starts>$2 AND starts<$3",
+          [id, starts - 1800000, starts + 1800000],
+        );
+        if (overlap.length)
+          throw fail(
+            409,
+            "Another confirmed 30-minute appointment overlaps this time",
+          );
       }
-      await q.query("UPDATE appointment_requests SET status=$1 WHERE request_id=$2",[status,id]);
-    });res.json({ok:true});
+      await q.query(
+        "UPDATE appointment_requests SET status=$1 WHERE request_id=$2",
+        [status, id],
+      );
+    });
+    res.json({ ok: true });
   });
-  app.patch("/api/cms/requests/:id",admin,async(req,res)=>{
-    const id=idSchema.parse(req.params.id);
-    const {status}=z.object({status:z.enum(["received","reviewing","contacted","completed","cancelled"])}).strict().parse(req.body);
-    const rows=await db.query("UPDATE service_requests SET status=$1 WHERE id=$2 RETURNING id",[status,id]);
-    if(!rows.length)throw fail(404,"Request not found");res.json({ok:true});
+  app.patch("/api/cms/requests/:id", admin, async (req, res) => {
+    const id = idSchema.parse(req.params.id);
+    const { status } = z
+      .object({
+        status: z.enum([
+          "received",
+          "reviewing",
+          "contacted",
+          "completed",
+          "cancelled",
+        ]),
+      })
+      .strict()
+      .parse(req.body);
+    const rows = await db.query(
+      "UPDATE service_requests SET status=$1 WHERE id=$2 RETURNING id",
+      [status, id],
+    );
+    if (!rows.length) throw fail(404, "Request not found");
+    res.json({ ok: true });
   });
   app.patch("/api/cms/inquiries/:id", admin, async (req, res) => {
     const data = z
@@ -454,6 +500,41 @@ export async function createApp(
       .status(201)
       .json({ id, url, alt, width: info.width, height: info.height });
   });
+  app.patch("/api/cms/media/:id", async (req, res) => {
+    const id = idSchema.parse(req.params.id);
+    const { alt } = z
+      .object({ alt: z.string().min(1).max(250) })
+      .strict()
+      .parse(req.body);
+    const rows = await db.query(
+      "UPDATE media SET alt=$1 WHERE id=$2 RETURNING id",
+      [alt, id],
+    );
+    if (!rows.length) throw fail(404, "Image not found");
+    res.json({ ok: true });
+  });
+  app.delete("/api/cms/media/:id", admin, async (req, res) => {
+    const id = idSchema.parse(req.params.id);
+    await db.transaction(async (q) => {
+      const [row] = await q.query("SELECT url FROM media WHERE id=$1", [id]);
+      if (!row) throw fail(404, "Image not found");
+      /* An image still placed on a page or a draft must not disappear from
+         under the editor, so deleting is refused until it is unused. */
+      const pattern = `%${row.url}%`;
+      const inUse = await q.query(
+        "SELECT id FROM documents WHERE draft LIKE $1 OR published LIKE $2",
+        [pattern, pattern],
+      );
+      if (inUse.length)
+        throw fail(
+          409,
+          "This image is still used on a page or a draft. Remove it there first.",
+        );
+      await q.query("DELETE FROM media_data WHERE media_id=$1", [id]);
+      await q.query("DELETE FROM media WHERE id=$1", [id]);
+    });
+    res.json({ ok: true });
+  });
   app.get("/media/:file", async (req, res) => {
     const id = z
       .string()
@@ -482,7 +563,9 @@ export async function createApp(
     if (!row) throw fail(404, "Published page not found");
     res.set("Cache-Control", "no-cache").json(JSON.parse(row.published));
   });
-  app.get("/api/public/experience",async(_req,res)=>res.set("Cache-Control","no-store").json(await getExperience(db)));
+  app.get("/api/public/experience", async (_req, res) =>
+    res.set("Cache-Control", "no-store").json(await getExperience(db)),
+  );
   app.get("/api/public/site", async (_req, res) => {
     const rows = await db.query(
       "SELECT kind,published FROM documents WHERE published IS NOT NULL AND kind IN ('menu','settings','section')",

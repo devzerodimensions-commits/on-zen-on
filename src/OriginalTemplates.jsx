@@ -2,6 +2,7 @@ import { InquiryForm } from "./InquiryForm.jsx";
 // Extracted from the original website. Original classes, layout and decorative elements are preserved.
 import React from "react";
 import { menuDefaults } from "../shared/templates.js";
+import { sectionClasses } from "../shared/section-style.js";
 function menuLinks(location, menus) {
   return (
     menus?.find((m) => m.location === location)?.items || menuDefaults[location]
@@ -24,10 +25,12 @@ export function OriginalTemplate({
   submit,
   formState,
 }) {
+  /* A branded section can be recoloured from the admin like any other. */
+  const tone = sectionClasses(content);
   switch (content.template) {
     case "hero":
       return (
-        <section className="hero">
+        <section className={"hero" + tone}>
           <div className="hero-copy">
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -99,7 +102,7 @@ export function OriginalTemplate({
       );
     case "ticker":
       return (
-        <section className="ticker" aria-label="Service highlights">
+        <section className={"ticker" + tone} aria-label="Service highlights">
           <div>
             {content.fields["text_1"]}
             <b>✦</b>
@@ -116,7 +119,7 @@ export function OriginalTemplate({
       );
     case "trust":
       return (
-        <section className="trust-bar">
+        <section className={"trust-bar" + tone}>
           <p>{content.fields["text_1"]}</p>
           <div>
             <span>{content.fields["text_2"]}</span>
@@ -129,7 +132,7 @@ export function OriginalTemplate({
       );
     case "about":
       return (
-        <section className="intro section" id="about">
+        <section className={"intro section" + tone} id="about">
           <p className="eyebrow">
             {content.fields["text_1"]}
             <i />
@@ -158,7 +161,7 @@ export function OriginalTemplate({
       );
     case "services":
       return (
-        <section className="services section" id="services">
+        <section className={"services section" + tone} id="services">
           <div className="section-head">
             <div>
               <p className="eyebrow">
@@ -231,7 +234,7 @@ export function OriginalTemplate({
       );
     case "capability":
       return (
-        <section className="capability" id="industries">
+        <section className={"capability" + tone} id="industries">
           <div className="capability-copy">
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -269,7 +272,7 @@ export function OriginalTemplate({
       );
     case "technology":
       return (
-        <section className="technology section">
+        <section className={"technology section" + tone}>
           <div className="technology-title">
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -363,7 +366,7 @@ export function OriginalTemplate({
       );
     case "features":
       return (
-        <section className="outcomes section" id="work">
+        <section className={"outcomes section" + tone} id="work">
           <p className="eyebrow">
             {content.fields["text_1"]}
             <i />
@@ -390,7 +393,7 @@ export function OriginalTemplate({
       );
     case "industries":
       return (
-        <section className="industries-showcase">
+        <section className={"industries-showcase" + tone}>
           <div>
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -418,7 +421,7 @@ export function OriginalTemplate({
       );
     case "results":
       return (
-        <section className="results section">
+        <section className={"results section" + tone}>
           <div className="results-intro">
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -452,7 +455,7 @@ export function OriginalTemplate({
       );
     case "process":
       return (
-        <section className="process">
+        <section className={"process" + tone}>
           <div className="process-label">
             <span>{content.fields["text_1"]}</span>
             <b>{content.fields["text_2"]}</b>
@@ -478,7 +481,7 @@ export function OriginalTemplate({
       );
     case "updates":
       return (
-        <section className="updates section" id="updates">
+        <section className={"updates section" + tone} id="updates">
           <div className="section-head">
             <div>
               <p className="eyebrow">
@@ -521,7 +524,7 @@ export function OriginalTemplate({
       );
     case "showcase":
       return (
-        <section className="showcase">
+        <section className={"showcase" + tone}>
           <div className="showcase-heading">
             <p className="eyebrow">
               {content.fields["text_1"]}
@@ -615,7 +618,7 @@ export function OriginalTemplate({
     case "floating-work":
       return (
         <section
-          className="floating-work"
+          className={"floating-work" + tone}
           aria-label="Selected digital experiences"
         >
           <div className="screen-field" aria-hidden="true">
@@ -641,7 +644,7 @@ export function OriginalTemplate({
       );
     case "contact":
       return (
-        <section className="contact" id="contact">
+        <section className={"contact" + tone} id="contact">
           <div>
             <p className="eyebrow">
               {content.fields["text_1"]}

@@ -146,10 +146,21 @@ export async function createWebsite(
     );
     const html = await readFile("dist/index.html", "utf8");
     if (!row) return res.status(404).type("html").send(html);
+    /* Company details feed the Organization entry in the page's structured data. */
+    const [config] = await db.query(
+      "SELECT published FROM documents WHERE public_key='settings:global' AND published IS NOT NULL",
+    );
     res
       .set("Cache-Control", "no-cache")
       .type("html")
-      .send(pageShell(html, JSON.parse(row.published), origin));
+      .send(
+        pageShell(
+          html,
+          JSON.parse(row.published),
+          origin,
+          config ? JSON.parse(config.published) : null,
+        ),
+      );
   });
   app.use((err, _req, res, _next) => {
     console.error(err.message);

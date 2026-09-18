@@ -40,6 +40,7 @@ export function ExperienceSettings({ value, onChange }) {
         {field("chatTitle", "Chatbot name")}
         {field("chatLauncher", "Chat button label")}
         {field("chatGreeting", "Welcome message", true)}
+        {field("aboutAnswer", "“Who are you?” response", true)}
         {field("pricingAnswer", "Pricing response", true)}
         {field("timelineAnswer", "Timeline response", true)}
         {field("contactAnswer", "Contact response", true)}
