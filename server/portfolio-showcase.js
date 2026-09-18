@@ -4,7 +4,7 @@ export async function migratePortfolioShowcase(db) {
   await db.transaction(async (q) => {
     const done = await q.query(
       "INSERT INTO cms_migrations(id)VALUES($1)ON CONFLICT(id)DO NOTHING RETURNING id",
-      ["portfolio-showcase-v1"],
+      ["portfolio-showcase-v2"],
     );
     if (!done.length) return;
     const rows = await q.query(
@@ -19,9 +19,10 @@ export async function migratePortfolioShowcase(db) {
         const gallery = page.blocks.find(
           (b) =>
             b.type === "casestudies" &&
-            b.heading === "Selected project builds" &&
-            b.items.length === 6 &&
-            b.items[0].title === "Service business website",
+            ((b.heading === "Selected project builds" &&
+              b.items.length === 6 && b.items[0].title === "Service business website") ||
+             (b.heading === "The kinds of projects we build" &&
+              b.items.length === 4 && b.items[0].title === "Business website with enquiry and booking")),
         );
         if (!gallery) continue;
         gallery.heading = "Nine ideas. Endless possibilities.";
