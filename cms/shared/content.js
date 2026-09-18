@@ -1,5 +1,6 @@
+import { themeSchema } from "../../shared/theme.js";
 import { z } from "zod";
-import {experienceSchema} from "../../shared/experience-settings.js";
+import { experienceSchema } from "../../shared/experience-settings.js";
 import { templateManifest } from "../../shared/templates.js";
 const short = z.string().max(250);
 export const safeLink = z
@@ -209,7 +210,8 @@ export const schemas = {
       footerText: z.string().max(2000),
       email: z.email(),
       phone: short,
-      experience:experienceSchema.optional(),
+      experience: experienceSchema.optional(),
+      theme: themeSchema.optional(),
     })
     .strict(),
 };

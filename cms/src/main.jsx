@@ -1,10 +1,13 @@
+import { ThemeEditor } from "./ThemeEditor.jsx";
+import { PageStarter, sectionNames } from "./PageStarter.jsx";
+import "./editor-guide.css";
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { blankBlock, sectionTypes } from "../shared/content.js";
 import { templateDefaults, templateManifest } from "../../shared/templates.js";
 import { Management } from "./Management.jsx";
 import { Requests } from "./Requests.jsx";
-import {ExperienceSettings} from "./ExperienceSettings.jsx";
+import { ExperienceSettings } from "./ExperienceSettings.jsx";
 import { PasswordField } from "./PasswordField.jsx";
 import "./style.css";
 import { MediaSelect as ImagePicker } from "./MediaSelect.jsx";
@@ -77,7 +80,9 @@ function Field({ label, value, onChange, area = false, ...props }) {
   );
 }
 function MediaSelect(props) {
- return <ImagePicker {...props} upload={data=>api("/media","POST",data)}/>;
+  return (
+    <ImagePicker {...props} upload={(data) => api("/media", "POST", data)} />
+  );
 }
 function BlockEditor({ block, onChange, media, sections }) {
   const set = (k, v) => onChange({ ...block, [k]: v });
@@ -88,26 +93,53 @@ function BlockEditor({ block, onChange, media, sections }) {
           Original {templateManifest[block.template].label} layout. Edit the
           content below; the design stays consistent.
         </p>
-        {Object.entries(templateManifest[block.template].fields).map(
-          ([key, field]) =>
-            field.kind === "image" ? (
-              <MediaSelect
-                key={key}
-                label={field.label}
-                value={block.fields[key]}
-                media={media}
-                onChange={(v) => set("fields", { ...block.fields, [key]: v })}
-              />
-            ) : (
-              <Field
-                key={key}
-                label={field.label}
-                value={block.fields[key]}
-                area={field.kind === "text" && block.fields[key].length > 80}
-                onChange={(v) => set("fields", { ...block.fields, [key]: v })}
-              />
-            ),
-        )}
+        {[
+          ["text", "Text content"],
+          ["image", "Images"],
+          ["link", "Buttons and links"],
+        ].map(([kind, title]) => {
+          const fields = Object.entries(
+            templateManifest[block.template].fields,
+          ).filter(([, field]) => field.kind === kind);
+          return fields.length ? (
+            <details
+              className="template-group"
+              key={kind}
+              open={kind === "text"}
+            >
+              <summary>
+                {title} <small>({fields.length})</small>
+              </summary>
+              {fields.map(([key, field], i) =>
+                kind === "image" ? (
+                  <MediaSelect
+                    key={key}
+                    label={"Image " + (i + 1) + " — " + field.label}
+                    value={block.fields[key]}
+                    media={media}
+                    onChange={(v) =>
+                      set("fields", { ...block.fields, [key]: v })
+                    }
+                  />
+                ) : (
+                  <Field
+                    key={key}
+                    label={
+                      kind === "link"
+                        ? "Link " + (i + 1) + " — destination"
+                        : field.label
+                    }
+                    value={block.fields[key]}
+                    area={kind === "text" && block.fields[key].length > 80}
+                    onChange={(v) =>
+                      set("fields", { ...block.fields, [key]: v })
+                    }
+                  />
+                ),
+              )}
+            </details>
+          ) : null;
+        })}
       </>
     );
   if (block.type === "shared")
@@ -142,19 +174,21 @@ function BlockEditor({ block, onChange, media, sections }) {
             onChange={(e) => set("type", e.target.value)}
           >
             {sectionTypes.map((t) => (
-              <option key={t}>{t}</option>
+              <option key={t} value={t}>
+                {sectionNames[t]}
+              </option>
             ))}
           </select>
         </label>
         <Field
-          label="Anchor ID"
+          label="Section link name (optional)"
           value={block.anchor}
           onChange={(v) => set("anchor", v)}
           placeholder="e.g. services"
         />
       </div>
       <Field
-        label="Eyebrow"
+        label="Small heading above the title"
         value={block.eyebrow}
         onChange={(v) => set("eyebrow", v)}
       />
@@ -164,7 +198,7 @@ function BlockEditor({ block, onChange, media, sections }) {
         onChange={(v) => set("heading", v)}
       />
       <Field
-        label="Body"
+        label="Main content"
         area
         value={block.body}
         onChange={(v) => set("body", v)}
@@ -185,7 +219,9 @@ function BlockEditor({ block, onChange, media, sections }) {
       <div className="two">
         <MediaSelect
           value={block.image}
-          onChange={(v,alt) => onChange({...block,image:v,...(alt ? {alt} : {})})}
+          onChange={(v, alt) =>
+            onChange({ ...block, image: v, ...(alt ? { alt } : {}) })
+          }
           media={media}
         />
         <Field
@@ -195,11 +231,30 @@ function BlockEditor({ block, onChange, media, sections }) {
         />
       </div>
       <div className="itemlist">
-        {block.type === "hero" && <div className="two">
-          <Field label="Image caption" value={block.imageCaption ?? "Thoughtfully designed."} onChange={v=>set("imageCaption",v)}/>
-          <Field label="Image caption emphasis" value={block.imageCaptionStrong ?? "Built for what’s next."} onChange={v=>set("imageCaptionStrong",v)}/>
-        </div>}
-        <Field label="Card button text" value={block.cardLinkLabel ?? (block.anchor==="included-services" ? "Discuss this service" : "Explore service")} onChange={v=>set("cardLinkLabel",v)}/>
+        {block.type === "hero" && (
+          <div className="two">
+            <Field
+              label="Image caption"
+              value={block.imageCaption ?? "Thoughtfully designed."}
+              onChange={(v) => set("imageCaption", v)}
+            />
+            <Field
+              label="Image caption emphasis"
+              value={block.imageCaptionStrong ?? "Built for what’s next."}
+              onChange={(v) => set("imageCaptionStrong", v)}
+            />
+          </div>
+        )}
+        <Field
+          label="Card button text"
+          value={
+            block.cardLinkLabel ??
+            (block.anchor === "included-services"
+              ? "Discuss this service"
+              : "Explore service")
+          }
+          onChange={(v) => set("cardLinkLabel", v)}
+        />
         <div className="row">
           <h4>Content cards</h4>
           <button
@@ -248,7 +303,14 @@ function BlockEditor({ block, onChange, media, sections }) {
             {["title", "text", "href", "alt"].map((k) => (
               <Field
                 key={k}
-                label={k === "alt" ? "Image alternative text" : k}
+                label={
+                  {
+                    alt: "Describe this image",
+                    title: "Card title",
+                    text: "Card description",
+                    href: "Link to page",
+                  }[k]
+                }
                 area={k === "text"}
                 value={item[k]}
                 onChange={(v) =>
@@ -298,11 +360,11 @@ function BlockEditor({ block, onChange, media, sections }) {
             <MediaSelect
               value={item.image}
               media={media}
-              onChange={(v,alt) =>
+              onChange={(v, alt) =>
                 set(
                   "items",
                   block.items.map((it, j) =>
-                    j === i ? { ...it, image: v, ...(alt ? {alt} : {}) } : it,
+                    j === i ? { ...it, image: v, ...(alt ? { alt } : {}) } : it,
                   ),
                 )
               }
@@ -312,8 +374,8 @@ function BlockEditor({ block, onChange, media, sections }) {
       </div>
       {block.type === "contact" && (
         <p className="note">
-          Contact content is editable here. The public component must retain the
-          existing inquiry form and its server-side validation.
+          Visitors can send you an inquiry from this section. Messages appear in
+          Inquiries. The form is added automatically.
         </p>
       )}
     </>
@@ -332,9 +394,14 @@ function App() {
     [busy, B] = useState(false),
     [preview, P] = useState(null),
     [history, H] = useState([]),
-    [search, Q] = useState("");
+    [search, Q] = useState(""),
+    [starter, SetStarter] = useState(false);
   useEffect(() => {
-    const added = e => M(current => [e.detail, ...current.filter(m => m.id !== e.detail.id)]);
+    const added = (e) =>
+      M((current) => [
+        e.detail,
+        ...current.filter((m) => m.id !== e.detail.id),
+      ]);
     window.addEventListener("cms-media-uploaded", added);
     return () => window.removeEventListener("cms-media-uploaded", added);
   }, []);
@@ -391,11 +458,19 @@ function App() {
     F(structuredClone(d.draft));
     D((a) => [d, ...a.filter((x) => x.id !== d.id)]);
   };
-  const create = (kind) =>
-    run(async () => {
+  const create = (kind, pageData) => {
+    if (kind === "page" && !pageData) {
+      SetStarter(true);
+      return;
+    }
+    return run(async () => {
       if (dirty && !window.confirm("Discard unsaved changes?")) return;
-      const d = await api("/documents", "POST", { kind, data: defaults(kind) });
+      const d = await api("/documents", "POST", {
+        kind,
+        data: pageData || defaults(kind),
+      });
       update(d);
+      SetStarter(false);
       T("Content");
       V(
         kind === "page"
@@ -407,6 +482,7 @@ function App() {
               : "Site settings",
       );
     });
+  };
   const save = async () => {
     const d = await api(`/documents/${selected.id}`, "PUT", {
       version: selected.version,
@@ -493,6 +569,14 @@ function App() {
   );
   return (
     <div className="app">
+      {starter && (
+        <PageStarter
+          error={message}
+          busy={busy}
+          onCancel={() => SetStarter(false)}
+          onCreate={(data) => create("page", data)}
+        />
+      )}
       <aside>
         <a className="brand" href="/admin/">
           <img
@@ -513,7 +597,9 @@ function App() {
             "Menus",
             "Media library",
             "Site settings",
-            ...(user.role === "admin" ? ["Inquiries", "Requests", "Users"] : []),
+            ...(user.role === "admin"
+              ? ["Inquiries", "Requests", "Users"]
+              : []),
           ].map((v, i) => (
             <button
               className={view === v ? "active" : ""}
@@ -594,19 +680,74 @@ function App() {
                   : "Manage what’s next for On Zen On."}
               </p>
             </div>
-            {kinds[view] && !selected && (
-              <button
-                className="primary"
-                disabled={busy}
-                onClick={() => create(kinds[view])}
-              >
-                + Create {kinds[view]}
-              </button>
-            )}
+            {kinds[view] &&
+              !selected &&
+              !(
+                view === "Site settings" &&
+                docs.some((d) => d.kind === "settings")
+              ) && (
+                <button
+                  className="primary"
+                  disabled={busy}
+                  onClick={() => create(kinds[view])}
+                >
+                  + Create {kinds[view]}
+                </button>
+              )}
           </div>
           {message && (
             <div className="notice" role="status">
               {message}
+            </div>
+          )}
+          {view === "Overview" && !selected && (
+            <div className="quick-start">
+              <h2>What would you like to change?</h2>
+              <div>
+                {[
+                  [
+                    "Edit website pages",
+                    "Pages",
+                    "Change text, images and sections",
+                  ],
+                  [
+                    "Change fonts & colors",
+                    "Site settings",
+                    "Theme, logo sizes and website settings",
+                  ],
+                  [
+                    "Manage pictures",
+                    "Media library",
+                    "Upload and reuse your images",
+                  ],
+                  [
+                    "Edit header & footer",
+                    "Reusable sections",
+                    "Logo, shared content and footer details",
+                  ],
+                  [
+                    "Manage navigation",
+                    "Menus",
+                    "Add page links to your website menus",
+                  ],
+                ].map(([title, destination, hint]) => (
+                  <button
+                    key={title}
+                    onClick={() => {
+                      V(destination);
+                      S(null);
+                      Q("");
+                    }}
+                  >
+                    <strong>{title} ↗</strong>
+                    <span>{hint}</span>
+                  </button>
+                ))}
+              </div>
+              <p>
+                Changes are private until you select Publish. Saved drafts can
+                be previewed before going live.
+              </p>
             </div>
           )}
           {view === "Overview" && !selected && (
@@ -702,41 +843,46 @@ function App() {
               </p>
             </>
           )}
-          {kinds[view] && !selected && (
-            <>
-              <Field
-                label="Search content"
-                value={search}
-                onChange={Q}
-                placeholder="Search by title…"
-              />
-              <div className="table">
-                {visible.map((d) => (
-                  <button
-                    className="table-row"
-                    key={d.id}
-                    onClick={() => choose(d)}
-                  >
-                    <strong>
-                      {label(d)}
-                      <small>
-                        {d.draft.path || d.draft.location || d.kind}
-                      </small>
-                    </strong>
-                    <span className={d.published ? "badge live" : "badge"}>
-                      {d.published ? "Published" : "Draft"}
-                    </span>
-                    <span>Version {d.version} →</span>
-                  </button>
-                ))}
-              </div>
-              {!visible.length && (
-                <div className="empty">
-                  No entries found. Create a {kinds[view]} to get started.
+          {kinds[view] &&
+            !selected &&
+            !(
+              view === "Site settings" &&
+              docs.some((d) => d.kind === "settings")
+            ) && (
+              <>
+                <Field
+                  label="Search content"
+                  value={search}
+                  onChange={Q}
+                  placeholder="Search by title…"
+                />
+                <div className="table">
+                  {visible.map((d) => (
+                    <button
+                      className="table-row"
+                      key={d.id}
+                      onClick={() => choose(d)}
+                    >
+                      <strong>
+                        {label(d)}
+                        <small>
+                          {d.draft.path || d.draft.location || d.kind}
+                        </small>
+                      </strong>
+                      <span className={d.published ? "badge live" : "badge"}>
+                        {d.published ? "Published" : "Draft"}
+                      </span>
+                      <span>Version {d.version} →</span>
+                    </button>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
+                {!visible.length && (
+                  <div className="empty">
+                    No entries found. Create a {kinds[view]} to get started.
+                  </div>
+                )}
+              </>
+            )}
           {selected && (
             <>
               <div className="toolbar">
@@ -936,6 +1082,18 @@ function App() {
                   <div className="panel">
                     {selected.kind === "page" && (
                       <>
+                        <div className="editor-steps">
+                          <strong>1. Edit your sections</strong>
+                          <span>2. Save draft</span>
+                          <span>3. Preview</span>
+                          <span>4. Publish</span>
+                        </div>
+                        <p className="note">
+                          Open a section below to change its text, images, and
+                          links. Move sections up or down to change their order.
+                          Add the published page to Menus so visitors can find
+                          it.
+                        </p>
                         <div className="two">
                           <Field
                             label="Page title"
@@ -943,7 +1101,7 @@ function App() {
                             onChange={(v) => change("title", v)}
                           />
                           <Field
-                            label="Page path"
+                            label="Website address"
                             value={draft.path}
                             onChange={(v) => change("path", v)}
                             placeholder="/services/web-development"
@@ -954,16 +1112,24 @@ function App() {
                             Page sections <small>{draft.blocks.length}</small>
                           </h2>
                           <div>
-                            <button
-                              onClick={() =>
-                                change("blocks", [
-                                  ...draft.blocks,
-                                  blankBlock("about"),
-                                ])
-                              }
+                            <select
+                              aria-label="Add a section"
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value)
+                                  change("blocks", [
+                                    ...draft.blocks,
+                                    blankBlock(e.target.value),
+                                  ]);
+                              }}
                             >
-                              + Section
-                            </button>
+                              <option value="">+ Add section</option>
+                              {sectionTypes.map((type) => (
+                                <option key={type} value={type}>
+                                  {sectionNames[type]}
+                                </option>
+                              ))}
+                            </select>
                             <select
                               aria-label="Add an original layout"
                               value=""
@@ -980,9 +1146,15 @@ function App() {
                                   ]);
                               }}
                             >
-                              <option value="">+ Original layout</option>
+                              <option value="">+ Branded section</option>
                               {Object.entries(templateManifest)
-                                .filter(([key]) => !key.startsWith("site-"))
+                                .filter(
+                                  ([key]) =>
+                                    !key.startsWith("site-") &&
+                                    !draft.blocks.some(
+                                      (b) => b.template === key,
+                                    ),
+                                )
                                 .map(([key, t]) => (
                                   <option key={key} value={key}>
                                     {t.label}
@@ -1022,7 +1194,12 @@ function App() {
                                   templateManifest[b.template]?.label ||
                                   "Reusable section"}
                               </strong>
-                              <span>{b.type}</span>
+                              <span>
+                                {sectionNames[b.type] ||
+                                  (b.type === "template"
+                                    ? "Original design"
+                                    : "Reusable section")}
+                              </span>
                             </summary>
                             <div className="block-body">
                               <div className="row">
@@ -1195,16 +1372,29 @@ function App() {
                       </>
                     )}
                     {selected.kind === "settings" &&
-                      Object.keys(draft).filter(k=>k!=="experience").map((k) => (
-                        <Field
-                          label={k.replace(/([A-Z])/g, " $1")}
-                          key={k}
-                          value={draft[k]}
-                          area={["addresses", "footerText"].includes(k)}
-                          onChange={(v) => change(k, v)}
-                        />
-                      ))}
-                    {selected.kind==="settings"&&<ExperienceSettings value={draft.experience} onChange={v=>change("experience",v)}/>}
+                      Object.keys(draft)
+                        .filter((k) => !["experience", "theme"].includes(k))
+                        .map((k) => (
+                          <Field
+                            label={k.replace(/([A-Z])/g, " $1")}
+                            key={k}
+                            value={draft[k]}
+                            area={["addresses", "footerText"].includes(k)}
+                            onChange={(v) => change(k, v)}
+                          />
+                        ))}
+                    {selected.kind === "settings" && (
+                      <ThemeEditor
+                        value={draft.theme}
+                        onChange={(v) => change("theme", v)}
+                      />
+                    )}
+                    {selected.kind === "settings" && (
+                      <ExperienceSettings
+                        value={draft.experience}
+                        onChange={(v) => change("experience", v)}
+                      />
+                    )}
                   </div>
                 )}
               </fieldset>
@@ -1213,7 +1403,7 @@ function App() {
           {["Inquiries", "Users"].includes(view) && (
             <Management view={view} api={api} run={run} />
           )}
-          {view==="Requests"&&<Requests api={api} run={run}/>}
+          {view === "Requests" && <Requests api={api} run={run} />}
           {view === "Media library" && (
             <>
               <form

@@ -1,3 +1,5 @@
+import { SectionMotion } from "./SectionMotion.jsx";
+import { PublishedTheme } from "./PublishedTheme.jsx";
 import { InquiryForm, ThankYou } from "./InquiryForm.jsx";
 import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
@@ -231,6 +233,8 @@ if (location.hash.startsWith("#/admin")) location.replace("/admin/");
 else
   createRoot(document.getElementById("root")).render(
     <ExperienceProvider>
+      <PublishedTheme />
+      <SectionMotion />
       {location.pathname === "/thank-you" ? (
         <ThankYou />
       ) : location.pathname === "/portal" ? (
