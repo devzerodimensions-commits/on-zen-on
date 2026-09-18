@@ -1,0 +1,92 @@
+.inner-pages .section-symbol {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  margin-right: 12px;
+  vertical-align: middle;
+  opacity: 0.9;
+}
+.inner-pages .section-symbol svg {
+  width: 21px;
+  height: 21px;
+}
+.inner-pages .inner-card-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 0 22px;
+  border: 1px solid currentColor;
+  border-radius: 15px;
+  color: var(--logo-green, #08723b);
+}
+.inner-pages main .service-card .inner-card-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.inner-pages .cms-features .service-grid,
+.inner-pages .cms-industries .service-grid {
+  gap: 24px;
+}
+.inner-pages .cms-features .service-card,
+.inner-pages .cms-industries .service-card {
+  border-top: 4px solid var(--logo-green, #08723b) !important;
+  padding: 28px !important;
+}
+.inner-pages .cms-features .service-card:nth-child(3n + 2),
+.inner-pages .cms-industries .service-card:nth-child(3n + 2) {
+  border-top-color: var(--logo-gold, #ecb900) !important;
+}
+.inner-pages .cms-features .service-card:nth-child(3n),
+.inner-pages .cms-industries .service-card:nth-child(3n) {
+  border-top-color: var(--logo-blue, #1119a5) !important;
+}
+.inner-pages .oz-section-heading {
+  max-width: 800px;
+}
+.inner-pages .oz-kind-process .oz-card-number {
+  font-size: 24px;
+  font-weight: 700;
+}
+.inner-pages .oz-kind-process .oz-service-card {
+  border-top: 4px solid var(--logo-gold, #ecb900);
+}
+.inner-pages .cms-contact .eyebrow .section-symbol {
+  margin-bottom: 5px;
+}
+.inner-pages .cms-cta {
+  text-align: center;
+}
+.inner-pages .cms-cta > .button {
+  margin: 24px auto 0;
+}
+.inner-pages .oz-service-section .oz-kicker {
+  display: flex;
+  align-items: center;
+}
+.inner-pages .oz-kind-faq .oz-section-heading {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.inner-pages .oz-kind-faq .oz-kicker {
+  justify-content: center;
+}
+@media (min-width: 701px) {
+  .inner-pages .service-grid:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .inner-pages .section-symbol {
+    width: 32px;
+    height: 32px;
+  }
+  .inner-pages .cms-features .service-card,
+  .inner-pages .cms-industries .service-card {
+    padding: 22px !important;
+  }
+}

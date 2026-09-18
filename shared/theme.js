@@ -503,14 +503,14 @@ export function themeCss(value) {
       /* Cards inside a coloured section keep their own pale surface. */
       /* Cards sit on the section, so they take the pale surface — unless the
          section is already that colour, where a soft tint separates them. */
-      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq){background:${
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq){background:${
         contrastRatio(t.surface, background) < 1.05
           ? tint(t.primary, 0.96)
           : t.surface
       }!important;border-color:${mix(background, ink, 0.18)}!important}`,
-      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
-      `${scope} :is(.service-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span){color:${t.muted}!important}`,
-      `${scope} :is(.service-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span,label){color:${t.muted}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
     ].join("\n");
   };
   /* Dark mode. Every rule above is scoped to light mode, so with dark mode on
@@ -532,7 +532,7 @@ export function themeCss(value) {
   const paleSections =
     ".intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase,.technology,.industries-showcase,.blog-listing,.trust-bar";
   const cardSelector =
-    ".service-card,.outcome-grid div,.floating-card,.cms-cases article,.cms-quotes figure,.cms-faq,.inquiry-card";
+    ".service-card,.oz-service-card,.oz-questions,.outcome-grid div,.floating-card,.cms-cases article,.cms-quotes figure,.cms-faq,.inquiry-card";
   const darkToneRules = (name, background) => {
     const ink = readableOn(background);
     const scope = `${dark} .cms-tone-${name}`;
@@ -718,3 +718,10 @@ ${[
 @media(max-width:800px){html body .public-site-header{height:${t.mobileLogoSize + 16}px!important}html body .public-site-header .brand{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important;flex-basis:${t.mobileLogoSize}px!important}html body .public-site-header .brand img{width:${t.mobileLogoSize}px!important;height:${t.mobileLogoSize}px!important}html body main>section,html body .oz-services>section,html body .section{padding-top:${Math.round(t.sectionSpacing * 0.65)}px!important;padding-bottom:${Math.round(t.sectionSpacing * 0.65)}px!important}}
 `;
 }
+
+// Section color choices work even when the global custom theme is off.
+export const defaultSectionCss = themeCss({ ...themeDefaults, enabled: true })
+  .split("\n")
+  .filter((line) => line.includes(".cms-tone-"))
+  .join("\n");
+

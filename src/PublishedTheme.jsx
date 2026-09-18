@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { themeCss } from "../shared/theme.js";
+import { themeCss, defaultSectionCss } from "../shared/theme.js";
 export function PublishedTheme() {
-  const [css, S] = useState("");
+  const [css, S] = useState(defaultSectionCss);
   const [preview, P] = useState(null);
   useEffect(() => {
     const c = new AbortController();
     fetch("/api/public/site", { signal: c.signal })
       .then((r) => (r.ok ? r.json() : null))
-      .then((site) => S(themeCss(site?.settings?.theme)))
+      .then((site) => S(themeCss(site?.settings?.theme) || defaultSectionCss))
       .catch(() => {});
     return () => c.abort();
   }, []);
@@ -27,6 +27,6 @@ export function PublishedTheme() {
     );
     return () => window.removeEventListener("message", listen);
   }, []);
-  const active = preview === null ? css : preview;
+  const active = preview === null ? css : preview || defaultSectionCss;
   return active ? <style>{active}</style> : null;
 }

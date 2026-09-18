@@ -1,3 +1,5 @@
+import { ServiceIcon } from "./ServiceIcon.jsx";
+import "./inner-pages.css";
 import { SectionMotion } from "./SectionMotion.jsx";
 import { PublishedTheme } from "./PublishedTheme.jsx";
 import { InquiryForm, ThankYou } from "./InquiryForm.jsx";
@@ -30,7 +32,20 @@ function GenericBlock({ content: b, submit, formState }) {
       id={b.anchor || undefined}
       className={`section cms-section cms-${b.type}${sectionClasses(b)}`}
     >
-      <p className="eyebrow">{b.eyebrow}</p>
+      <p className="eyebrow">
+        <span className="section-symbol" aria-hidden="true">
+          <ServiceIcon
+            name={
+              b.type === "contact"
+                ? "phone"
+                : b.type === "process"
+                  ? "growth"
+                  : "spark"
+            }
+          />
+        </span>
+        {b.eyebrow}
+      </p>
       {b.type === "hero" ? <h1>{b.heading}</h1> : <h2>{b.heading}</h2>}
       <p className="cms-body">{b.body}</p>
       {b.image && <img className="cms-image" src={b.image} alt={b.alt} />}
@@ -79,6 +94,9 @@ function GenericBlock({ content: b, submit, formState }) {
                   {it.image && (
                     <img className="cms-image" src={it.image} alt={it.alt} />
                   )}
+                  <span className="inner-card-icon" aria-hidden="true">
+                    <ServiceIcon name={it.icon || "spark"} />
+                  </span>
                   <h3>{it.title}</h3>
                   <p>{it.text}</p>
                   {it.href && <a href={it.href}>Learn more ↗</a>}
@@ -297,7 +315,7 @@ function App() {
   /* Typography and colour set on individual sections, scoped to each one. */
   const custom = pageCustomCss(shown.blocks);
   return (
-    <div className={page.path === "/" ? "homepage" : undefined}>
+    <div className={page.path === "/" ? "homepage" : "inner-pages"}>
       {custom && <style>{custom}</style>}
       {builder && (
         <style>{`
