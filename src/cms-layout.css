@@ -606,12 +606,30 @@
 }
 
 /* ---- home page service cards ------------------------------------------- */
+.services .service-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+  border-top: 0;
+}
+@media (max-width: 1100px) {
+  .services .service-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .services .service-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+}
 /* The card pinned its "Explore" link to the bottom with absolute positioning
    while the text flowed underneath it, so on every card the last line and the
    link occupied the same 24 pixels. The card also had no horizontal padding,
    leaving text against its edge. Laying the card out as a column puts the link
    after the text however long the text runs. */
 .services .service-grid .service-card {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
