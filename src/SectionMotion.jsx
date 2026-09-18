@@ -32,10 +32,11 @@ export function SectionMotion() {
       },
       { threshold: 0, rootMargin: "0px 0px -24px 0px" },
     );
-    const scan = () =>
+    const scan = () => {
+      if (document.querySelector(".brand-intro")) return;
       document
         .querySelectorAll(
-          "main section, main article, main .inquiry-thanks-card, main .portal-card",
+          "main section, main article, main .inquiry-thanks-card, main .portal-card, #root footer",
         )
         .forEach((el) => {
           if (!seen.has(el)) {
@@ -43,6 +44,7 @@ export function SectionMotion() {
             observer.observe(el);
           }
         });
+    };
     scan();
     const changes = new MutationObserver(scan);
     changes.observe(document.getElementById("root"), {

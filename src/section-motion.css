@@ -15,6 +15,12 @@
     :is(.button, .oz-action, .inquiry-card button):hover {
     filter: brightness(1.06);
   }
+  html:not([data-motion="off"]) article.section-enter:nth-child(3n + 2) {
+    animation-delay: 70ms;
+  }
+  html:not([data-motion="off"]) article.section-enter:nth-child(3n) {
+    animation-delay: 140ms;
+  }
   @keyframes section-arrive {
     from {
       opacity: 0;
