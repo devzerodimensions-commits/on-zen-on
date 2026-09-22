@@ -1,6 +1,7 @@
 import { InquiryForm } from "./InquiryForm.jsx";
 // Extracted from the original website. Original classes, layout and decorative elements are preserved.
 import React from "react";
+import { ServiceMarquee } from "./ServiceMarquee.jsx";
 import { menuDefaults } from "../shared/templates.js";
 import { sectionClasses } from "../shared/section-style.js";
 function menuLinks(location, menus) {
@@ -102,20 +103,7 @@ export function OriginalTemplate({
       );
     case "ticker":
       return (
-        <section className={"ticker" + tone} aria-label="Service highlights">
-          <div>
-            {content.fields["text_1"]}
-            <b>✦</b>
-            {content.fields["text_2"]}
-            <b>✦</b>
-            {content.fields["text_3"]}
-            <b>✦</b>
-            {content.fields["text_4"]}
-            <b>✦</b>
-            {content.fields["text_5"]}
-            <b>✦</b>
-          </div>
-        </section>
+        <ServiceMarquee fields={content.fields} tone={tone} />
       );
     case "trust":
       return (
