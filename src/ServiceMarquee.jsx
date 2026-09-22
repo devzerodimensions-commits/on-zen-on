@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { useExperience } from "./ExperienceContext.jsx";
 import "./service-marquee.css";
 
 export function ServiceMarquee({ fields, tone = "" }) {
-  const [paused, setPaused] = useState(false);
   const { motionEnabled } = useExperience();
   const labels = [
     ...new Set(
@@ -15,23 +14,12 @@ export function ServiceMarquee({ fields, tone = "" }) {
     <section
       className={`ticker service-marquee${tone}`}
       aria-label="Service highlights"
-      data-paused={paused || !motionEnabled}
+      data-paused={!motionEnabled}
     >
       <div className="marquee-toolbar">
         <span className="marquee-caption">
           ONE TEAM. CONNECTED POSSIBILITIES.
         </span>
-        {motionEnabled && (
-          <button
-            type="button"
-            className="marquee-control"
-            aria-pressed={paused}
-            onClick={() => setPaused(!paused)}
-          >
-            {paused ? "▶ Play" : "Ⅱ Pause"}
-            <span className="marquee-sr"> service highlights animation</span>
-          </button>
-        )}
       </div>
       <div className="marquee-window">
         <div className="marquee-track">
