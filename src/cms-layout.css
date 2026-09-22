@@ -606,6 +606,34 @@
 }
 
 /* ---- home page service cards ------------------------------------------- */
+/* Technology names need real text space, especially with larger theme fonts. */
+.technology .stack-groups,
+.technology .stack-groups article,
+.technology .tech-badges {
+  min-width: 0;
+}
+.technology .tech-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+.technology .tech-badges b {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 78px;
+  padding: 12px 8px;
+  place-content: center;
+  line-height: 1.3;
+}
+.technology .tech-badges b small {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
 /* Leave room for font ascenders/descenders and italic overhang in both modes. */
 html body main :is(h1, h2, h3) {
   line-height: 1.2;
