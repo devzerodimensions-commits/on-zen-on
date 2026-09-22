@@ -160,8 +160,16 @@ export function ServicesPage({ page, submit, formState, renderFallback }) {
                   {b.items.map((item, i) => (
                     <details key={i}>
                       <summary>
-                        {item.title}
-                        <span aria-hidden="true">+</span>
+                        <span className="oz-question-number" aria-hidden="true">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <strong className="oz-question-title">
+                          {item.title}
+                        </strong>
+                        <span
+                          className="oz-question-toggle"
+                          aria-hidden="true"
+                        />
                       </summary>
                       <p>{item.text}</p>
                       {item.image && (

@@ -503,14 +503,14 @@ export function themeCss(value) {
       /* Cards inside a coloured section keep their own pale surface. */
       /* Cards sit on the section, so they take the pale surface — unless the
          section is already that colour, where a soft tint separates them. */
-      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq){background:${
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions details,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq){background:${
         contrastRatio(t.surface, background) < 1.05
           ? tint(t.primary, 0.96)
           : t.surface
       }!important;border-color:${mix(background, ink, 0.18)}!important}`,
-      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
-      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span,label){color:${t.muted}!important}`,
-      `${scope} :is(.service-card,.oz-service-card,.oz-questions,.inquiry-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions details,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(h1,h2,h3,strong,summary,cite){color:${t.text}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions details,.inquiry-card,.cms-cases article,.cms-quotes figure,.cms-faq) :is(p,li,small,span,label){color:${t.muted}!important}`,
+      `${scope} :is(.service-card,.oz-service-card,.oz-questions details,.inquiry-card,.cms-cases article,.cms-faq) a:not(.button){color:${link0}!important}`,
     ].join("\n");
   };
   /* Dark mode. Every rule above is scoped to light mode, so with dark mode on
@@ -532,7 +532,7 @@ export function themeCss(value) {
   const paleSections =
     ".intro,.cms-section,.oz-service-section,.outcomes,.results,.showcase,.technology,.industries-showcase,.blog-listing,.trust-bar";
   const cardSelector =
-    ".service-card,.oz-service-card,.oz-questions,.outcome-grid div,.floating-card,.cms-cases article,.cms-quotes figure,.cms-faq,.inquiry-card";
+    ".service-card,.oz-service-card,.oz-questions details,.outcome-grid div,.floating-card,.cms-cases article,.cms-quotes figure,.cms-faq,.inquiry-card";
   const darkToneRules = (name, background) => {
     const ink = readableOn(background);
     const scope = `${dark} .cms-tone-${name}`;
@@ -727,4 +727,3 @@ export const defaultSectionCss = themeCss({ ...themeDefaults, enabled: true })
   .split("\n")
   .filter((line) => line.includes(".cms-tone-"))
   .join("\n");
-
