@@ -693,6 +693,9 @@ ${dark} main a:not(.button):not(.oz-action):not(.blog-button){color:${reachable(
 ${dark} :is(.hero h1 em,.hero .eyebrow,.services .eyebrow,.contact .eyebrow,.oz-service-hero .eyebrow){color:${reachable(t.accent, darkBrand)}!important}
 /* Small chips kept their own pale pill, leaving light text on white. */
 ${dark} :is(${paleSections}) :is(.trust-bar span,.industry-tags span,.stack-heading span){background:${darkRaised}!important;border-color:${mix(darkRaised, darkInk, 0.25)}!important;color:${darkInk}!important}
+${dark} :is(.intro,.technology,.industries-showcase,.results,.showcase,.updates) :is(h1,h2,h3) em{color:${reachable(t.accent, darkPanel)}!important}
+${dark} .system-pills span{background:${darkRaised}!important;border-color:${mix(darkRaised, darkInk, 0.25)}!important;color:${darkInk}!important}
+${dark} .inquiry-card label{color:${darkInk}!important}
 /* A button's arrow follows its label rather than the body colour. */
 ${dark} :is(.button,.oz-action,.blog-button) :is(span,b,i){color:inherit!important}
 ${dark} .blog-button{background:${darkCta}!important;color:${readableOn(darkCta)}!important}

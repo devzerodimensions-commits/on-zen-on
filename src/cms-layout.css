@@ -606,6 +606,14 @@
 }
 
 /* ---- home page service cards ------------------------------------------- */
+/* Leave room for font ascenders/descenders and italic overhang in both modes. */
+html body main :is(h1, h2, h3) {
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+html body main :is(h1, h2, h3) em {
+  padding-right: 0.08em;
+}
 .services .service-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
