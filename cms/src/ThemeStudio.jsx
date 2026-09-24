@@ -7,6 +7,7 @@ import {
   colorPresets,
   contrastRatio,
 } from "../../shared/theme.js";
+import { MediaSelect } from "./MediaSelect.jsx";
 
 const devices = {
   desktop: { label: "Computer", width: "100%", icon: "🖥" },
@@ -20,7 +21,7 @@ const tabs = [
   ["colors", "Colours"],
   ["buttons", "Buttons"],
   ["layout", "Spacing & shape"],
-  ["logo", "Logo size"],
+  ["logo", "Logo picture & size"],
 ];
 
 function Slider({
@@ -100,6 +101,10 @@ function Swatch({ label, hint, value, onChange, allowEmpty, fallback }) {
 export function ThemeStudio({
   value,
   onChange,
+  logo,
+  onLogoChange,
+  media = [],
+  upload,
   pages = [],
   busy,
   dirty,
@@ -127,6 +132,20 @@ export function ThemeStudio({
     }, 60);
     return () => clearTimeout(id);
   }, [t, ready, path]);
+
+  /* The logo is a picture rather than a style rule, so it is sent to the
+     preview separately and swapped in there as it is chosen. */
+  useEffect(() => {
+    const target = frame.current?.contentWindow;
+    if (!target) return;
+    const id = setTimeout(() => {
+      target.postMessage(
+        { type: "oz-logo-preview", logo: logo || "" },
+        window.location.origin,
+      );
+    }, 60);
+    return () => clearTimeout(id);
+  }, [logo, ready, path]);
 
   useEffect(() => {
     const listen = (event) => {
@@ -556,12 +575,34 @@ export function ThemeStudio({
 
           {tab === "logo" && (
             <div className="studio-section">
-              <h3>Logo size</h3>
+              <h3>Your logo</h3>
               <p>
-                Change the logo image itself in{" "}
-                <strong>Header &amp; footer</strong>. These settings only
-                control how large it appears.
+                Choose the picture used in the header, the footer, the opening
+                animation and the browser tab. A wide PNG or WebP with a
+                see-through background works best.
               </p>
+              <MediaSelect
+                label="Website logo"
+                value={logo || ""}
+                onChange={(url) => onLogoChange(url)}
+                media={media}
+                upload={upload}
+              />
+              {logo ? (
+                <button
+                  type="button"
+                  className="studio-reset"
+                  onClick={() => onLogoChange("")}
+                >
+                  Use the original On Zen On logo
+                </button>
+              ) : (
+                <p className="studio-note">
+                  The original On Zen On logo is in use.
+                </p>
+              )}
+              <h3>Logo size</h3>
+              <p>These settings only control how large it appears.</p>
               <Slider
                 label="Logo on computers"
                 value={t.logoSize}

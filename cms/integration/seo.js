@@ -21,7 +21,10 @@ export function structuredData(page, settings, origin) {
     url: `${origin}/`,
     logo: {
       "@type": "ImageObject",
-      url: new URL("/assets/on-zen-on-official-logo.png", origin).href,
+      url: new URL(
+        settings?.logo || "/assets/on-zen-on-official-logo.png",
+        origin,
+      ).href,
     },
     ...(settings?.tagline ? { slogan: settings.tagline } : {}),
     ...(settings?.footerText ? { description: settings.footerText } : {}),
@@ -141,7 +144,14 @@ export function pageShell(html, page, origin, settings) {
       structuredData(page, settings, origin),
     ).replace(/</g, String.raw`\u003c`)}</script>`,
   );
-  return html
+  /* A logo chosen in the admin also becomes the browser tab icon. */
+  const shell = settings?.logo
+    ? html.replace(
+        /<link\b[^>]*rel=["']icon["'][^>]*>/gi,
+        () => `<link rel="icon" href="${escape(settings.logo)}">`,
+      )
+    : html;
+  return shell
     .replace(/<title>[\s\S]*?<\/title>/gi, "")
     .replace(
       /<script[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi,

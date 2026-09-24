@@ -455,6 +455,13 @@ function BlockEditor({ block, onChange, media, sections }) {
                 <summary>
                   {title} <small>({fields.length})</small>
                 </summary>
+                {kind === "image" && block.template.startsWith("site-") && (
+                  <p className="note">
+                    A logo chosen in{" "}
+                    <strong>Appearance → Logo picture &amp; size</strong> is
+                    used here instead of the picture below.
+                  </p>
+                )}
                 {fields.map(([key, field], i) =>
                   kind === "image" ? (
                     <MediaSelect
@@ -1103,7 +1110,7 @@ function App() {
                   [
                     "Change fonts & colours",
                     "Appearance",
-                    "Ready themes, fonts, colours and logo size",
+                    "Ready themes, fonts, colours and your logo",
                   ],
                   [
                     "Manage pictures",
@@ -1113,7 +1120,7 @@ function App() {
                   [
                     "Edit header & footer",
                     "Reusable sections",
-                    "Logo, shared content and footer details",
+                    "Shared content and footer details",
                   ],
                   [
                     "Manage navigation",
@@ -1280,6 +1287,10 @@ function App() {
             <ThemeStudio
               value={draft.theme}
               onChange={(v) => change("theme", v)}
+              logo={draft.logo || ""}
+              onLogoChange={(v) => change("logo", v)}
+              media={media}
+              upload={(data) => api("/media", "POST", data)}
               busy={busy}
               dirty={dirty}
               canPublish={user.role === "admin"}
@@ -1818,9 +1829,27 @@ function App() {
                         ))}
                       </>
                     )}
+                    {selected.kind === "settings" && (
+                      <div className="panel-pointer">
+                        <h2>Website logo</h2>
+                        <p>
+                          Used in the header, the footer, the opening animation
+                          and the browser tab. Leave it empty to keep the
+                          original On Zen On logo.
+                        </p>
+                        <MediaSelect
+                          label="Website logo"
+                          value={draft.logo || ""}
+                          media={media}
+                          onChange={(url) => change("logo", url)}
+                        />
+                      </div>
+                    )}
                     {selected.kind === "settings" &&
                       Object.keys(draft)
-                        .filter((k) => !["experience", "theme"].includes(k))
+                        .filter(
+                          (k) => !["experience", "theme", "logo"].includes(k),
+                        )
                         .map((k) => (
                           <Field
                             label={k.replace(/([A-Z])/g, " $1")}

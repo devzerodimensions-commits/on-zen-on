@@ -124,6 +124,60 @@ test("appearance settings publish and reach the public site as CSS", async () =>
   assert.equal(themeCss({ ...published, enabled: false }), "");
 });
 
+test("a logo chosen in the admin publishes to the whole website", async () => {
+  const file = await sharp({
+    create: { width: 24, height: 24, channels: 3, background: "#0b6b3a" },
+  })
+    .png()
+    .toBuffer();
+  const uploaded = await admin
+    .post("/api/cms/media")
+    .set("Origin", origin)
+    .set("X-CSRF-Token", csrf)
+    .field("alt", "New company logo")
+    .attach("file", file, "company-logo.png")
+    .expect(201);
+
+  /* Only one settings document is ever published, so the logo is saved onto
+     the one the website already reads. */
+  const all = await admin.get("/api/cms/documents").expect(200);
+  const settings = all.body.find((d) => d.kind === "settings" && d.published);
+  const saved = await write("put", `/api/cms/documents/${settings.id}`, {
+    version: settings.version,
+    data: { ...settings.draft, logo: uploaded.body.url },
+  }).expect(200);
+  assert.equal(saved.body.draft.logo, uploaded.body.url);
+  await write("post", `/api/cms/documents/${saved.body.id}/publish`, {
+    version: saved.body.version,
+  }).expect(200);
+
+  const site = await admin.get("/api/public/site").expect(200);
+  assert.equal(site.body.settings.logo, uploaded.body.url);
+
+  /* The picture behind the live logo cannot be deleted out from under it. */
+  const refused = await write(
+    "delete",
+    `/api/cms/media/${uploaded.body.id}`,
+  ).expect(409);
+  assert.match(refused.body.error, /still used/);
+
+  /* Anything that is not an uploaded picture or a bundled asset is refused. */
+  await write("put", `/api/cms/documents/${settings.id}`, {
+    version: saved.body.version + 1,
+    data: { ...settings.draft, logo: "https://example.test/logo.png" },
+  }).expect(400);
+});
+
+test("a website with no chosen logo keeps the original one", async () => {
+  const all = await admin.get("/api/cms/documents").expect(200);
+  const settings = all.body.find((d) => d.kind === "settings" && d.published);
+  const cleared = await write("put", `/api/cms/documents/${settings.id}`, {
+    version: settings.version,
+    data: { ...settings.draft, logo: "" },
+  }).expect(200);
+  assert.equal(cleared.body.draft.logo, "");
+});
+
 test("settings saved before the appearance studio existed still validate", async () => {
   const legacy = {
     siteName: "On Zen On",

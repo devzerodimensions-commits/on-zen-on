@@ -128,7 +128,10 @@ function App() {
     [menu, M] = useState(false),
     [formState, F] = useState(""),
     [builder, B] = useState(false),
-    [active, A] = useState("");
+    [active, A] = useState(""),
+    /* The appearance studio pushes an unsaved logo down while it is being
+       chosen, so the editor sees it on the real website before publishing. */
+    [logoPreview, L] = useState(null);
   const previewId = location.pathname.startsWith("/_preview/")
     ? location.pathname.split("/")[2]
     : null;
@@ -177,6 +180,8 @@ function App() {
         P(message.page);
       }
       if (message.type === "oz-builder-select") A(message.id || "");
+      if (message.type === "oz-logo-preview")
+        L(typeof message.logo === "string" ? message.logo : null);
     };
     window.addEventListener("message", listen);
     window.parent.postMessage(
@@ -286,13 +291,22 @@ function App() {
   /* Sections switched off in the admin stay in the draft but never reach visitors. */
   const shown = { ...page, blocks: page.blocks.filter((b) => !b.hidden) };
   const props = { menu, setMenu: M, menus: site.menus, submit, formState };
-  const header =
+  const header = structuredClone(
     site.layouts.find((x) => x.template === "site-header") ||
-    templateDefaults["site-header"];
+      templateDefaults["site-header"],
+  );
   const footer = structuredClone(
     site.layouts.find((x) => x.template === "site-footer") ||
       templateDefaults["site-footer"],
   );
+  /* One logo chosen in the admin is used everywhere the brand mark appears —
+     header, footer and the opening animation — so it is changed in one place
+     rather than section by section. */
+  const logo = logoPreview ?? site.settings?.logo ?? "";
+  if (logo) {
+    header.fields.image_4 = logo;
+    footer.fields.image_1 = logo;
+  }
   if (site.settings) {
     const old = templateDefaults["site-footer"].fields;
     for (const key of Object.keys(footer.fields)) {

@@ -30,7 +30,24 @@ Choosing a ready-made theme turns the switch on for you.
 | **Colours** | Each colour on its own: brand colour, page background, card background, text, links, header and footer. |
 | **Buttons** | Filled, outline or fully rounded; small, medium or large; corner rounding; shadow; button text colour. |
 | **Spacing & shape** | Space above and below sections, how wide the content may grow, rounded corners on cards, and card shadows. |
-| **Logo size** | How large the logo appears on computers and on phones. Change the logo picture itself under **Reusable sections**. |
+| **Logo picture & size** | The logo itself — choose a picture already on the website or upload a new one — and how large it appears on computers and on phones. |
+
+## Changing your logo
+
+Open **Appearance → Logo picture & size**. Choose a picture from the list, or
+open **Upload a new image**, pick the file, describe it in a few words and
+select **Upload & use image**. The preview beside the controls shows the new
+logo straight away.
+
+One picture covers the whole website: the header, the footer, the short opening
+animation on the home page and the small icon on the browser tab. Select
+**Use the original On Zen On logo** to put the supplied logo back.
+
+A wide picture with a see-through background (PNG or WebP) looks best. Pictures
+are stored in your media library, so the same logo can be reused anywhere else
+on the website.
+
+Nothing changes for visitors until you select **Publish design**.
 
 ## Check it on a phone
 

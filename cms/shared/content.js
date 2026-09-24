@@ -293,6 +293,10 @@ export const schemas = {
     .object({
       siteName: short.min(1),
       tagline: short,
+      /* The logo shown in the header, the footer and the browser tab. Empty
+         means the original supplied logo, so nothing breaks for a site saved
+         before the admin could change it. */
+      logo: image.default(""),
       footerText: z.string().max(2000),
       email: z.email(),
       phone: short,

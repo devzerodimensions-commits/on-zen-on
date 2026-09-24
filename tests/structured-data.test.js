@@ -153,3 +153,30 @@ test("published customer quotes are offered to search engines as reviews", () =>
   assert.equal(reviews[0].reviewBody, "What they actually said.");
   assert.equal(reviews[0].itemReviewed["@id"], `${origin}/#organization`);
 });
+
+test("a chosen logo becomes the organisation logo and the browser tab icon", () => {
+  const logo = "/media/2c1f8a52-7b4e-4a0c-9a2a-1a2b3c4d5e6f.webp";
+  const branded = { ...settings, logo };
+  const org = structuredData(page(), branded, origin)["@graph"].find(
+    (e) => e["@type"] === "Organization",
+  );
+  assert.equal(org.logo.url, origin + logo);
+
+  const html = pageShell(
+    '<html><head><link rel="icon" href="/assets/on-zen-on-official-logo.png" /></head><body></body></html>',
+    page(),
+    origin,
+    branded,
+  );
+  assert.ok(html.includes('<link rel="icon" href="' + logo + '">'));
+  assert.ok(!html.includes("on-zen-on-official-logo.png"));
+
+  /* With no logo chosen, the supplied one is still used. */
+  const plain = pageShell(
+    '<html><head><link rel="icon" href="/assets/on-zen-on-official-logo.png" /></head><body></body></html>',
+    page(),
+    origin,
+    settings,
+  );
+  assert.ok(plain.includes("on-zen-on-official-logo.png"));
+});
